@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#1769e0">
 <title>PDF Search & Save</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:18px;color:#222}
-.app{max-width:760px;margin:auto;background:#fff;padding:22px;border-radius:14px;box-shadow:0 3px 16px #0002}
+.app{max-width:900px;margin:auto;background:#fff;padding:22px;border-radius:14px;box-shadow:0 3px 16px #0002}
 h1{text-align:center;color:#1769e0;margin-top:0}
 label{display:block;font-weight:bold;margin:16px 0 7px}
 input,button{width:100%;box-sizing:border-box;padding:13px;border-radius:8px;border:1px solid #bbb;font-size:16px}
-button{background:#1769e0;color:#fff;border:0;margin-top:10px;font-weight:bold}
-.stop{background:#c62828}
-.save{background:#188038}
+button{background:#1769e0;color:#fff;border:0;margin-top:10px;font-weight:bold;cursor:pointer}
+.stop{background:#c62828}.multi{background:#188038}.download{background:#6a1b9a}
 .status{margin-top:16px;padding:12px;background:#eef2f5;border-radius:8px}
 table{width:100%;border-collapse:collapse;margin-top:16px}
 th,td{border:1px solid #ddd;padding:8px;font-size:13px}
@@ -27,89 +28,91 @@ th{background:#eef2f5}
 <h1>PDF Search & Save</h1>
 
 <label>1. Select PDF Files</label>
-<input id="pdf" type="file" accept=".pdf" multiple>
+<input id="pdf" type="file" accept=".pdf,application/pdf" multiple>
 
-<label>2. Select CSV File</label>
-<input id="csv" type="file" accept=".csv">
+<label>2. Select Excel File (.xlsx / .xls)</label>
+<input id="excel" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
 
 <button id="search">START SEARCH</button>
 <button id="stop" class="stop" disabled>STOP</button>
+<button id="multi" class="multi" disabled>DOWNLOAD SELECTED PDFs (ZIP)</button>
 
 <div id="status" class="status">Ready</div>
 
 <table>
-<thead><tr><th>Search Name</th><th>Status</th><th>PDF File</th></tr></thead>
+<thead><tr><th><input id="all" type="checkbox" style="width:auto"> Select All</th><th>Search Name</th><th>Status</th><th>PDF File</th></tr></thead>
 <tbody id="out"></tbody>
 </table>
 
 <div class="note">
-For security, a browser cannot silently create/move files in an arbitrary folder.
-This version lets you search matching PDFs and then save/download the selected PDF.
-For many PDFs, select the files once and use the Save button shown for each match.
+Excel की पहली sheet की पहली column (Column A) में Search Name / Proposal No. रखें।
+Matching PDF filename में वही text खोजा जाएगा। ऊपर "DOWNLOAD SELECTED PDFs (ZIP)" से सभी selected PDFs एक ZIP में डाउनलोड होंगे।
 </div>
 </div>
 
 <script>
-let stopped=false;
-const pdf=document.getElementById('pdf'),csv=document.getElementById('csv');
-const search=document.getElementById('search'),stop=document.getElementById('stop');
-const status=document.getElementById('status'),out=document.getElementById('out');
+let stopped=false, matches=[];
+const pdf=document.getElementById('pdf'), excel=document.getElementById('excel');
+const search=document.getElementById('search'), stop=document.getElementById('stop');
+const multi=document.getElementById('multi'), all=document.getElementById('all');
+const status=document.getElementById('status'), out=document.getElementById('out');
 
-stop.onclick=()=>{stopped=true;status.textContent='Stopping...';};
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function downloadFile(file){const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+function refreshMulti(){multi.disabled=!matches.some(x=>x.checked);}
 
-function esc(s){
- return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+all.onchange=()=>{out.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=all.checked);refreshMulti();};
 
-function downloadFile(file){
- const a=document.createElement('a');
- a.href=URL.createObjectURL(file);
- a.download=file.name;
- document.body.appendChild(a);
- a.click();
- a.remove();
- setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-}
+multi.onclick=async()=>{
+ const selected=matches.filter(x=>x.checked);
+ if(!selected.length)return;
+ multi.disabled=true;status.textContent='Creating ZIP...';
+ const zip=new JSZip();
+ selected.forEach(x=>zip.file(x.file.name,x.file));
+ const blob=await zip.generateAsync({type:'blob'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Selected_PDFs.zip';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+ status.textContent=selected.length+' PDF(s) downloaded as Selected_PDFs.zip';
+ multi.disabled=false;
+};
 
 search.onclick=async()=>{
- stopped=false;out.innerHTML='';
- const files=[...pdf.files], data=csv.files[0];
+ stopped=false;matches=[];all.checked=false;out.innerHTML='';
+ const files=[...pdf.files], data=excel.files[0];
  if(!files.length)return alert('Please select PDF files.');
- if(!data)return alert('Please select CSV file.');
+ if(!data)return alert('Please select an Excel file.');
 
  search.disabled=true;stop.disabled=false;
  try{
-   let text=await data.text();
-   let names=text.split(/\r?\n/)
-     .map(x=>x.split(',')[0].replace(/^"|"$/g,'').trim())
-     .filter(Boolean);
-   if(names.length && /search name/i.test(names[0])) names.shift();
+   const buffer=await data.arrayBuffer();
+   const wb=XLSX.read(buffer,{type:'array'});
+   const ws=wb.Sheets[wb.SheetNames[0]];
+   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+   let names=rows.map(r=>String(r[0]??'').trim()).filter(Boolean);
+   if(names.length && /search\s*name|proposal\s*no|proposal/i.test(names[0])) names.shift();
 
    let found=0,notFound=0;
    for(const name of names){
      if(stopped)break;
      const match=files.find(f=>f.name.toLowerCase().includes(name.toLowerCase()));
      const tr=document.createElement('tr');
-     const n=document.createElement('td');n.textContent=name;
-     const s=document.createElement('td');
-     const f=document.createElement('td');
-
+     const c0=document.createElement('td'),c1=document.createElement('td'),c2=document.createElement('td'),c3=document.createElement('td');
      if(match){
        found++;
-       s.textContent='FOUND';s.className='ok';
-       f.innerHTML=esc(match.name)+'<br><button class="save" type="button">SAVE PDF</button>';
-       f.querySelector('button').onclick=()=>downloadFile(match);
+       const cb=document.createElement('input');cb.type='checkbox';cb.style.width='auto';cb.onchange=refreshMulti;
+       c0.appendChild(cb);c1.textContent=name;c2.textContent='FOUND';c2.className='ok';c3.textContent=match.name;
+       const item={name,file:match,checked:false};matches.push(item);
+       cb.onchange=()=>{item.checked=cb.checked;refreshMulti();};
      }else{
-       notFound++;
-       s.textContent='NOT FOUND';s.className='bad';
+       notFound++;c1.textContent=name;c2.textContent='NOT FOUND';c2.className='bad';
      }
-     tr.append(n,s,f);out.append(tr);
+     tr.append(c0,c1,c2,c3);out.append(tr);
      status.textContent=`Processed: ${found+notFound} | Found: ${found} | Not Found: ${notFound}`;
      await new Promise(r=>setTimeout(r,0));
    }
-   status.textContent += stopped?' | STOPPED':' | COMPLETE';
+   status.textContent+=(stopped?' | STOPPED':' | COMPLETE');
  }catch(e){alert('Error: '+e.message)}
- finally{search.disabled=false;stop.disabled=true}
+ finally{search.disabled=false;stop.disabled=true;refreshMulti();}
 };
 </script>
 </body>

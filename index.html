@@ -3,266 +3,235 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1769e0">
-<title>PDF Search • Merge • Compress • ZIP</title>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<title>PDF Compressor - Strong Size Reduction</title>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
 <style>
-*{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:16px;color:#222}
-.app{max-width:950px;margin:auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 3px 16px #0002}
-h1{text-align:center;color:#1769e0;margin:0 0 18px}
-section{border:1px solid #ddd;padding:15px;margin:14px 0;border-radius:10px}
-h2{font-size:18px;margin:0 0 12px}
-label{display:block;font-weight:bold;margin:10px 0 6px}
-input,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;font-size:15px}
-input,select{border:1px solid #bbb}
-button{border:0;background:#1769e0;color:#fff;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
-.stop{background:#c62828}.green{background:#188038}.purple{background:#6a1b9a}.orange{background:#ef6c00}.gray{background:#555}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.status{padding:11px;background:#eef2f5;border-radius:8px;margin-top:8px;line-height:1.45}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th,td{border:1px solid #ddd;padding:8px;font-size:13px}
-th{background:#eef2f5}
-.ok{color:green;font-weight:bold}.bad{color:#c00;font-weight:bold}
+body{font-family:Arial;background:#f4f6f8;margin:0;padding:16px;color:#222}
+.app{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:14px;box-shadow:0 3px 15px #0002}
+h1{text-align:center;color:#1769e0}
+section{border:1px solid #ddd;padding:16px;margin:14px 0;border-radius:10px}
+input,select,button{width:100%;padding:12px;margin:6px 0;box-sizing:border-box;border-radius:8px;font-size:15px}
+input,select{border:1px solid #bbb}button{border:0;background:#1769e0;color:white;font-weight:bold}
+.stop{background:#c62828}.zip{background:#188038}
+.status{background:#eef2f5;padding:12px;border-radius:8px;margin-top:8px}
 .note{font-size:13px;color:#666;line-height:1.5}
-@media(max-width:650px){.row{grid-template-columns:1fr}.app{padding:14px}}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border:1px solid #ddd;padding:7px;font-size:13px}
+.good{color:green;font-weight:bold}.warn{color:#c62828;font-weight:bold}
 </style>
 </head>
-
 <body>
 <div class="app">
-<h1>PDF Search • Merge • Compress • ZIP</h1>
+<h1>PDF Compressor – Strong Size Reduction</h1>
 
 <section>
-<h2>1. Search PDF from Excel</h2>
-<label>Select PDF files</label>
-<input id="pdf" type="file" accept=".pdf,application/pdf" multiple>
-<label>Select Excel file (.xlsx / .xls)</label>
-<input id="excel" type="file" accept=".xlsx,.xls">
+<h3>Select Multiple PDF Files</h3>
+<input id="files" type="file" accept=".pdf,application/pdf" multiple>
 
-<div class="row">
-<button id="search">START SEARCH</button>
+<h3>Target Maximum Size</h3>
+<select id="target">
+<option value="1">1 MB – Extreme</option>
+<option value="2">2 MB – Very Strong</option>
+<option value="5" selected>5 MB – Strong</option>
+<option value="10">10 MB – Medium</option>
+<option value="20">20 MB – Light</option>
+</select>
+
+<h3>Compression Quality</h3>
+<select id="quality">
+<option value="extreme">Extreme – smallest size</option>
+<option value="strong" selected>Strong – recommended</option>
+<option value="medium">Medium</option>
+<option value="light">Light – better quality</option>
+</select>
+
+<button id="start">COMPRESS ALL PDF + CREATE ZIP</button>
 <button id="stop" class="stop" disabled>STOP</button>
-</div>
-<button id="zipFound" class="green" disabled>DOWNLOAD SELECTED PDFs AS ZIP</button>
 
-<div id="searchStatus" class="status">Ready</div>
+<div id="status" class="status">Ready</div>
 <table>
-<thead><tr>
-<th><input id="selectAll" type="checkbox" style="width:auto"> Select</th>
-<th>Search Name</th><th>Status</th><th>PDF File</th>
-</tr></thead>
-<tbody id="results"></tbody>
+<thead><tr><th>PDF</th><th>Original</th><th>Compressed</th><th>Result</th></tr></thead>
+<tbody id="list"></tbody>
 </table>
 </section>
 
-<section>
-<h2>2. Compress Multiple PDFs</h2>
-<label>Select multiple PDFs</label>
-<input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple>
-
-<label>Maximum target size per PDF</label>
-<select id="target">
-<option value="1">1 MB</option>
-<option value="2">2 MB</option>
-<option value="5" selected>5 MB</option>
-<option value="10">10 MB</option>
-<option value="20">20 MB</option>
-</select>
-
-<div class="row">
-<button id="compressBtn" class="orange">COMPRESS ALL & CREATE ZIP</button>
-<button id="compressStop" class="stop" disabled>STOP COMPRESSION</button>
-</div>
-<div id="compressStatus" class="status">Ready</div>
-
 <div class="note">
-This compression rebuilds pages as JPEG images, so it can significantly reduce scanned/photo PDFs.
-It may reduce text/vector sharpness. The target is a maximum target where technically possible; very complex PDFs may remain above the target.
+<b>Important:</b> This version converts each PDF page to a JPEG image before creating the new PDF.
+That gives much stronger reduction for scanned/photo PDFs. Text/vector PDFs can also become smaller,
+but text may no longer remain selectable. If a PDF is already highly compressed, a large reduction
+may not be possible without visible quality loss.
 </div>
-</section>
-
-<section>
-<h2>3. Merge PDFs</h2>
-<label>Select PDFs in merge order</label>
-<input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple>
-<input id="mergeName" value="Merged_PDF.pdf" placeholder="Output file name">
-<button id="mergeBtn" class="purple">MERGE PDFs & DOWNLOAD</button>
-<div id="mergeStatus" class="status">Ready</div>
-</section>
-
 </div>
 
 <script type="module">
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
-
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 const {jsPDF}=window.jspdf;
-let searchStopped=false, compressionStopped=false, foundItems=[];
 
+let stopped=false;
 const $=id=>document.getElementById(id);
+const MB=1024*1024;
 
-function downloadBlob(blob,name){
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob); a.download=name;
- document.body.appendChild(a); a.click(); a.remove();
- setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+function download(blob,name){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
-function mb(n){return n/1024/1024}
-function safeName(n){return n.replace(/[\\/:*?"<>|]/g,"_")}
+function size(n){return (n/MB).toFixed(2)+" MB"}
 
-function refreshFoundZip(){
- $("zipFound").disabled=!foundItems.some(x=>x.checked);
-}
-$("selectAll").onchange=()=>{
- foundItems.forEach(x=>x.checked=$("selectAll").checked);
- $("results").querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=$("selectAll").checked);
- refreshFoundZip();
-};
-$("stop").onclick=()=>{searchStopped=true;$("searchStatus").textContent="Stopping...";};
-$("compressStop").onclick=()=>{compressionStopped=true;$("compressStatus").textContent="Stopping after current file...";};
-
-$("zipFound").onclick=async()=>{
- const selected=foundItems.filter(x=>x.checked);
- if(!selected.length)return;
- const zip=new JSZip();
- selected.forEach(x=>zip.file(x.file.name,x.file));
- $("searchStatus").textContent="Creating ZIP...";
- const blob=await zip.generateAsync({type:"blob"});
- downloadBlob(blob,"Selected_PDFs.zip");
- $("searchStatus").textContent=selected.length+" PDF(s) downloaded as ZIP.";
+const profiles={
+ extreme:[
+  {dpi:55,q:.30},{dpi:45,q:.24},{dpi:38,q:.20},{dpi:32,q:.17}
+ ],
+ strong:[
+  {dpi:65,q:.40},{dpi:55,q:.32},{dpi:45,q:.26},{dpi:38,q:.20}
+ ],
+ medium:[
+  {dpi:80,q:.50},{dpi:65,q:.42},{dpi:55,q:.34},{dpi:45,q:.27}
+ ],
+ light:[
+  {dpi:100,q:.62},{dpi:85,q:.52},{dpi:70,q:.44},{dpi:60,q:.36}
+ ]
 };
 
-$("search").onclick=async()=>{
- searchStopped=false;foundItems=[];$("results").innerHTML="";$("selectAll").checked=false;
- const files=[...$("pdf").files], excel=$("excel").files[0];
+async function makePDF(file,opt){
+  const source=await pdfjsLib.getDocument({
+    data:await file.arrayBuffer(),
+    useWorkerFetch:true,
+    disableAutoFetch:false
+  }).promise;
+
+  let doc=null;
+
+  for(let p=1;p<=source.numPages;p++){
+    if(stopped)break;
+    const page=await source.getPage(p);
+
+    // PDF points are 72 dpi. Render at requested DPI.
+    const scale=opt.dpi/72;
+    const viewport=page.getViewport({scale});
+    const canvas=document.createElement("canvas");
+    const ctx=canvas.getContext("2d",{alpha:false});
+    canvas.width=Math.max(1,Math.floor(viewport.width));
+    canvas.height=Math.max(1,Math.floor(viewport.height));
+
+    ctx.fillStyle="#fff";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    await page.render({canvasContext:ctx,viewport}).promise;
+    const jpg=canvas.toDataURL("image/jpeg",opt.q);
+
+    // Keep the original page's physical size in points.
+    const pageSize=page.getViewport({scale:1});
+    const pw=pageSize.width, ph=pageSize.height;
+
+    if(!doc){
+      doc=new jsPDF({
+        orientation:pw>ph?"landscape":"portrait",
+        unit:"pt",
+        format:[pw,ph],
+        compress:true,
+        putOnlyUsedFonts:true
+      });
+    }else{
+      doc.addPage([pw,ph],pw>ph?"landscape":"portrait");
+    }
+
+    doc.addImage(jpg,"JPEG",0,0,pw,ph,undefined,"FAST");
+
+    // Free canvas memory.
+    canvas.width=1;canvas.height=1;
+    if(window.gc)window.gc();
+  }
+
+  if(!doc)throw new Error("No pages processed");
+  const bytes=doc.output("arraybuffer");
+  await source.destroy();
+  return new Blob([bytes],{type:"application/pdf"});
+}
+
+async function compressFile(file,target,profile){
+  let best=null;
+  for(const opt of profiles[profile]){
+    if(stopped)break;
+    const blob=await makePDF(file,opt);
+    if(!best || blob.size<best.size)best=blob;
+    if(blob.size<=target)break;
+  }
+  return best;
+}
+
+$("stop").onclick=()=>{
+ stopped=true;
+ $("status").textContent="Stopping after current PDF...";
+};
+
+$("start").onclick=async()=>{
+ const files=[...$("files").files];
  if(!files.length)return alert("Please select PDF files.");
- if(!excel)return alert("Please select Excel file.");
- $("search").disabled=true;$("stop").disabled=false;
+
+ const target=Number($("target").value)*MB;
+ const profile=$("quality").value;
+ stopped=false;
+ $("start").disabled=true;$("stop").disabled=false;
+ $("list").innerHTML="";
+ const zip=new JSZip();
+ let done=0;
+
  try{
-   const wb=XLSX.read(await excel.arrayBuffer(),{type:"array"});
-   const ws=wb.Sheets[wb.SheetNames[0]];
-   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
-   let names=rows.map(r=>String(r[0]??"").trim()).filter(Boolean);
-   if(names.length && /search\\s*name|proposal\\s*no|proposal/i.test(names[0]))names.shift();
+  for(const file of files){
+   if(stopped)break;
 
-   let found=0,notFound=0;
-   for(const name of names){
-     if(searchStopped)break;
-     const file=files.find(f=>f.name.toLowerCase().includes(name.toLowerCase()));
-     const tr=document.createElement("tr");
-     const td0=document.createElement("td"),td1=document.createElement("td"),
-           td2=document.createElement("td"),td3=document.createElement("td");
-     if(file){
-       found++;
-       const item={file,checked:false};foundItems.push(item);
-       const cb=document.createElement("input");cb.type="checkbox";cb.style.width="auto";
-       cb.onchange=()=>{item.checked=cb.checked;refreshFoundZip();};
-       td0.appendChild(cb);td1.textContent=name;td2.textContent="FOUND";td2.className="ok";td3.textContent=file.name;
-     }else{
-       notFound++;td1.textContent=name;td2.textContent="NOT FOUND";td2.className="bad";
-     }
-     tr.append(td0,td1,td2,td3);$("results").appendChild(tr);
-     $("searchStatus").textContent=`Processed: ${found+notFound} | Found: ${found} | Not Found: ${notFound}`;
-     await new Promise(r=>setTimeout(r,0));
+   const tr=document.createElement("tr");
+   const c1=document.createElement("td"),c2=document.createElement("td"),
+         c3=document.createElement("td"),c4=document.createElement("td");
+   c1.textContent=file.name;c2.textContent=size(file.size);
+   c3.textContent="Processing...";c4.textContent="...";
+   tr.append(c1,c2,c3,c4);$("list").appendChild(tr);
+
+   $("status").textContent=`Compressing ${done+1} of ${files.length}: ${file.name}`;
+
+   try{
+    const blob=await compressFile(file,target,profile);
+    c3.textContent=size(blob.size);
+
+    const outName=file.name.replace(/\.pdf$/i,"")+"_compressed.pdf";
+    zip.file(outName,blob);
+    done++;
+
+    if(blob.size<=target){
+      c4.textContent="TARGET OK";
+      c4.className="good";
+    }else{
+      c4.textContent="Smallest possible result > target";
+      c4.className="warn";
+    }
+   }catch(e){
+    c3.textContent="ERROR";c4.textContent=e.message;c4.className="warn";
    }
-   $("searchStatus").textContent+=(searchStopped?" | STOPPED":" | COMPLETE");
- }catch(e){alert("Excel/Search error: "+e.message);}
- $("search").disabled=false;$("stop").disabled=true;refreshFoundZip();
-};
+   await new Promise(r=>setTimeout(r,0));
+  }
 
-async function renderPage(pdfDoc,pageNo,scale,quality){
- const page=await pdfDoc.getPage(pageNo);
- const viewport=page.getViewport({scale});
- const canvas=document.createElement("canvas");
- const ctx=canvas.getContext("2d",{alpha:false});
- canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
- await page.render({canvasContext:ctx,viewport}).promise;
- const data=canvas.toDataURL("image/jpeg",quality);
- return {data,w:canvas.width,h:canvas.height};
-}
-
-async function compressOne(file,targetMB){
- const src=await pdfjsLib.getDocument({data:await file.arrayBuffer(),useWorkerFetch:true}).promise;
- const targetBytes=targetMB*1024*1024;
- const attempts=[
-   {scale:1.30,q:.82},{scale:1.10,q:.72},{scale:.95,q:.62},
-   {scale:.80,q:.52},{scale:.68,q:.42},{scale:.55,q:.34}
- ];
- let best=null;
-
- for(const a of attempts){
-   if(compressionStopped)break;
-   const out=new jsPDF({unit:"pt",format:"a4",compress:true});
-   for(let p=1;p<=src.numPages;p++){
-     const img=await renderPage(src,p,a.scale,a.q);
-     const pageW=out.internal.pageSize.getWidth(),pageH=out.internal.pageSize.getHeight();
-     const ratio=Math.min(pageW/img.w,pageH/img.h);
-     const w=img.w*ratio,h=img.h*ratio;
-     if(p>1)out.addPage("a4","p");
-     out.addImage(img.data,"JPEG",(pageW-w)/2,(pageH-h)/2,w,h,undefined,"FAST");
-   }
-   const bytes=out.output("arraybuffer");
-   best=bytes;
-   if(bytes.byteLength<=targetBytes)break;
+  if(done){
+   $("status").textContent="Creating ZIP...";
+   const zipBlob=await zip.generateAsync({
+     type:"blob",
+     compression:"DEFLATE",
+     compressionOptions:{level:9}
+   });
+   download(zipBlob,`Compressed_PDFs_${$("target").value}MB.zip`);
+   $("status").textContent=`DONE – ${done} PDF(s) compressed and saved in one ZIP.`;
+  }else{
+   $("status").textContent="No PDF compressed.";
+  }
+ }catch(e){
+  $("status").textContent="Error: "+e.message;
  }
- await src.cleanup();
- return new Blob([best],{type:"application/pdf"});
-}
 
-$("compressBtn").onclick=async()=>{
- const files=[...$("compressFiles").files];
- if(!files.length)return alert("Please select one or more PDF files.");
- const target=Number($("target").value);
- compressionStopped=false;$("compressBtn").disabled=true;$("compressStop").disabled=false;
- const zip=new JSZip();let done=0;
- try{
-   for(const file of files){
-     if(compressionStopped)break;
-     $("compressStatus").textContent=`Compressing ${done+1} of ${files.length}: ${file.name}`;
-     const blob=await compressOne(file,target);
-     const outName=safeName(file.name.replace(/\.pdf$/i,"")+"_compressed.pdf");
-     zip.file(outName,blob);
-     done++;
-     $("compressStatus").textContent=`Compressed ${done}/${files.length}`;
-     await new Promise(r=>setTimeout(r,0));
-   }
-   if(done){
-     $("compressStatus").textContent="Creating ZIP...";
-     const zipBlob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:6}});
-     downloadBlob(zipBlob,`Compressed_PDFs_${target}MB.zip`);
-     $("compressStatus").textContent=`DONE: ${done} PDF(s) compressed and saved in one ZIP. Target: ${target} MB`;
-   }else $("compressStatus").textContent="No file processed.";
- }catch(e){$("compressStatus").textContent="Compression error: "+e.message;}
- $("compressBtn").disabled=false;$("compressStop").disabled=true;
-};
-
-$("mergeBtn").onclick=async()=>{
- const files=[...$("mergeFiles").files];
- if(files.length<2)return alert("Please select at least 2 PDFs.");
- const btn=$("mergeBtn");btn.disabled=true;
- try{
-   const merged=await PDFDocument.create();
-   for(let i=0;i<files.length;i++){
-     $("mergeStatus").textContent=`Merging ${i+1} of ${files.length}...`;
-     const src=await PDFDocument.load(await files[i].arrayBuffer(),{ignoreEncryption:true});
-     const pages=await merged.copyPages(src,src.getPageIndices());
-     pages.forEach(p=>merged.addPage(p));
-   }
-   const bytes=await merged.save({useObjectStreams:true});
-   let name=$("mergeName").value.trim()||"Merged_PDF.pdf";
-   if(!/\.pdf$/i.test(name))name+=".pdf";
-   downloadBlob(new Blob([bytes],{type:"application/pdf"}),name);
-   $("mergeStatus").textContent=`DONE: ${files.length} PDFs merged.`;
- }catch(e){$("mergeStatus").textContent="Merge error: "+e.message;}
- btn.disabled=false;
+ $("start").disabled=false;$("stop").disabled=true;
 };
 </script>
 </body>

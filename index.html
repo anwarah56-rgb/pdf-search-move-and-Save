@@ -1,5 +1,116 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PDF Search & Move</title><style>body{font-family:Arial;background:#f4f6f8;padding:20px}.app{max-width:700px;margin:auto;background:#fff;padding:22px;border-radius:14px;box-shadow:0 3px 15px #0002}h1{text-align:center;color:#1769e0}label{display:block;font-weight:bold;margin:15px 0 6px}input,button{width:100%;padding:13px;box-sizing:border-box;margin-bottom:10px;border-radius:8px;border:1px solid #bbb;font-size:16px}button{background:#1769e0;color:#fff;border:0;font-weight:bold}.stop{background:#c62828}.status{padding:12px;background:#eef2f5;border-radius:8px}table{width:100%;border-collapse:collapse;margin-top:15px}th,td{border:1px solid #ddd;padding:8px;font-size:14px}th{background:#eef2f5}.ok{color:green;font-weight:bold}.bad{color:#c00;font-weight:bold}.note{color:#666;font-size:13px;margin-top:12px}</style></head><body><div class="app"><h1>PDF Search & Move</h1><label>1. Select PDF files</label><input id="pdf" type="file" accept=".pdf" multiple><label>2. Select CSV file</label><input id="csv" type="file" accept=".csv"><button id="start">START SEARCH</button><button id="stop" class="stop" disabled>STOP</button><div id="status" class="status">Ready</div><table><thead><tr><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="out"></tbody></table><div class="note">Browser security does not allow a webpage to directly move files inside your phone/PC folder. This version searches filenames and shows matches. CSV should have search names in column A.</div></div><script>
-let stopped=false;const pdf=document.getElementById('pdf'),csv=document.getElementById('csv'),start=document.getElementById('start'),stop=document.getElementById('stop'),status=document.getElementById('status'),out=document.getElementById('out');
-stop.onclick=()=>{stopped=true;status.textContent='Stopping...'};
-start.onclick=async()=>{stopped=false;out.innerHTML='';let files=[...pdf.files],data=csv.files[0];if(!files.length)return alert('Select PDF files first.');if(!data)return alert('Select CSV file first.');start.disabled=true;stop.disabled=false;try{let text=await data.text();let names=text.split(/\r?\n/).map(x=>x.split(',')[0].replace(/^"|"$/g,'').trim()).filter(Boolean);if(names.length&&/search name/i.test(names[0]))names.shift();let f=0,n=0;for(let name of names){if(stopped)break;let m=files.find(x=>x.name.toLowerCase().includes(name.toLowerCase()));let tr=document.createElement('tr');tr.innerHTML='<td>'+name.replace(/</g,'&lt;')+'</td>';let td=document.createElement('td'),tf=document.createElement('td');if(m){td.textContent='Found';td.className='ok';tf.textContent=m.name;f++}else{td.textContent='Not Found';td.className='bad';n++}tr.append(td,tf);out.append(tr);status.textContent='Processed: '+(f+n)+' | Found: '+f+' | Not Found: '+n;await new Promise(r=>setTimeout(r,0))}status.textContent+=(stopped?' | STOPPED':' | COMPLETE')}catch(e){alert(e.message)}finally{start.disabled=false;stop.disabled=true}};
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1769e0">
+<title>PDF Search & Save</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:18px;color:#222}
+.app{max-width:760px;margin:auto;background:#fff;padding:22px;border-radius:14px;box-shadow:0 3px 16px #0002}
+h1{text-align:center;color:#1769e0;margin-top:0}
+label{display:block;font-weight:bold;margin:16px 0 7px}
+input,button{width:100%;box-sizing:border-box;padding:13px;border-radius:8px;border:1px solid #bbb;font-size:16px}
+button{background:#1769e0;color:#fff;border:0;margin-top:10px;font-weight:bold}
+.stop{background:#c62828}
+.save{background:#188038}
+.status{margin-top:16px;padding:12px;background:#eef2f5;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th,td{border:1px solid #ddd;padding:8px;font-size:13px}
+th{background:#eef2f5}
+.ok{color:green;font-weight:bold}.bad{color:#c00;font-weight:bold}
+.note{font-size:13px;color:#666;margin-top:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>PDF Search & Save</h1>
+
+<label>1. Select PDF Files</label>
+<input id="pdf" type="file" accept=".pdf" multiple>
+
+<label>2. Select CSV File</label>
+<input id="csv" type="file" accept=".csv">
+
+<button id="search">START SEARCH</button>
+<button id="stop" class="stop" disabled>STOP</button>
+
+<div id="status" class="status">Ready</div>
+
+<table>
+<thead><tr><th>Search Name</th><th>Status</th><th>PDF File</th></tr></thead>
+<tbody id="out"></tbody>
+</table>
+
+<div class="note">
+For security, a browser cannot silently create/move files in an arbitrary folder.
+This version lets you search matching PDFs and then save/download the selected PDF.
+For many PDFs, select the files once and use the Save button shown for each match.
+</div>
+</div>
+
+<script>
+let stopped=false;
+const pdf=document.getElementById('pdf'),csv=document.getElementById('csv');
+const search=document.getElementById('search'),stop=document.getElementById('stop');
+const status=document.getElementById('status'),out=document.getElementById('out');
+
+stop.onclick=()=>{stopped=true;status.textContent='Stopping...';};
+
+function esc(s){
+ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function downloadFile(file){
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(file);
+ a.download=file.name;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+search.onclick=async()=>{
+ stopped=false;out.innerHTML='';
+ const files=[...pdf.files], data=csv.files[0];
+ if(!files.length)return alert('Please select PDF files.');
+ if(!data)return alert('Please select CSV file.');
+
+ search.disabled=true;stop.disabled=false;
+ try{
+   let text=await data.text();
+   let names=text.split(/\r?\n/)
+     .map(x=>x.split(',')[0].replace(/^"|"$/g,'').trim())
+     .filter(Boolean);
+   if(names.length && /search name/i.test(names[0])) names.shift();
+
+   let found=0,notFound=0;
+   for(const name of names){
+     if(stopped)break;
+     const match=files.find(f=>f.name.toLowerCase().includes(name.toLowerCase()));
+     const tr=document.createElement('tr');
+     const n=document.createElement('td');n.textContent=name;
+     const s=document.createElement('td');
+     const f=document.createElement('td');
+
+     if(match){
+       found++;
+       s.textContent='FOUND';s.className='ok';
+       f.innerHTML=esc(match.name)+'<br><button class="save" type="button">SAVE PDF</button>';
+       f.querySelector('button').onclick=()=>downloadFile(match);
+     }else{
+       notFound++;
+       s.textContent='NOT FOUND';s.className='bad';
+     }
+     tr.append(n,s,f);out.append(tr);
+     status.textContent=`Processed: ${found+notFound} | Found: ${found} | Not Found: ${notFound}`;
+     await new Promise(r=>setTimeout(r,0));
+   }
+   status.textContent += stopped?' | STOPPED':' | COMPLETE';
+ }catch(e){alert('Error: '+e.message)}
+ finally{search.disabled=false;stop.disabled=true}
+};
+</script>
+</body>
+</html>

@@ -73,7 +73,11 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <div><label>Target Maximum Size</label><select id="target"><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option><option value="20">20 MB</option></select></div>
 <div><label>Quality</label><select id="quality"><option value="extreme">Extreme</option><option value="strong" selected>Strong</option><option value="medium">Medium</option><option value="light">Light</option></select></div>
 </div>
-<div class="grid2"><button id="compressBtn" class="orange">COMPRESS ALL + ZIP</button><button id="compressStop" class="red" disabled>STOP</button></div>
+<div class="grid2"><button id="compressBtn" class="orange">🗜️ COMPRESS ALL</button><button id="compressStop" class="red" disabled>STOP</button></div>
+<div class="grid2">
+<button id="compressZip" class="green" disabled>📦 DOWNLOAD COMPRESSED AS ZIP</button>
+<button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
+</div>
 <div id="compressStatus" class="status">Ready</div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th></tr></thead><tbody id="compressRows"></tbody></table>
 <div class="note">Important: scanned/image PDFs can be reduced strongly by rendering pages as JPEG. If a compressed result becomes larger than the original, this app will keep the original instead.</div>
@@ -154,18 +158,107 @@ $("searchBtn").onclick=async()=>{
  for(let name of names){if(searchStopped)break;let file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;let item={file,checked:false};found.push(item);let c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;refresh()};tr.innerHTML="<td></td><td>"+name+"</td><td class='good'>FOUND</td><td>"+file.name+"</td>";tr.cells[0].appendChild(c)}else{n++;tr.innerHTML="<td></td><td>"+name+"</td><td class='bad'>NOT FOUND</td><td></td>"}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processed ${f+n} | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=searchStopped?" | STOPPED":" | COMPLETE"}catch(e){$("searchStatus").textContent="Error: "+e.message}$("searchBtn").disabled=false;$("searchStop").disabled=true;refresh()};
 
 const profiles={extreme:[{dpi:55,q:.30},{dpi:45,q:.24},{dpi:38,q:.20},{dpi:32,q:.17}],strong:[{dpi:65,q:.40},{dpi:55,q:.32},{dpi:45,q:.26},{dpi:38,q:.20}],medium:[{dpi:80,q:.50},{dpi:65,q:.42},{dpi:55,q:.34},{dpi:45,q:.27}],light:[{dpi:100,q:.62},{dpi:85,q:.52},{dpi:70,q:.44},{dpi:60,q:.36}]};
-let compStop=false;
-$("compressStop").onclick=()=>{compStop=true;$("compressStatus").textContent="Stopping..."};
-async function makeCompressed(file,opt){
- let src=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise,doc=null;
- for(let i=1;i<=src.numPages;i++){let page=await src.getPage(i),v=page.getViewport({scale:opt.dpi/72}),cv=document.createElement("canvas"),ctx=cv.getContext("2d",{alpha:false});cv.width=Math.ceil(v.width);cv.height=Math.ceil(v.height);ctx.fillStyle="#fff";ctx.fillRect(0,0,cv.width,cv.height);await page.render({canvasContext:ctx,viewport:v}).promise;let jpg=cv.toDataURL("image/jpeg",opt.q),ps=page.getViewport({scale:1});if(!doc)doc=new jsPDF({orientation:ps.width>ps.height?"landscape":"portrait",unit:"pt",format:[ps.width,ps.height],compress:true});else doc.addPage([ps.width,ps.height],ps.width>ps.height?"landscape":"portrait");doc.addImage(jpg,"JPEG",0,0,ps.width,ps.height,undefined,"FAST");cv.width=1;cv.height=1}
-await src.destroy();return new Blob([doc.output("arraybuffer")],{type:"application/pdf"});
+let compStop=false, compressedResults=[];
+$("compressStop").onclick=()=>{
+  compStop=true;
+  $("compressStatus").textContent="Stopping after current PDF...";
+};
+function refreshCompressionActions(){
+  const has=compressedResults.length>0;
+  $("compressZip").disabled=!has;
+  $("compressMerge").disabled=!has;
 }
+$("compressZip").onclick=async()=>{
+  if(!compressedResults.length)return;
+  $("compressStatus").textContent="Creating ZIP...";
+  const z=new JSZip();
+  compressedResults.forEach(x=>z.file(x.name,x.blob));
+  const blob=await z.generateAsync({
+    type:"blob",
+    compression:"DEFLATE",
+    compressionOptions:{level:9}
+  });
+  download(blob,`Compressed_PDFs_${$("target").value}MB.zip`);
+  $("compressStatus").textContent=`ZIP downloaded — ${compressedResults.length} PDF(s).`;
+};
+$("compressMerge").onclick=async()=>{
+  if(!compressedResults.length)return;
+  $("compressMerge").disabled=true;
+  try{
+    $("compressStatus").textContent="Merging compressed PDFs...";
+    const out=await PDFDocument.create();
+    for(let i=0;i<compressedResults.length;i++){
+      $("compressStatus").textContent=`Merging ${i+1} of ${compressedResults.length}: ${compressedResults[i].name}`;
+      const src=await PDFDocument.load(await compressedResults[i].blob.arrayBuffer(),{ignoreEncryption:true});
+      const pages=await out.copyPages(src,src.getPageIndices());
+      pages.forEach(p=>out.addPage(p));
+      await new Promise(r=>setTimeout(r,0));
+    }
+    const bytes=await out.save({useObjectStreams:true});
+    download(new Blob([bytes],{type:"application/pdf"}),"Compressed_Merged_PDF.pdf");
+    $("compressStatus").textContent=`Merged PDF downloaded — ${compressedResults.length} PDF(s).`;
+  }catch(e){
+    $("compressStatus").textContent="Merge error: "+e.message;
+  }
+  refreshCompressionActions();
+};
 $("compressBtn").onclick=async()=>{
- let files=[...$("compressFiles").files];if(!files.length)return alert("Select PDFs.");let target=Number($("target").value)*1048576,prof=$("quality").value;compStop=false;$("compressBtn").disabled=true;$("compressStop").disabled=false;$("compressRows").innerHTML="";let zip=new JSZip(),done=0;
- try{for(let file of files){if(compStop)break;let tr=document.createElement("tr");tr.innerHTML="<td>"+file.name+"</td><td>"+mb(file.size)+"</td><td>Processing...</td><td>...</td>";$("compressRows").appendChild(tr);let best=null;for(let opt of profiles[prof]){if(compStop)break;let b=await makeCompressed(file,opt);if(!best||b.size<best.size)best=b;if(b.size<=target)break}if(!best||best.size>=file.size){best=file;tr.cells[2].textContent=mb(best.size);tr.cells[3].textContent=best===file?"Original kept (compressed was not smaller)":"Done"}else{tr.cells[2].textContent=mb(best.size);tr.cells[3].textContent=best.size<=target?"TARGET OK":"Smallest found"}zip.file(file.name.replace(/\.pdf$/i,"")+"_compressed.pdf",best);done++;$("compressStatus").textContent=`Compressed ${done}/${files.length}`;await new Promise(r=>setTimeout(r,0))}
- if(done){let blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}});download(blob,`Compressed_PDFs_${$("target").value}MB.zip`);$("compressStatus").textContent=`DONE — ${done} PDF(s) saved in one ZIP.`}else $("compressStatus").textContent="No file processed."}catch(e){$("compressStatus").textContent="Error: "+e.message}$("compressBtn").disabled=false;$("compressStop").disabled=true};
+  let files=[...$("compressFiles").files];
+  if(!files.length)return alert("Select PDFs.");
+  let target=Number($("target").value)*1048576,prof=$("quality").value;
+  compStop=false;
+  compressedResults=[];
+  $("compressBtn").disabled=true;
+  $("compressStop").disabled=false;
+  $("compressRows").innerHTML="";
+  refreshCompressionActions();
+  let done=0;
+  try{
+    for(let file of files){
+      if(compStop)break;
+      let tr=document.createElement("tr");
+      tr.innerHTML="<td>"+file.name+"</td><td>"+mb(file.size)+"</td><td>Processing...</td><td>...</td>";
+      $("compressRows").appendChild(tr);
 
+      let best=null;
+      for(let opt of profiles[prof]){
+        if(compStop)break;
+        let b=await makeCompressed(file,opt);
+        if(!best||b.size<best.size)best=b;
+        if(b.size<=target)break;
+      }
+
+      // Critical protection: never replace an original with a larger compressed PDF.
+      let finalBlob=best && best.size<file.size ? best : file;
+      let finalName=file.name.replace(/\.pdf$/i,"")+"_compressed.pdf";
+      compressedResults.push({name:finalName,blob:finalBlob});
+
+      tr.cells[2].textContent=mb(finalBlob.size);
+      if(finalBlob===file){
+        tr.cells[3].textContent="Original kept";
+        tr.cells[3].className="bad";
+      }else if(finalBlob.size<=target){
+        tr.cells[3].textContent="TARGET OK";
+        tr.cells[3].className="good";
+      }else{
+        tr.cells[3].textContent="Reduced, target not reached";
+        tr.cells[3].className="good";
+      }
+
+      done++;
+      $("compressStatus").textContent=`Compressed ${done}/${files.length}`;
+      await new Promise(r=>setTimeout(r,0));
+    }
+    $("compressStatus").textContent=done
+      ? `DONE — ${done} PDF(s) ready. Choose ZIP or MERGE below.`
+      : "No file processed.";
+  }catch(e){
+    $("compressStatus").textContent="Error: "+e.message;
+  }
+  $("compressBtn").disabled=false;
+  $("compressStop").disabled=true;
+  refreshCompressionActions();
+};
 $("mergeBtn").onclick=async()=>{let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
 
 $("zipBtn").onclick=async()=>{let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};

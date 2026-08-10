@@ -58,7 +58,10 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple>
 <label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
 <div class="grid2"><button id="searchBtn">START SEARCH</button><button id="searchStop" class="red" disabled>STOP</button></div>
-<button id="searchZip" class="green" disabled>DOWNLOAD SELECTED AS ZIP</button>
+<div class="grid2">
+<button id="searchZip" class="green" disabled>📦 DOWNLOAD SELECTED AS ZIP</button>
+<button id="searchMerge" class="purple" disabled>🔗 MERGE SELECTED PDFs</button>
+</div>
 <div id="searchStatus" class="status">Ready</div>
 <table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
 </section>
@@ -105,9 +108,45 @@ const mb=n=>(n/1048576).toFixed(2)+" MB";
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.tab).classList.add("active")});
 
 let found=[],searchStopped=false;
-function refresh(){ $("searchZip").disabled=!found.some(x=>x.checked) }
+function refresh(){
+ const has=found.some(x=>x.checked);
+ $("searchZip").disabled=!has;
+ $("searchMerge").disabled=!has;
+}
 $("searchStop").onclick=()=>{searchStopped=true;$("searchStatus").textContent="Stopping..."};
-$("searchZip").onclick=async()=>{let a=found.filter(x=>x.checked);if(!a.length)return;let z=new JSZip();a.forEach(x=>z.file(x.file.name,x.file));$("searchStatus").textContent="Creating ZIP...";download(await z.generateAsync({type:"blob"}),"Selected_PDFs.zip");$("searchStatus").textContent=a.length+" PDF(s) saved in ZIP."};
+
+$("searchZip").onclick=async()=>{
+ let a=found.filter(x=>x.checked);
+ if(!a.length)return;
+ let z=new JSZip();
+ a.forEach(x=>z.file(x.file.name,x.file));
+ $("searchStatus").textContent="Creating ZIP...";
+ download(await z.generateAsync({type:"blob"}),"Selected_PDFs.zip");
+ $("searchStatus").textContent=a.length+" PDF(s) saved in ZIP.";
+};
+
+$("searchMerge").onclick=async()=>{
+ let a=found.filter(x=>x.checked);
+ if(!a.length)return;
+ $("searchMerge").disabled=true;
+ try{
+   $("searchStatus").textContent="Merging selected PDFs...";
+   const merged=await PDFDocument.create();
+   for(let i=0;i<a.length;i++){
+     $("searchStatus").textContent=`Merging ${i+1} of ${a.length}: ${a[i].file.name}`;
+     const src=await PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true});
+     const pages=await merged.copyPages(src,src.getPageIndices());
+     pages.forEach(p=>merged.addPage(p));
+     await new Promise(r=>setTimeout(r,0));
+   }
+   const bytes=await merged.save({useObjectStreams:true});
+   download(new Blob([bytes],{type:"application/pdf"}),"Selected_Merged_PDF.pdf");
+   $("searchStatus").textContent=a.length+" selected PDF(s) merged and downloaded.";
+ }catch(e){
+   $("searchStatus").textContent="Merge error: "+e.message;
+ }
+ refresh();
+};
 $("searchBtn").onclick=async()=>{
  found=[];searchStopped=false;$("searchRows").innerHTML="";let fs=[...$("searchPdfs").files],ef=$("searchExcel").files[0];
  if(!fs.length||!ef)return alert("Please select PDF files and Excel file.");$("searchBtn").disabled=true;$("searchStop").disabled=false;

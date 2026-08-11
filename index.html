@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b57d0">
 <title>PDF Utility Hub by Anwar </title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
+// UI safety: make sure the auth controls are always visible and report uncaught errors.
+window.addEventListener("error", e => {
+  const ids=["compressStatus","mergeStatus","zipStatus","searchStatus"];
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el && e.message) el.textContent="Error: "+e.message; });
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -56,9 +62,9 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 </style>
 </head>
 <body>
-<div class="authbar"><span id="authUser" class="auth-user"></span><span id="roleBadge" class="role-badge">FREE • 50</span><button id="loginBtn">Login</button><button id="registerBtn">Register</button><button id="logoutBtn" style="display:none">Logout</button></div>
+<div class="authbar"><span id="authUser" class="auth-user"></span><span id="roleBadge" class="role-badge">FREE • 50</span><button id="loginBtn" type="button">🔐 Login</button><button id="registerBtn" type="button">📝 Register</button><button id="logoutBtn" type="button" style="display:none">🚪 Logout</button></div>
 <div style="position:absolute;left:22px;top:18px;font-size:12px;color:#64748b">Free: 50 operations • Premium: Unlimited</div>
-<div id="authModal" class="modal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="auth-actions"><button id="authSubmit" class="green">Login</button><button id="authClose">Close</button></div><div id="authMsg" class="free-limit"></div><div class="premium-card"><b>⭐ Premium</b><br>₹200 / 6 Months • ₹300 / 1 Year<br>Unlimited Compress & Merge</div></div></div>
+<div id="authModal" class="modal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="auth-actions"><button id="authSubmit" type="button" class="green">Login</button><button id="authClose" type="button">Close</button></div><div id="authMsg" class="free-limit"></div><div class="premium-card"><b>⭐ Premium</b><br>₹200 / 6 Months • ₹300 / 1 Year<br>Unlimited Compress & Merge</div></div></div>
 
 <header class="header"><div class="header-inner">
  <div class="top-builder">Build by Anwar</div>
@@ -67,10 +73,10 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 
 <div class="container">
 <nav class="tabs">
-<button class="tab active" data-tab="searchPanel">🔎 Search</button>
-<button class="tab" data-tab="compressPanel">🗜️ Compress</button>
-<button class="tab" data-tab="mergePanel">🔗 Merge</button>
-<button class="tab" data-tab="zipPanel">📦 ZIP</button>
+<button type="button" class="tab active" data-tab="searchPanel">🔎 Search</button>
+<button type="button" class="tab" data-tab="compressPanel">🗜️ Compress</button>
+<button type="button" class="tab" data-tab="mergePanel">🔗 Merge</button>
+<button type="button" class="tab" data-tab="zipPanel">📦 ZIP</button>
 </nav>
 
 <section id="searchPanel" class="panel active">
@@ -109,7 +115,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <button id="compressZip" class="green" disabled>📦 DOWNLOAD COMPRESSED AS ZIP</button>
 <button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
 </div>
-<div id="compressStatus" class="status">Ready</div>
+<div id="compressStatus" class="status">Ready — Select PDF files and click COMPRESS ALL.</div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 <div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
 </section>
@@ -119,7 +125,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple>
 <label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf">
 <button id="mergeBtn" class="purple">MERGE & DOWNLOAD</button>
-<div id="mergeStatus" class="status">Ready</div>
+<div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div>
 </section>
 
 <section id="zipPanel" class="panel">
@@ -127,7 +133,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple>
 <label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip">
 <button id="zipBtn" class="green">CREATE ZIP & DOWNLOAD</button>
-<div id="zipStatus" class="status">Ready</div>
+<div id="zipStatus" class="status">Ready — Select PDF files.</div>
 </section>
 </div>
 <script type="module">
@@ -414,7 +420,7 @@ $("compressBtn").onclick=async()=>{
         tr.cells[4].className="good";
       }else{
         tr.cells[4].textContent="Reduced, target not reached";
-        tr.cells[3].className="good";
+        tr.cells[4].className="good";
       }
 
       done++;

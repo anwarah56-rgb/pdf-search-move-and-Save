@@ -27,9 +27,9 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 .lower{display:grid;grid-template-columns:1fr;gap:15px;margin-top:15px}.activity-card{padding:20px}.activity-table{width:100%;border-collapse:collapse}.activity-table td,.activity-table th{padding:10px;border-bottom:1px solid var(--line);font-size:12px}.complete{color:#16a34a;font-weight:800}
 .premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px}.premium-banner h2{margin:0 0 5px;font-size:19px}.premium-banner p{margin:0;color:#667085;font-size:12px}.plan-actions{display:flex;gap:8px;flex-wrap:wrap}.plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
 .footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px}.footer b{color:#69d18a}
-.modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(360px,90vw);background:#fff;border-radius:14px;padding:16px;box-shadow:0 25px 80px #0004;position:relative}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.modal-head h3{margin:0}.modal-tools{display:flex;gap:6px}.modal-tools button{width:32px;height:32px;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}.modal-card h3{margin-top:0}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.modal-actions button{width:100%;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer}
+.modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center;padding:20px;overflow:auto}.modal.show{display:flex}.modal-card{width:min(360px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 25px 80px #0004;position:relative}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:#fff;z-index:3;padding-bottom:8px;border-bottom:1px solid #eef2f6}.modal-head h3{margin:0}.modal-tools{display:flex;gap:6px}.modal-tools button{width:34px;height:34px;flex:none;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}.modal-card h3{margin-top:0}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.modal-actions button{width:100%;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer}
 .payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}.payment-minimized .modal-card>*:not(.modal-head){display:none}.payment-minimized .modal-head h3{font-size:13px}.payment-minimized .modal-tools button{width:28px;height:28px}.success{background:#ecfdf3!important;border-color:#bbf7d0!important;color:#166534}.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}.payment-plan strong{font-size:18px}.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0}.qr-wrap{display:flex;justify-content:center;margin:12px 0}.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.qr-box small{display:block;color:#667085;margin-top:7px}.admin-badge{display:inline-block;background:#111827;color:#fff;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:850}
-@media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
+@media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.modal{padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:13px}.modal-head h3{font-size:16px}.modal-tools button{width:32px;height:32px}.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -85,6 +85,19 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 <footer class="footer">© 2026 PDF Utility Hub &nbsp;•&nbsp; <b>Build by Anwar</b> &nbsp;•&nbsp; Professional PDF Tools</footer>
 
 <div class="modal" id="authModal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="modal-actions"><button id="authSubmit" class="greenbtn">Login</button><button id="authClose" style="background:#e5e7eb">Close</button></div><div id="authMsg" class="status"></div><p style="font-size:12px;color:#667085">Guest: 20 pages/PDF • Registered: 50 pages/PDF • Premium: Unlimited</p></div></div>
+
+<div class="modal" id="settingsModal"><div class="modal-card">
+  <div class="modal-head"><h3>⚙️ Settings</h3><div class="modal-tools"><button id="closeSettings" class="close-pay">✕</button></div></div>
+  <label>Country</label>
+  <select id="settingsCountry">
+    <option>India</option><option>United States</option><option>United Kingdom</option>
+    <option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option>
+    <option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option>
+    <option>Singapore</option><option>Other</option>
+  </select>
+  <button id="saveSettings" class="action greenbtn">SAVE SETTINGS</button>
+  <div id="settingsMsg" class="status">Choose your country and save.</div>
+</div></div>
 
 <div class="modal" id="profileModal"><div class="modal-card"><h3>⚙️ Account Settings</h3><label>Country</label><select id="countrySelect"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><div class="modal-actions"><button id="saveProfile" class="greenbtn">Save</button><button id="closeProfile" style="background:#e5e7eb">Close</button></div></div></div>
 
@@ -166,7 +179,7 @@ document.addEventListener("click",e=>{if(!e.target.closest("#userMenu"))$("dropd
 $("logoutBtn").onclick=()=>signOut(auth);
 $("profileBtn").onclick=()=>{$("dropdown").classList.remove("show");$("profileModal").classList.add("show");$("countrySelect").value=localStorage.getItem("pdfhub_country_"+(currentUser?.uid||""))||"India"};
 $("closeProfile").onclick=()=>$("profileModal").classList.remove("show");
-$("saveProfile").onclick=()=>{if(currentUser)localStorage.setItem("pdfhub_country_"+currentUser.uid,$("countrySelect").value);$("countryValue").textContent=$("countrySelect").value;$("profileModal").classList.remove("show")};
+$("saveProfile").onclick=()=>{localStorage.setItem("pdfhub_country_"+(currentUser?.uid||"guest"),$("countrySelect").value);$("countryValue").textContent=$("countrySelect").value;$("profileModal").classList.remove("show")};
 function openPayment(plan){
  selectedPlan=plan;
  const amount=plan==="6"?"200":"300";

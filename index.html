@@ -34,7 +34,7 @@ button:hover{transform:translateY(-1px);filter:brightness(1.03)}button:disabled{
 .status{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:13px;font-size:14px}
 table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;overflow:hidden;border:1px solid var(--line);border-radius:10px}
 th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:left}th{background:#f8fafc;font-weight:800}tr:last-child td{border-bottom:0}
-.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}
+.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}.pwrap{min-width:115px}.pbar{height:20px;background:#eef2f7;border-radius:10px;overflow:hidden;border:1px solid #dbe2ea}.pbar span{display:block;height:100%;background:#16a34a;color:#fff;text-align:center;font-size:11px;line-height:18px;font-weight:800;transition:width .25s}
 .note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:12px;padding:10px 12px;background:#f8fafc;border-radius:9px}
 .footer{text-align:center;color:#98a2b3;font-size:12px;padding:0 15px 25px}
 @media(max-width:700px){.tabs{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.brand{font-size:25px}.panel{padding:17px}}
@@ -104,7 +104,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
 </div>
 <div id="compressStatus" class="status">Ready</div>
-<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
+<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 <div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
 </section>
 
@@ -314,11 +314,20 @@ $("compressBtn").onclick=async()=>{
       $("compressRows").appendChild(tr);
 
       let best=null;
+      const attempts=profiles[prof].length;
+      let attemptNo=0;
       for(let opt of profiles[prof]){
         if(compStop)break;
+        attemptNo++;
+        const pct=Math.min(95,Math.round((attemptNo/attempts)*90));
+        tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${pct}%">${pct}%</span></div></div>`;
         let b=await makeCompressed(file,opt);
         if(!best||b.size<best.size)best=b;
-        if(b.size<=target)break;
+        if(b.size<=target){
+          tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';
+          break;
+        }
+        await new Promise(r=>setTimeout(r,0));
       }
 
       // Critical protection: never replace an original with a larger compressed PDF.
@@ -327,6 +336,11 @@ $("compressBtn").onclick=async()=>{
       compressedResults.push({name:finalName,blob:finalBlob});
 
       tr.cells[2].textContent=sizeLabel(finalBlob.size);
+      tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';
+      const dl=document.createElement("button");
+      dl.className="green"; dl.textContent="⬇️ Download"; dl.style.padding="7px 10px"; dl.style.fontSize="12px";
+      dl.onclick=()=>download(finalBlob,finalName);
+      tr.cells[5].appendChild(dl);
       const downloadCell=tr.insertCell(4);
       const downloadBtn=document.createElement("button");
       downloadBtn.type="button";
@@ -338,13 +352,13 @@ $("compressBtn").onclick=async()=>{
       downloadBtn.onclick=()=>download(finalBlob,finalName);
       downloadCell.appendChild(downloadBtn);
       if(finalBlob===file){
-        tr.cells[3].textContent="Original kept";
-        tr.cells[3].className="bad";
+        tr.cells[4].textContent="Original kept";
+        tr.cells[4].className="bad";
       }else if(finalBlob.size<=target){
-        tr.cells[3].textContent="TARGET OK";
-        tr.cells[3].className="good";
+        tr.cells[4].textContent="TARGET OK";
+        tr.cells[4].className="good";
       }else{
-        tr.cells[3].textContent="Reduced, target not reached";
+        tr.cells[4].textContent="Reduced, target not reached";
         tr.cells[3].className="good";
       }
 

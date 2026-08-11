@@ -47,7 +47,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 <button class="drop-item" id="adminBtn" style="display:none">🛡️ Admin Dashboard</button>
 <button class="drop-item danger" id="logoutBtn">🚪 Logout</button>
 </div></div>
-<button id="loginBtn" class="light">🔐 Login</button><button id="registerBtn" class="light">📝 Register</button>
+<button id="loginBtn" class="light">🔐 Login</button><button id="registerBtn" class="light">📝 Register</button><button id="adminLoginBtn" class="light">🛡️ Admin Login</button><button id="settingsBtn" class="light">⚙️ Settings</button>
 </div></div>
 <div class="hero"><h1 id="welcomeTitle">Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, compress, merge and ZIP your PDF files directly in your browser.</p></div>
 </div></header>
@@ -84,7 +84,20 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 </main>
 <footer class="footer">© 2026 PDF Utility Hub &nbsp;•&nbsp; <b>Build by Anwar</b> &nbsp;•&nbsp; Professional PDF Tools</footer>
 
-<div class="modal" id="authModal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="modal-actions"><button id="authSubmit" class="greenbtn">Login</button><button id="authClose" style="background:#e5e7eb">Close</button></div><div id="authMsg" class="status"></div><p style="font-size:12px;color:#667085">Guest: 20 pages/PDF • Registered: 50 pages/PDF • Premium: Unlimited</p></div></div>
+<div class="modal" id="authModal"><div class="modal-card">
+<div class="modal-head"><h3 id="authTitle">Login</h3><div class="modal-tools"><button id="authClose" class="close-pay">✕</button></div></div>
+<input id="authName" type="text" placeholder="Full Name" style="display:none">
+<input id="authPhone" type="tel" placeholder="Mobile Number (+919876543210)" style="display:none">
+<input id="authEmail" type="email" placeholder="Email">
+<input id="authPassword" type="password" placeholder="Password">
+<div id="otpBox" style="display:none">
+<label>OTP</label><input id="authOtp" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit OTP">
+<button id="verifyOtp" class="action bluebtn">VERIFY OTP</button>
+</div>
+<div class="modal-actions"><button id="authSubmit" class="greenbtn">Login</button><button id="authCancel" style="background:#e5e7eb">Cancel</button></div>
+<div id="recaptcha-container"></div><div id="authMsg" class="status"></div>
+<p style="font-size:12px;color:#667085">Guest: 20 pages/PDF • Registered: 50 pages/PDF • Premium: Unlimited</p>
+</div></div>
 
 <div class="modal" id="settingsModal"><div class="modal-card">
   <div class="modal-head"><h3>⚙️ Settings</h3><div class="modal-tools"><button id="closeSettings" class="close-pay">✕</button></div></div>
@@ -105,7 +118,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,updateProfile,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,updateProfile,signOut,PhoneAuthProvider,EmailAuthProvider,RecaptchaVerifier,signInWithPhoneNumber} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
@@ -161,22 +174,100 @@ onAuthStateChanged(auth,async u=>{
  currentName=u?.displayName||"";
  pageUsage=Number(localStorage.getItem(u?"pdfhub_pages_"+u.uid:"pdfhub_guest_pages")||0);
  if(u){try{const a=await getDoc(doc(db,"admins",u.uid));if(a.exists()&&a.data().active!==false)currentRole="admin";else{const p=await getDoc(doc(db,"premiumUsers",u.uid));if(p.exists()&&p.data().active!==false&&p.data().validTill?.toDate?.()>new Date())currentRole="premium"}}catch(e){console.warn(e)}}
- $("loginBtn").style.display=u?"none":"inline-block";$("registerBtn").style.display=u?"none":"inline-block";$("userMenu").style.display=u?"block":"none";
- $("userEmail").textContent=u?.email||"";$("dropName").textContent=u?.email?.split("@")[0]||"Account";$("userShort").textContent=u?.email?.split("@")[0]||"Account";
+ $("loginBtn").style.display=u?"none":"inline-block";
+ $("registerBtn").style.display=u?"none":"inline-block";
+ $("adminLoginBtn").style.display=currentRole==="admin"?"none":"inline-block";
+ $("settingsBtn").style.display="inline-block";
+ $("userMenu").style.display=u?"block":"none";
+ $("userEmail").textContent=u?.email||"";
+ $("dropName").textContent=u?.displayName||u?.email?.split("@")[0]||"Account";
+ $("userShort").textContent=u?.displayName||u?.email?.split("@")[0]||"Account";
+ $("welcomeTitle").textContent=u?(u.displayName?"Welcome, "+u.displayName+"!":"Welcome!"):"Welcome to PDF Utility Hub";
  updateUI();
 });
 function authOpen(mode){
  $("authTitle").textContent=mode==="register"?"Create Account":mode==="admin"?"Admin Login":"Login";
- $("authSubmit").textContent=mode==="register"?"Register":mode==="admin"?"Admin Login":"Login";
+ $("authSubmit").textContent=mode==="register"?"Send OTP":mode==="admin"?"Admin Login":"Login";
  $("authSubmit").dataset.mode=mode;
- $("authName").style.display=mode==="register"?"block":"none"; $("authName").value="";
- $("authModal").classList.add("show");$("authMsg").textContent="";
+ $("authName").style.display=mode==="register"?"block":"none";
+ $("authPhone").style.display=mode==="register"?"block":"none";
+ $("otpBox").style.display="none";
+ $("authOtp").value="";
+ $("authMsg").textContent="";
+ $("authSubmit").disabled=false;
+ $("authModal").classList.add("show");
 }
-$("loginBtn").onclick=()=>authOpen("login");$("registerBtn").onclick=()=>authOpen("register");$("authClose").onclick=()=>$("authModal").classList.remove("show");
-$("authSubmit").onclick=async()=>{const e=$("authEmail").value.trim(),p=$("authPassword").value;if(!e||!p){$("authMsg").textContent="Enter email and password.";return}try{if($("authSubmit").dataset.mode==="register"){await createUserWithEmailAndPassword(auth,e,p);$("authMsg").className="status success";$("authMsg").textContent="✓ Registration Successful! Your account is ready.";setTimeout(()=>$("authModal").classList.remove("show"),1100)}else{await signInWithEmailAndPassword(auth,e,p);$("authModal").classList.remove("show")}}catch(x){$("authMsg").className="status";$("authMsg").textContent=x.code==="auth/email-already-in-use"?"Email is already registered. Please Login.":x.message}};
-$("userBtn").onclick=()=>$("dropdown").classList.toggle("show");
-document.addEventListener("click",e=>{if(!e.target.closest("#userMenu"))$("dropdown").classList.remove("show")});
+
+$("loginBtn").onclick=()=>authOpen("login");
+$("registerBtn").onclick=()=>authOpen("register");
+$("adminLoginBtn").onclick=()=>authOpen("admin");
+$("authClose").onclick=()=>$("authModal").classList.remove("show");
+$("authCancel").onclick=()=>$("authModal").classList.remove("show");
 $("logoutBtn").onclick=()=>signOut(auth);
+
+let phoneConfirmation=null, recaptchaVerifier=null, pendingRegistration=null;
+
+async function sendRegistrationOtp(){
+ const n=$("authName").value.trim(), phone=$("authPhone").value.trim(), e=$("authEmail").value.trim(), p=$("authPassword").value;
+ if(!n||!phone||!e||!p){$("authMsg").textContent="Enter name, mobile, email and password.";return}
+ if(!/^\+[1-9]\d{7,14}$/.test(phone)){$("authMsg").textContent="Use mobile with country code, e.g. +919876543210.";return}
+ try{
+   if(recaptchaVerifier){try{recaptchaVerifier.clear()}catch(x){}}
+   recaptchaVerifier=new RecaptchaVerifier(auth,"recaptcha-container",{size:"invisible"});
+   phoneConfirmation=await signInWithPhoneNumber(auth,phone,recaptchaVerifier);
+   pendingRegistration={name:n,phone,email:e,password:p};
+   $("otpBox").style.display="block";
+   $("authSubmit").disabled=true;
+   $("authMsg").textContent="OTP sent to "+phone+". Enter the 6-digit OTP.";
+ }catch(x){
+   $("authMsg").textContent="OTP could not be sent: "+x.message;
+ }
+}
+
+$("authSubmit").onclick=async()=>{
+ const mode=$("authSubmit").dataset.mode;
+ if(mode==="register"){await sendRegistrationOtp();return}
+ const e=$("authEmail").value.trim(),p=$("authPassword").value;
+ if(!e||!p){$("authMsg").textContent="Enter email and password.";return}
+ try{
+   await signInWithEmailAndPassword(auth,e,p);
+   $("authModal").classList.remove("show");
+ }catch(x){$("authMsg").textContent=x.message}
+};
+
+$("verifyOtp").onclick=async()=>{
+ if(!phoneConfirmation||!pendingRegistration){$("authMsg").textContent="Please request OTP first.";return}
+ const code=$("authOtp").value.trim();
+ if(!/^\d{6}$/.test(code)){$("authMsg").textContent="Enter the 6-digit OTP.";return}
+ try{
+   const result=await phoneConfirmation.confirm(code);
+   const user=result.user;
+   const cred=EmailAuthProvider.credential(pendingRegistration.email,pendingRegistration.password);
+   await user.linkWithCredential(cred);
+   await updateProfile(user,{displayName:pendingRegistration.name});
+   currentName=pendingRegistration.name;
+   $("authMsg").textContent="Registration Successful — Welcome, "+pendingRegistration.name+"!";
+   setTimeout(()=>{$("authModal").classList.remove("show")},700);
+ }catch(x){
+   $("authMsg").textContent="Registration/OTP verification failed: "+x.message;
+ }
+};
+
+$("settingsBtn").onclick=()=>{
+ const c=localStorage.getItem("pdfhub_country_"+(currentUser?.uid||"guest"))||"India";
+ if($("settingsCountry"))$("settingsCountry").value=c;
+ $("settingsModal").classList.add("show");
+};
+$("closeSettings").onclick=()=>$("settingsModal").classList.remove("show");
+$("saveSettings").onclick=()=>{
+ const c=$("settingsCountry").value;
+ localStorage.setItem("pdfhub_country_"+(currentUser?.uid||"guest"),c);
+ if($("countryValue"))$("countryValue").textContent=c;
+ if($("profileCountry"))$("profileCountry").textContent=c+" 🌍";
+ $("settingsMsg").textContent="Settings saved successfully.";
+ $("settingsModal").classList.remove("show");
+};
+
 $("profileBtn").onclick=()=>{$("dropdown").classList.remove("show");$("profileModal").classList.add("show");$("countrySelect").value=localStorage.getItem("pdfhub_country_"+(currentUser?.uid||""))||"India"};
 $("closeProfile").onclick=()=>$("profileModal").classList.remove("show");
 $("saveProfile").onclick=()=>{localStorage.setItem("pdfhub_country_"+(currentUser?.uid||"guest"),$("countrySelect").value);$("countryValue").textContent=$("countrySelect").value;$("profileModal").classList.remove("show")};

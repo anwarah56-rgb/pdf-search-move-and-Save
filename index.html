@@ -68,7 +68,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 </nav>
 
 <section id="searchPanel" class="panel active">
-<h2>Search PDFs from Excel</h2><div class="subtitle">Excel की पहली sheet के Column A में दिए नाम को PDF filename में खोजें।</div>
+<h2>Search PDFs from Excel</h2><div class="subtitle">Excel की पहली sheet के Column A में दिए नाम/Proposal को PDF filename में खोजें।</div>
 <label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple>
 <label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
 <div class="grid2"><button id="searchBtn">START SEARCH</button><button id="searchStop" class="red" disabled>STOP</button></div>
@@ -96,7 +96,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <option value="10">10 MB</option>
 <option value="20">20 MB</option>
 </select></div>
-<div><label>Quality</label><select id="quality"><option value="extreme">Extreme</option><option value="strong" selected>Strong</option><option value="medium">Medium</option><option value="light">Light</option></select></div>
+<div><label>Quality</label><select id="quality"><option value="extreme">Maximum Compression</option><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div>
 </div>
 <div class="grid2"><button id="compressBtn" class="orange">🗜️ COMPRESS ALL</button><button id="compressStop" class="red" disabled>STOP</button></div>
 <div class="grid2">
@@ -105,7 +105,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 </div>
 <div id="compressStatus" class="status">Ready</div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th></tr></thead><tbody id="compressRows"></tbody></table>
-<div class="note">Important: scanned/image PDFs compress best. This tool renders pages as JPEG. If a compressed result becomes larger than the original, the original is kept instead.</div>
+<div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
 </section>
 
 <section id="mergePanel" class="panel">
@@ -182,23 +182,40 @@ $("searchBtn").onclick=async()=>{
  for(let name of names){if(searchStopped)break;let file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;let item={file,checked:false};found.push(item);let c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;refresh()};tr.innerHTML="<td></td><td>"+name+"</td><td class='good'>FOUND</td><td>"+file.name+"</td>";tr.cells[0].appendChild(c)}else{n++;tr.innerHTML="<td></td><td>"+name+"</td><td class='bad'>NOT FOUND</td><td></td>"}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processed ${f+n} | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=searchStopped?" | STOPPED":" | COMPLETE"}catch(e){$("searchStatus").textContent="Error: "+e.message}$("searchBtn").disabled=false;$("searchStop").disabled=true;refresh()};
 
 const profiles={
+  // Text Priority: high DPI keeps printed/scanned text much sharper.
+  // Images may lose quality before text becomes difficult to read.
   extreme:[
-    {dpi:48,q:.24},{dpi:42,q:.20},{dpi:36,q:.16},{dpi:30,q:.13},{dpi:24,q:.10},{dpi:20,q:.08},{dpi:16,q:.06}
+    {dpi:150,q:.72},{dpi:135,q:.66},{dpi:120,q:.60},{dpi:105,q:.54},{dpi:90,q:.48}
   ],
   strong:[
-    {dpi:60,q:.38},{dpi:52,q:.32},{dpi:45,q:.27},{dpi:38,q:.22},{dpi:32,q:.18},{dpi:26,q:.14}
+    {dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70},{dpi:130,q:.64},{dpi:115,q:.58},{dpi:100,q:.52}
   ],
   medium:[
-    {dpi:80,q:.50},{dpi:68,q:.44},{dpi:58,q:.38},{dpi:48,q:.32},{dpi:40,q:.27}
+    {dpi:200,q:.86},{dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70},{dpi:130,q:.64}
   ],
   light:[
-    {dpi:100,q:.62},{dpi:88,q:.55},{dpi:76,q:.48},{dpi:64,q:.42},{dpi:54,q:.36}
+    {dpi:220,q:.90},{dpi:200,q:.86},{dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70}
   ]
 };
 
-// Real browser-side PDF compression. Scanned/image PDFs reduce the most.
+// Text-first compression strategy.
+// First try lossless PDF re-save so selectable text, fonts and vectors are preserved.
+// Only if that does not reduce the file do we rasterize pages at high DPI.
 async function makeCompressed(file,opt){
   const data=await file.arrayBuffer();
+
+  try{
+    const src=await PDFDocument.load(data,{ignoreEncryption:true});
+    const out=await PDFDocument.create();
+    const pages=await out.copyPages(src,src.getPageIndices());
+    pages.forEach(p=>out.addPage(p));
+    const bytes=await out.save({useObjectStreams:true,addDefaultPage:false,compress:true});
+    const lossless=new Blob([bytes],{type:"application/pdf"});
+    if(lossless.size<file.size) return lossless;
+  }catch(e){
+    console.warn("Lossless optimization skipped:",e);
+  }
+
   const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   let doc=null;
 

@@ -279,4 +279,24 @@ $("mergeBtn").onclick=async()=>{let fs=[...$("mergeFiles").files];if(fs.length<2
 
 $("zipBtn").onclick=async()=>{let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
 </script>
+    <footer style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    padding:18px 20px;
+    margin-top:30px;
+    background:#ffffff;
+    border-top:1px solid #e5e7eb;
+    font-size:13px;
+    box-sizing:border-box;
+">
+    <span style="color:#86efac;font-weight:600;">
+        © 2026 PDF Utility Hub
+    </span>
+
+    <strong style="color:#16a34a;font-weight:800;">
+        Build by Anwar
+    </strong>
+</footer>
 </body></html>

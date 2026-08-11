@@ -317,7 +317,7 @@ $("compressBtn").onclick=async()=>{
     for(let file of files){
       if(compStop)break;
       let tr=document.createElement("tr");
-      tr.innerHTML="<td>"+file.name+"</td><td>"+sizeLabel(file.size)+"</td><td>Processing...</td><td><div class="pwrap"><div class="pbar"><span style=\"width:0%\">0%</span></div></div></td><td>...</td><td></td>";
+      tr.innerHTML=`<td>${file.name}</td><td>${sizeLabel(file.size)}</td><td>Processing...</td><td><div class="pwrap"><div class="pbar"><span style="width:0%">0%</span></div></div></td><td>...</td><td></td>`;
       $("compressRows").appendChild(tr);
 
       let best=null;

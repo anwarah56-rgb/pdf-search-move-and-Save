@@ -27,8 +27,8 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 .lower{display:grid;grid-template-columns:1fr;gap:15px;margin-top:15px}.activity-card{padding:20px}.activity-table{width:100%;border-collapse:collapse}.activity-table td,.activity-table th{padding:10px;border-bottom:1px solid var(--line);font-size:12px}.complete{color:#16a34a;font-weight:800}
 .premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px}.premium-banner h2{margin:0 0 5px;font-size:19px}.premium-banner p{margin:0;color:#667085;font-size:12px}.plan-actions{display:flex;gap:8px;flex-wrap:wrap}.plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
 .footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px}.footer b{color:#69d18a}
-.modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(460px,92vw);background:#fff;border-radius:16px;padding:22px;box-shadow:0 25px 80px #0004;position:relative}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.modal-head h3{margin:0}.modal-tools{display:flex;gap:6px}.modal-tools button{width:32px;height:32px;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}.modal-card h3{margin-top:0}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.modal-actions button{width:100%;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer}
-.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}.payment-minimized .modal-card{width:260px!important;padding:12px!important;border-radius:12px!important}.payment-minimized .modal-card>*:not(.modal-head){display:none}.payment-minimized .modal-head h3{font-size:13px}.payment-minimized .modal-tools button{width:28px;height:28px}.success{background:#ecfdf3!important;border-color:#bbf7d0!important;color:#166534}.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}.payment-plan strong{font-size:18px}.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0}.qr-wrap{display:flex;justify-content:center;margin:12px 0}.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.qr-box small{display:block;color:#667085;margin-top:7px}.admin-badge{display:inline-block;background:#111827;color:#fff;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:850}
+.modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(360px,90vw);background:#fff;border-radius:14px;padding:16px;box-shadow:0 25px 80px #0004;position:relative}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.modal-head h3{margin:0}.modal-tools{display:flex;gap:6px}.modal-tools button{width:32px;height:32px;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}.modal-card h3{margin-top:0}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.modal-actions button{width:100%;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer}
+.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}.payment-minimized .modal-card>*:not(.modal-head){display:none}.payment-minimized .modal-head h3{font-size:13px}.payment-minimized .modal-tools button{width:28px;height:28px}.success{background:#ecfdf3!important;border-color:#bbf7d0!important;color:#166534}.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}.payment-plan strong{font-size:18px}.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0}.qr-wrap{display:flex;justify-content:center;margin:12px 0}.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.qr-box small{display:block;color:#667085;margin-top:7px}.admin-badge{display:inline-block;background:#111827;color:#fff;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:850}
 @media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -49,7 +49,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 </div></div>
 <button id="loginBtn" class="light">🔐 Login</button><button id="registerBtn" class="light">📝 Register</button>
 </div></div>
-<div class="hero"><h1>Welcome to PDF Utility Hub</h1><p>Search, compress, merge and ZIP your PDF files directly in your browser.</p></div>
+<div class="hero"><h1 id="welcomeTitle">Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, compress, merge and ZIP your PDF files directly in your browser.</p></div>
 </div></header>
 
 <main class="container">
@@ -92,14 +92,14 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,updateProfile,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 const {PDFDocument}=window.PDFLib,$=id=>document.getElementById(id);
 const firebaseConfig={apiKey:"AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",authDomain:"pdf-utility-hu.firebaseapp.com",projectId:"pdf-utility-hu",storageBucket:"pdf-utility-hu.firebasestorage.app",messagingSenderId:"838702125905",appId:"1:838702125905:web:8f2d2f7e52e291bfbd7970",measurementId:"G-BZCFEZS2SE"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-let currentUser=null,currentRole="free",selectedPlan="6";
+let currentUser=null,currentRole="free",selectedPlan="6",currentName="";
 let pageUsage=Number(localStorage.getItem("pdfhub_guest_pages")||0);
 const UPI_ID="md.anwar18@ybl";
 const download=(blob,name)=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
@@ -139,18 +139,26 @@ function updateUI(){
  $("dropPlan").textContent=(currentRole==="admin"?"ADMIN ACCESS":currentRole==="premium"?"PREMIUM — UNLIMITED":"FREE — 50 OPERATIONS");
  $("premiumMenuBtn").style.display=currentRole==="premium"||currentRole==="admin"?"none":"block";
  $("adminBtn").style.display=currentRole==="admin"?"block":"none";
+ $("adminLoginBtn").style.display=currentRole==="admin"?"none":"inline-block";
  updatePageUsage();
 }
 function addActivity(tool,detail){const b=$("activityBody");if(b.children.length===1&&b.children[0].children[1]?.textContent==="No activity yet")b.innerHTML="";const tr=document.createElement("tr");tr.innerHTML=`<td>${tool}</td><td>${detail}</td><td class="complete">✓ Completed</td><td>${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td>`;b.prepend(tr)}
 onAuthStateChanged(auth,async u=>{
  currentUser=u;currentRole="free";
+ currentName=u?.displayName||"";
  pageUsage=Number(localStorage.getItem(u?"pdfhub_pages_"+u.uid:"pdfhub_guest_pages")||0);
  if(u){try{const a=await getDoc(doc(db,"admins",u.uid));if(a.exists()&&a.data().active!==false)currentRole="admin";else{const p=await getDoc(doc(db,"premiumUsers",u.uid));if(p.exists()&&p.data().active!==false&&p.data().validTill?.toDate?.()>new Date())currentRole="premium"}}catch(e){console.warn(e)}}
  $("loginBtn").style.display=u?"none":"inline-block";$("registerBtn").style.display=u?"none":"inline-block";$("userMenu").style.display=u?"block":"none";
  $("userEmail").textContent=u?.email||"";$("dropName").textContent=u?.email?.split("@")[0]||"Account";$("userShort").textContent=u?.email?.split("@")[0]||"Account";
  updateUI();
 });
-function authOpen(mode){$("authTitle").textContent=mode==="register"?"Create Account":"Login";$("authSubmit").textContent=mode==="register"?"Register":"Login";$("authSubmit").dataset.mode=mode;$("authModal").classList.add("show");$("authMsg").textContent=""}
+function authOpen(mode){
+ $("authTitle").textContent=mode==="register"?"Create Account":mode==="admin"?"Admin Login":"Login";
+ $("authSubmit").textContent=mode==="register"?"Register":mode==="admin"?"Admin Login":"Login";
+ $("authSubmit").dataset.mode=mode;
+ $("authName").style.display=mode==="register"?"block":"none"; $("authName").value="";
+ $("authModal").classList.add("show");$("authMsg").textContent="";
+}
 $("loginBtn").onclick=()=>authOpen("login");$("registerBtn").onclick=()=>authOpen("register");$("authClose").onclick=()=>$("authModal").classList.remove("show");
 $("authSubmit").onclick=async()=>{const e=$("authEmail").value.trim(),p=$("authPassword").value;if(!e||!p){$("authMsg").textContent="Enter email and password.";return}try{if($("authSubmit").dataset.mode==="register"){await createUserWithEmailAndPassword(auth,e,p);$("authMsg").className="status success";$("authMsg").textContent="✓ Registration Successful! Your account is ready.";setTimeout(()=>$("authModal").classList.remove("show"),1100)}else{await signInWithEmailAndPassword(auth,e,p);$("authModal").classList.remove("show")}}catch(x){$("authMsg").className="status";$("authMsg").textContent=x.code==="auth/email-already-in-use"?"Email is already registered. Please Login.":x.message}};
 $("userBtn").onclick=()=>$("dropdown").classList.toggle("show");

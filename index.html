@@ -201,7 +201,7 @@ const profiles={
 // Text-first compression strategy.
 // First try lossless PDF re-save so selectable text, fonts and vectors are preserved.
 // Only if that does not reduce the file do we rasterize pages at high DPI.
-async function makeCompressed(file,opt){
+async function makeCompressed(file,opt,onProgress){
   const data=await file.arrayBuffer();
 
   try{
@@ -216,6 +216,7 @@ async function makeCompressed(file,opt){
     console.warn("Lossless optimization skipped:",e);
   }
 
+  if(onProgress) onProgress(5);
   const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
   let doc=null;
 
@@ -242,12 +243,17 @@ async function makeCompressed(file,opt){
       doc.addPage([pageW,pageH]);
     }
     doc.addImage(jpg,"JPEG",0,0,pageW,pageH,undefined,"FAST");
+    if(onProgress) onProgress(10 + Math.round((pno / pdf.numPages) * 85));
+    await new Promise(r=>setTimeout(r,0));
 
     canvas.width=1;
     canvas.height=1;
     await new Promise(r=>setTimeout(r,0));
   }
-  return doc.output("blob");
+  if(onProgress) onProgress(98);
+  const result=doc.output("blob");
+  if(onProgress) onProgress(100);
+  return result;
 }
 
 let compStop=false, compressedResults=[];
@@ -310,7 +316,7 @@ $("compressBtn").onclick=async()=>{
     for(let file of files){
       if(compStop)break;
       let tr=document.createElement("tr");
-      tr.innerHTML="<td>"+file.name+"</td><td>"+sizeLabel(file.size)+"</td><td>Processing...</td><td>...</td>";
+      tr.innerHTML="<td>"+file.name+"</td><td>"+sizeLabel(file.size)+"</td><td>Processing...</td><td><div class="pwrap"><div class="pbar"><span style=\"width:0%\">0%</span></div></div></td><td>...</td><td></td>";
       $("compressRows").appendChild(tr);
 
       let best=null;
@@ -321,7 +327,9 @@ $("compressBtn").onclick=async()=>{
         attemptNo++;
         const pct=Math.min(95,Math.round((attemptNo/attempts)*90));
         tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${pct}%">${pct}%</span></div></div>`;
-        let b=await makeCompressed(file,opt);
+        let b=await makeCompressed(file,opt,p=>{
+          tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${p}%">${p}%</span></div></div>`;
+        });
         if(!best||b.size<best.size)best=b;
         if(b.size<=target){
           tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';

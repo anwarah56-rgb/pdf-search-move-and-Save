@@ -59,10 +59,83 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 }
 
 .authbar{position:absolute;right:22px;top:18px;display:flex;gap:8px;align-items:center;z-index:5}.authbar button{padding:8px 12px;border-radius:9px;border:1px solid #d7dee8;background:#fff;cursor:pointer;font-weight:700}.premium-theme{--accent:#7c3aed;--green:#16a34a}.premium-theme .brand{color:#7c3aed}.auth-user{font-size:13px;font-weight:800}.role-badge{padding:5px 9px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:800}.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(420px,92vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modal-card h3{margin-top:0}.modal-card input{width:100%;box-sizing:border-box;margin:7px 0;padding:11px;border:1px solid #d7dee8;border-radius:9px}.auth-actions{display:flex;gap:8px;margin-top:12px}.auth-actions button{flex:1;padding:11px;border:0;border-radius:9px;font-weight:800;cursor:pointer}.premium-card{border:1px solid #ddd6fe;background:#faf5ff;padding:14px;border-radius:12px;margin-top:12px}.free-limit{font-size:12px;color:#64748b;margin-top:6px}
+
+/* Visible Login / Register controls */
+.authbar{
+  position:absolute !important;
+  right:22px !important;
+  top:18px !important;
+  display:flex !important;
+  gap:8px !important;
+  align-items:center !important;
+  z-index:9999 !important;
+}
+.authbar button{
+  width:auto !important;
+  min-width:92px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:9px 14px !important;
+  border-radius:10px !important;
+  border:1px solid #d7dee8 !important;
+  background:#fff !important;
+  color:#17346b !important;
+  cursor:pointer !important;
+  font-weight:800 !important;
+  font-size:14px !important;
+  margin:0 !important;
+}
+#loginBtn{display:inline-flex !important;}
+#registerBtn{display:inline-flex !important;}
+#logoutBtn{display:none;}
+@media(max-width:700px){
+  .authbar{right:10px !important;top:10px !important;}
+  .authbar button{min-width:80px !important;padding:8px 9px !important;font-size:12px !important;}
+}
+
+
+/* Profile / Country / Logout */
+.profile-wrap{position:relative;display:none;align-items:center;gap:7px}
+#profileBtn{display:inline-flex!important;width:auto!important;min-width:100px!important;align-items:center;justify-content:center;padding:9px 13px!important;margin:0!important;background:#fff!important;color:#17346b!important;border:1px solid #d7dee8!important;border-radius:10px!important;font-weight:800!important}
+.profile-menu{display:none;position:absolute;right:0;top:46px;width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:15px;box-shadow:0 15px 45px #0002;z-index:10001;color:#172033}
+.profile-menu.show{display:block}
+.profile-menu h4{margin:0 0 10px;font-size:16px}
+.profile-menu .profile-email{font-size:12px;color:#667085;margin-bottom:10px;word-break:break-all}
+.profile-menu label{font-size:12px;margin:8px 0 5px}
+.profile-menu select{width:100%;padding:9px;border:1px solid #d0d5dd;border-radius:8px}
+.profile-menu button{width:100%;margin-top:10px;padding:9px;border-radius:8px}
+@media(max-width:700px){
+ .profile-menu{right:-35px;width:250px}
+ #profileBtn{min-width:90px!important;font-size:12px!important}
+}
+
 </style>
 </head>
 <body>
-<div class="authbar"><span id="authUser" class="auth-user"></span><span id="roleBadge" class="role-badge">FREE • 50</span><button id="loginBtn" type="button">🔐 Login</button><button id="registerBtn" type="button">📝 Register</button><button id="logoutBtn" type="button" style="display:none">🚪 Logout</button></div>
+<div class="authbar">
+<span id="authUser" class="auth-user"></span>
+<span id="roleBadge" class="role-badge">FREE • 50</span>
+<button id="loginBtn" type="button">🔐 Login</button>
+<button id="registerBtn" type="button">📝 Register</button>
+<div id="profileWrap" class="profile-wrap">
+  <button id="profileBtn" type="button">👤 Profile ▾</button>
+  <div id="profileMenu" class="profile-menu">
+    <h4>👤 Profile Settings</h4>
+    <div id="profileEmail" class="profile-email">Not logged in</div>
+    <label for="countrySelect">🌍 Country</label>
+    <select id="countrySelect">
+      <option value="">Select Country</option>
+      <option>India</option><option>United States</option><option>United Kingdom</option>
+      <option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option>
+      <option>Nepal</option><option>Pakistan</option><option>Australia</option>
+      <option>Canada</option><option>Singapore</option><option>Other</option>
+    </select>
+    <button id="saveProfileBtn" type="button" class="green">💾 Save Profile</button>
+    <button id="logoutBtn" type="button" class="red">🚪 Logout</button>
+  </div>
+</div>
+</div>
 <div style="position:absolute;left:22px;top:18px;font-size:12px;color:#64748b">Free: 50 operations • Premium: Unlimited</div>
 <div id="authModal" class="modal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="auth-actions"><button id="authSubmit" type="button" class="green">Login</button><button id="authClose" type="button">Close</button></div><div id="authMsg" class="free-limit"></div><div class="premium-card"><b>⭐ Premium</b><br>₹200 / 6 Months • ₹300 / 1 Year<br>Unlimited Compress & Merge</div></div></div>
 
@@ -141,6 +214,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+// DOM helper must be declared before any handler uses it.
+const $=id=>document.getElementById(id);
+
 // Replace these values with your Firebase Web App configuration.
 const firebaseConfig={
   apiKey:"YOUR_API_KEY",
@@ -164,9 +240,31 @@ if(firebaseReady){
     document.body.classList.toggle("premium-theme",currentRole==="premium");
     $("authUser").textContent=user?(user.email||""):"";
     $("roleBadge").textContent=currentRole==="admin"?"ADMIN • UNLIMITED":currentRole==="premium"?"⭐ PREMIUM • UNLIMITED":"FREE • 50";
-    $("loginBtn").style.display=user?"none":"inline-block"; $("registerBtn").style.display=user?"none":"inline-block"; $("logoutBtn").style.display=user?"inline-block":"none";
+    $("loginBtn").style.display=user?"none":"inline-flex"; $("registerBtn").style.display=user?"none":"inline-flex"; setProfileVisibility(user);
   });
 }
+
+function setProfileVisibility(user){
+  const wrap=$("profileWrap");
+  if(wrap) wrap.style.display=user?"inline-flex":"none";
+  if($("profileEmail")) $("profileEmail").textContent=user?(user.email||""):"Not logged in";
+  if(user){
+    const saved=localStorage.getItem("pdfhub_country_"+user.uid)||"";
+    if($("countrySelect")) $("countrySelect").value=saved;
+  }
+}
+$("profileBtn").onclick=()=>$("profileMenu").classList.toggle("show");
+$("saveProfileBtn").onclick=()=>{
+  if(!currentUser){$("profileMenu").classList.remove("show");return;}
+  localStorage.setItem("pdfhub_country_"+currentUser.uid,$("countrySelect").value);
+  $("profileMenu").classList.remove("show");
+  alert("Profile settings saved.");
+};
+document.addEventListener("click",e=>{
+  const w=$("profileWrap");
+  if(w && !w.contains(e.target)) $("profileMenu").classList.remove("show");
+});
+
 function openAuth(mode){ $("authTitle").textContent=mode==="register"?"Create Account":"Login"; $("authSubmit").textContent=mode==="register"?"Register":"Login"; $("authModal").classList.add("show"); $("authMsg").textContent=firebaseReady?"":"Firebase config is not set yet."; $("authSubmit").dataset.mode=mode; }
 $("loginBtn").onclick=()=>openAuth("login"); $("registerBtn").onclick=()=>openAuth("register"); $("authClose").onclick=()=>$("authModal").classList.remove("show");
 $("logoutBtn").onclick=()=>firebaseAuth&&signOut(firebaseAuth);
@@ -180,7 +278,12 @@ $("authSubmit").onclick=async()=>{
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 const {jsPDF}=window.jspdf; const {PDFDocument}=window.PDFLib;
-const $=id=>document.getElementById(id);
+window.addEventListener("unhandledrejection",e=>{
+  const msg=e.reason?.message||String(e.reason||"Unknown error");
+  ["compressStatus","mergeStatus","zipStatus","searchStatus"].forEach(id=>{
+    const el=$(id); if(el) el.textContent="Error: "+msg;
+  });
+});
 const download=(blob,name)=>{let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 const mb=n=>(n/1048576).toFixed(2)+" MB";
 const sizeLabel=n=>n<1048576?(n/1024).toFixed(0)+" KB":(n/1048576).toFixed(2)+" MB";
@@ -438,10 +541,10 @@ $("compressBtn").onclick=async()=>{
   refreshCompressionActions();
 };
 $("mergeBtn").onclick=async()=>{
- if(!operationAllowed())return;let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
+ let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");if(!operationAllowed())return;$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
 
 $("zipBtn").onclick=async()=>{
- if(!operationAllowed())return;let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
+ let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");if(!operationAllowed())return;let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
 </script>
     <footer style="
     text-align:center;

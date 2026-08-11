@@ -34,7 +34,7 @@ button:hover{transform:translateY(-1px);filter:brightness(1.03)}button:disabled{
 .status{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:13px;font-size:14px}
 table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;overflow:hidden;border:1px solid var(--line);border-radius:10px}
 th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:left}th{background:#f8fafc;font-weight:800}tr:last-child td{border-bottom:0}
-.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}.pwrap{min-width:115px}.pbar{height:20px;background:#eef2f7;border-radius:10px;overflow:hidden;border:1px solid #dbe2ea}.pbar span{display:block;height:100%;background:#16a34a;color:#fff;text-align:center;font-size:11px;line-height:18px;font-weight:800;transition:width .25s}
+.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}.pwrap{min-width:140px}.pbar{height:20px;background:#eef2f7;border-radius:10px;overflow:hidden;border:1px solid #dbe2ea}.pbar span{display:block;height:100%;background:#16a34a;color:#fff;text-align:center;font-size:11px;line-height:18px;font-weight:800;transition:width .25s}
 .note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:12px;padding:10px 12px;background:#f8fafc;border-radius:9px}
 .footer{text-align:center;color:#98a2b3;font-size:12px;padding:0 15px 25px}
 @media(max-width:700px){.tabs{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.brand{font-size:25px}.panel{padding:17px}}
@@ -104,7 +104,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
 </div>
 <div id="compressStatus" class="status">Ready</div>
-<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
+<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 <div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
 </section>
 
@@ -221,6 +221,8 @@ async function makeCompressed(file,opt,onProgress){
   let doc=null;
 
   for(let pno=1;pno<=pdf.numPages;pno++){
+    if(onProgress) onProgress(10 + Math.round(((pno-1) / pdf.numPages) * 85));
+    await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
     const page=await pdf.getPage(pno);
     const scale=opt.dpi/72;
     const viewport=page.getViewport({scale});
@@ -235,6 +237,8 @@ async function makeCompressed(file,opt,onProgress){
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
     await page.render({canvasContext:ctx,viewport,background:"white"}).promise;
+    if(onProgress) onProgress(10 + Math.round((pno / pdf.numPages) * 85));
+    await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
     const jpg=canvas.toDataURL("image/jpeg",opt.q);
 
     if(!doc){
@@ -243,9 +247,6 @@ async function makeCompressed(file,opt,onProgress){
       doc.addPage([pageW,pageH]);
     }
     doc.addImage(jpg,"JPEG",0,0,pageW,pageH,undefined,"FAST");
-    if(onProgress) onProgress(10 + Math.round((pno / pdf.numPages) * 85));
-    await new Promise(r=>setTimeout(r,0));
-
     canvas.width=1;
     canvas.height=1;
     await new Promise(r=>setTimeout(r,0));
@@ -325,8 +326,9 @@ $("compressBtn").onclick=async()=>{
       for(let opt of profiles[prof]){
         if(compStop)break;
         attemptNo++;
-        const pct=Math.min(95,Math.round((attemptNo/attempts)*90));
+        const pct=Math.min(95,Math.round(((attemptNo-1)/attempts)*10));
         tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${pct}%">${pct}%</span></div></div>`;
+        await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
         let b=await makeCompressed(file,opt,p=>{
           tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${p}%">${p}%</span></div></div>`;
         });
@@ -345,11 +347,6 @@ $("compressBtn").onclick=async()=>{
 
       tr.cells[2].textContent=sizeLabel(finalBlob.size);
       tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';
-      const dl=document.createElement("button");
-      dl.className="green"; dl.textContent="⬇️ Download"; dl.style.padding="7px 10px"; dl.style.fontSize="12px";
-      dl.onclick=()=>download(finalBlob,finalName);
-      tr.cells[5].appendChild(dl);
-      const downloadCell=tr.insertCell(4);
       const downloadBtn=document.createElement("button");
       downloadBtn.type="button";
       downloadBtn.className="green";
@@ -358,7 +355,7 @@ $("compressBtn").onclick=async()=>{
       downloadBtn.style.padding="7px 10px";
       downloadBtn.style.fontSize="12px";
       downloadBtn.onclick=()=>download(finalBlob,finalName);
-      downloadCell.appendChild(downloadBtn);
+      tr.cells[5].appendChild(downloadBtn);
       if(finalBlob===file){
         tr.cells[4].textContent="Original kept";
         tr.cells[4].className="bad";

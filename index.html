@@ -84,7 +84,18 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <h2>Compress Multiple PDFs</h2><div class="subtitle">Target size तक strong compression की कोशिश होगी।</div>
 <label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple>
 <div class="grid2">
-<div><label>Target Maximum Size</label><select id="target"><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option><option value="20">20 MB</option></select></div>
+<div><label>Target Maximum Size</label><select id="target">
+<option value="0.09765625">100 KB</option>
+<option value="0.1953125">200 KB</option>
+<option value="0.29296875">300 KB</option>
+<option value="0.48828125">500 KB</option>
+<option value="0.732421875">750 KB</option>
+<option value="1">1 MB</option>
+<option value="2">2 MB</option>
+<option value="5" selected>5 MB</option>
+<option value="10">10 MB</option>
+<option value="20">20 MB</option>
+</select></div>
 <div><label>Quality</label><select id="quality"><option value="extreme">Extreme</option><option value="strong" selected>Strong</option><option value="medium">Medium</option><option value="light">Light</option></select></div>
 </div>
 <div class="grid2"><button id="compressBtn" class="orange">🗜️ COMPRESS ALL</button><button id="compressStop" class="red" disabled>STOP</button></div>
@@ -94,7 +105,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 </div>
 <div id="compressStatus" class="status">Ready</div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th></tr></thead><tbody id="compressRows"></tbody></table>
-<div class="note">Important: scanned/image PDFs can be reduced strongly by rendering pages as JPEG. If a compressed result becomes larger than the original, this app will keep the original instead.</div>
+<div class="note">Important: scanned/image PDFs compress best. This tool renders pages as JPEG. If a compressed result becomes larger than the original, the original is kept instead.</div>
 </section>
 
 <section id="mergePanel" class="panel">
@@ -120,6 +131,7 @@ const {jsPDF}=window.jspdf; const {PDFDocument}=window.PDFLib;
 const $=id=>document.getElementById(id);
 const download=(blob,name)=>{let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 const mb=n=>(n/1048576).toFixed(2)+" MB";
+const sizeLabel=n=>n<1048576?(n/1024).toFixed(0)+" KB":(n/1048576).toFixed(2)+" MB";
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.tab).classList.add("active")});
 
@@ -169,7 +181,58 @@ $("searchBtn").onclick=async()=>{
  try{let wb=XLSX.read(await ef.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),names=rows.map(r=>String(r[0]||"").trim()).filter(Boolean);if(names[0]&&/proposal|search/i.test(names[0]))names.shift();let f=0,n=0;
  for(let name of names){if(searchStopped)break;let file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;let item={file,checked:false};found.push(item);let c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;refresh()};tr.innerHTML="<td></td><td>"+name+"</td><td class='good'>FOUND</td><td>"+file.name+"</td>";tr.cells[0].appendChild(c)}else{n++;tr.innerHTML="<td></td><td>"+name+"</td><td class='bad'>NOT FOUND</td><td></td>"}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processed ${f+n} | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=searchStopped?" | STOPPED":" | COMPLETE"}catch(e){$("searchStatus").textContent="Error: "+e.message}$("searchBtn").disabled=false;$("searchStop").disabled=true;refresh()};
 
-const profiles={extreme:[{dpi:55,q:.30},{dpi:45,q:.24},{dpi:38,q:.20},{dpi:32,q:.17}],strong:[{dpi:65,q:.40},{dpi:55,q:.32},{dpi:45,q:.26},{dpi:38,q:.20}],medium:[{dpi:80,q:.50},{dpi:65,q:.42},{dpi:55,q:.34},{dpi:45,q:.27}],light:[{dpi:100,q:.62},{dpi:85,q:.52},{dpi:70,q:.44},{dpi:60,q:.36}]};
+const profiles={
+  extreme:[
+    {dpi:48,q:.24},{dpi:42,q:.20},{dpi:36,q:.16},{dpi:30,q:.13},{dpi:24,q:.10},{dpi:20,q:.08},{dpi:16,q:.06}
+  ],
+  strong:[
+    {dpi:60,q:.38},{dpi:52,q:.32},{dpi:45,q:.27},{dpi:38,q:.22},{dpi:32,q:.18},{dpi:26,q:.14}
+  ],
+  medium:[
+    {dpi:80,q:.50},{dpi:68,q:.44},{dpi:58,q:.38},{dpi:48,q:.32},{dpi:40,q:.27}
+  ],
+  light:[
+    {dpi:100,q:.62},{dpi:88,q:.55},{dpi:76,q:.48},{dpi:64,q:.42},{dpi:54,q:.36}
+  ]
+};
+
+// Real browser-side PDF compression. Scanned/image PDFs reduce the most.
+async function makeCompressed(file,opt){
+  const data=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
+  let doc=null;
+
+  for(let pno=1;pno<=pdf.numPages;pno++){
+    const page=await pdf.getPage(pno);
+    const scale=opt.dpi/72;
+    const viewport=page.getViewport({scale});
+    const pageW=viewport.width/scale;
+    const pageH=viewport.height/scale;
+
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.ceil(viewport.width));
+    canvas.height=Math.max(1,Math.ceil(viewport.height));
+    const ctx=canvas.getContext("2d",{alpha:false});
+    ctx.fillStyle="#fff";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    await page.render({canvasContext:ctx,viewport,background:"white"}).promise;
+    const jpg=canvas.toDataURL("image/jpeg",opt.q);
+
+    if(!doc){
+      doc=new jsPDF({unit:"pt",format:[pageW,pageH],compress:true,putOnlyUsedFonts:true});
+    }else{
+      doc.addPage([pageW,pageH]);
+    }
+    doc.addImage(jpg,"JPEG",0,0,pageW,pageH,undefined,"FAST");
+
+    canvas.width=1;
+    canvas.height=1;
+    await new Promise(r=>setTimeout(r,0));
+  }
+  return doc.output("blob");
+}
+
 let compStop=false, compressedResults=[];
 $("compressStop").onclick=()=>{
   compStop=true;
@@ -190,7 +253,8 @@ $("compressZip").onclick=async()=>{
     compression:"DEFLATE",
     compressionOptions:{level:9}
   });
-  download(blob,`Compressed_PDFs_${$("target").value}MB.zip`);
+  const targetLabel=$("target").selectedOptions[0].textContent.trim().replace(/\s+/g,"_");
+  download(blob,`Compressed_PDFs_${targetLabel}.zip`);
   $("compressStatus").textContent=`ZIP downloaded — ${compressedResults.length} PDF(s).`;
 };
 $("compressMerge").onclick=async()=>{
@@ -229,7 +293,7 @@ $("compressBtn").onclick=async()=>{
     for(let file of files){
       if(compStop)break;
       let tr=document.createElement("tr");
-      tr.innerHTML="<td>"+file.name+"</td><td>"+mb(file.size)+"</td><td>Processing...</td><td>...</td>";
+      tr.innerHTML="<td>"+file.name+"</td><td>"+sizeLabel(file.size)+"</td><td>Processing...</td><td>...</td>";
       $("compressRows").appendChild(tr);
 
       let best=null;
@@ -245,7 +309,7 @@ $("compressBtn").onclick=async()=>{
       let finalName=file.name.replace(/\.pdf$/i,"")+"_compressed.pdf";
       compressedResults.push({name:finalName,blob:finalBlob});
 
-      tr.cells[2].textContent=mb(finalBlob.size);
+      tr.cells[2].textContent=sizeLabel(finalBlob.size);
       if(finalBlob===file){
         tr.cells[3].textContent="Original kept";
         tr.cells[3].className="bad";

@@ -104,7 +104,7 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 <button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
 </div>
 <div id="compressStatus" class="status">Ready</div>
-<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th></tr></thead><tbody id="compressRows"></tbody></table>
+<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 <div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
 </section>
 
@@ -327,6 +327,16 @@ $("compressBtn").onclick=async()=>{
       compressedResults.push({name:finalName,blob:finalBlob});
 
       tr.cells[2].textContent=sizeLabel(finalBlob.size);
+      const downloadCell=tr.insertCell(4);
+      const downloadBtn=document.createElement("button");
+      downloadBtn.type="button";
+      downloadBtn.className="green";
+      downloadBtn.textContent="⬇️ Download";
+      downloadBtn.style.marginTop="0";
+      downloadBtn.style.padding="7px 10px";
+      downloadBtn.style.fontSize="12px";
+      downloadBtn.onclick=()=>download(finalBlob,finalName);
+      downloadCell.appendChild(downloadBtn);
       if(finalBlob===file){
         tr.cells[3].textContent="Original kept";
         tr.cells[3].className="bad";

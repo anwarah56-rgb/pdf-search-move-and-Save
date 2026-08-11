@@ -51,9 +51,15 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
     box-shadow: 0 3px 10px #0003;
     z-index: 10;
 }
+
+.authbar{position:absolute;right:22px;top:18px;display:flex;gap:8px;align-items:center;z-index:5}.authbar button{padding:8px 12px;border-radius:9px;border:1px solid #d7dee8;background:#fff;cursor:pointer;font-weight:700}.premium-theme{--accent:#7c3aed;--green:#16a34a}.premium-theme .brand{color:#7c3aed}.auth-user{font-size:13px;font-weight:800}.role-badge{padding:5px 9px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:800}.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(420px,92vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modal-card h3{margin-top:0}.modal-card input{width:100%;box-sizing:border-box;margin:7px 0;padding:11px;border:1px solid #d7dee8;border-radius:9px}.auth-actions{display:flex;gap:8px;margin-top:12px}.auth-actions button{flex:1;padding:11px;border:0;border-radius:9px;font-weight:800;cursor:pointer}.premium-card{border:1px solid #ddd6fe;background:#faf5ff;padding:14px;border-radius:12px;margin-top:12px}.free-limit{font-size:12px;color:#64748b;margin-top:6px}
 </style>
 </head>
 <body>
+<div class="authbar"><span id="authUser" class="auth-user"></span><span id="roleBadge" class="role-badge">FREE • 50</span><button id="loginBtn">Login</button><button id="registerBtn">Register</button><button id="logoutBtn" style="display:none">Logout</button></div>
+<div style="position:absolute;left:22px;top:18px;font-size:12px;color:#64748b">Free: 50 operations • Premium: Unlimited</div>
+<div id="authModal" class="modal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="auth-actions"><button id="authSubmit" class="green">Login</button><button id="authClose">Close</button></div><div id="authMsg" class="free-limit"></div><div class="premium-card"><b>⭐ Premium</b><br>₹200 / 6 Months • ₹300 / 1 Year<br>Unlimited Compress & Merge</div></div></div>
+
 <header class="header"><div class="header-inner">
  <div class="top-builder">Build by Anwar</div>
 <div class="brand">📄 PDF Utility Hub</div><div class="tag">All-in-one PDF tools for Search, Compression, Merge & ZIP</div>
@@ -125,6 +131,46 @@ th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:
 </section>
 </div>
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+// Replace these values with your Firebase Web App configuration.
+const firebaseConfig={
+  apiKey:"YOUR_API_KEY",
+  authDomain:"YOUR_PROJECT.firebaseapp.com",
+  projectId:"YOUR_PROJECT_ID",
+  storageBucket:"YOUR_PROJECT.appspot.com",
+  messagingSenderId:"YOUR_SENDER_ID",
+  appId:"YOUR_APP_ID"
+};
+const firebaseReady=!Object.values(firebaseConfig).some(v=>String(v).startsWith("YOUR_"));
+let firebaseAuth=null, db=null, currentUser=null, currentRole="free";
+if(firebaseReady){
+  const app=initializeApp(firebaseConfig); firebaseAuth=getAuth(app); db=getFirestore(app);
+  onAuthStateChanged(firebaseAuth,async user=>{
+    currentUser=user; currentRole="free";
+    if(user && db){
+      try{ const snap=await getDoc(doc(db,"admins",user.uid)); if(snap.exists() && snap.data().active!==false) currentRole="admin";
+            else { const ps=await getDoc(doc(db,"premiumUsers",user.uid)); if(ps.exists() && ps.data().active!==false && ps.data().validTill?.toDate?.() > new Date()) currentRole="premium"; }
+      }catch(e){console.warn("Role lookup:",e)}
+    }
+    document.body.classList.toggle("premium-theme",currentRole==="premium");
+    $("authUser").textContent=user?(user.email||""):"";
+    $("roleBadge").textContent=currentRole==="admin"?"ADMIN • UNLIMITED":currentRole==="premium"?"⭐ PREMIUM • UNLIMITED":"FREE • 50";
+    $("loginBtn").style.display=user?"none":"inline-block"; $("registerBtn").style.display=user?"none":"inline-block"; $("logoutBtn").style.display=user?"inline-block":"none";
+  });
+}
+function openAuth(mode){ $("authTitle").textContent=mode==="register"?"Create Account":"Login"; $("authSubmit").textContent=mode==="register"?"Register":"Login"; $("authModal").classList.add("show"); $("authMsg").textContent=firebaseReady?"":"Firebase config is not set yet."; $("authSubmit").dataset.mode=mode; }
+$("loginBtn").onclick=()=>openAuth("login"); $("registerBtn").onclick=()=>openAuth("register"); $("authClose").onclick=()=>$("authModal").classList.remove("show");
+$("logoutBtn").onclick=()=>firebaseAuth&&signOut(firebaseAuth);
+$("authSubmit").onclick=async()=>{
+  if(!firebaseReady){$("authMsg").textContent="Add your Firebase Web App config first.";return;}
+  const email=$("authEmail").value.trim(), pass=$("authPassword").value; if(!email||!pass){$("authMsg").textContent="Enter email and password.";return;}
+  try{ if($("authSubmit").dataset.mode==="register") await createUserWithEmailAndPassword(firebaseAuth,email,pass); else await signInWithEmailAndPassword(firebaseAuth,email,pass); $("authModal").classList.remove("show"); }
+  catch(e){$("authMsg").textContent=e.message;}
+};
+
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 const {jsPDF}=window.jspdf; const {PDFDocument}=window.PDFLib;
@@ -132,6 +178,9 @@ const $=id=>document.getElementById(id);
 const download=(blob,name)=>{let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
 const mb=n=>(n/1048576).toFixed(2)+" MB";
 const sizeLabel=n=>n<1048576?(n/1024).toFixed(0)+" KB":(n/1048576).toFixed(2)+" MB";
+let freeOps=Number(localStorage.getItem("pdfhub_free_ops")||0);
+function operationAllowed(){ if(currentRole==="admin"||currentRole==="premium") return true; if(freeOps>=50){alert("Free limit of 50 operations reached. Please Login/Register or buy Premium.");return false;} freeOps++; localStorage.setItem("pdfhub_free_ops",freeOps); $("roleBadge").textContent=`FREE • ${50-freeOps} left`; return true; }
+
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.tab).classList.add("active")});
 
@@ -303,6 +352,7 @@ $("compressMerge").onclick=async()=>{
   refreshCompressionActions();
 };
 $("compressBtn").onclick=async()=>{
+ if(!operationAllowed())return;
   let files=[...$("compressFiles").files];
   if(!files.length)return alert("Select PDFs.");
   let target=Number($("target").value)*1048576,prof=$("quality").value;
@@ -381,9 +431,11 @@ $("compressBtn").onclick=async()=>{
   $("compressStop").disabled=true;
   refreshCompressionActions();
 };
-$("mergeBtn").onclick=async()=>{let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
+$("mergeBtn").onclick=async()=>{
+ if(!operationAllowed())return;let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
 
-$("zipBtn").onclick=async()=>{let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
+$("zipBtn").onclick=async()=>{
+ if(!operationAllowed())return;let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
 </script>
     <footer style="
     text-align:center;

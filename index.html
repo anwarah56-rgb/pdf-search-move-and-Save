@@ -4,572 +4,118 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b57d0">
-<title>PDF Utility Hub by Anwar </title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
-// UI safety: make sure the auth controls are always visible and report uncaught errors.
-window.addEventListener("error", e => {
-  const ids=["compressStatus","mergeStatus","zipStatus","searchStatus"];
-  ids.forEach(id=>{ const el=document.getElementById(id); if(el && e.message) el.textContent="Error: "+e.message; });
-});
-</script>
+<title>PDF Utility Hub by Anwar</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
-:root{--primary:#2563eb;--primary-dark:#1d4ed8;--soft:#eff6ff;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--purple:#7c3aed;--ink:#172033;--muted:#667085;--line:#e5e7eb}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:#f6f8fc;color:var(--ink)}
-.header{position:relative;overflow:hidden;background:linear-gradient(135deg,#123b91 0%,#2563eb 55%,#4f46e5 100%);color:#fff;padding:34px 18px 70px}
-.header:after{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:#fff1;right:-90px;top:-130px}
-.header-inner{max-width:1120px;margin:auto;position:relative;z-index:1}
-.brand{font-size:31px;font-weight:800;letter-spacing:-.5px}.tag{opacity:.88;margin-top:8px;font-size:15px}
-.container{max-width:1120px;margin:-38px auto 32px;padding:0 14px;position:relative;z-index:2}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#ffffffdd;backdrop-filter:blur(12px);padding:10px;border:1px solid #fff;border-radius:18px;box-shadow:0 12px 35px #17346b20}
-.tab{border:0!important;background:transparent!important;color:#475467!important;padding:14px 8px!important;border-radius:12px!important;font-weight:800;cursor:pointer;transition:.2s}
-.tab:hover{background:#f3f6fb!important}.tab.active{background:var(--soft)!important;color:var(--primary)!important;box-shadow:inset 0 0 0 1px #bfdbfe}
-.panel{display:none;background:#fff;margin-top:16px;padding:24px;border-radius:18px;border:1px solid var(--line);box-shadow:0 8px 30px #1d293910}.panel.active{display:block}
-h2{margin:0;font-size:22px;letter-spacing:-.3px}.subtitle{color:var(--muted);font-size:14px;margin:6px 0 20px}
-label{font-weight:750;display:block;margin:13px 0 7px;font-size:14px}
-input,select{width:100%;padding:13px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;font-size:14px;outline:none;transition:.2s}
-input:focus,select:focus{border-color:#7aa2ff;box-shadow:0 0 0 3px #2563eb15}
-button{width:100%;padding:13px;border:0;border-radius:10px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer;margin-top:8px;transition:.18s;box-shadow:0 2px 5px #0001}
-button:hover{transform:translateY(-1px);filter:brightness(1.03)}button:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.green{background:var(--green)}.red{background:var(--red)}.orange{background:var(--orange)}.purple{background:var(--purple)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.status{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:13px;font-size:14px}
-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:15px;overflow:hidden;border:1px solid var(--line);border-radius:10px}
-th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:left}th{background:#f8fafc;font-weight:800}tr:last-child td{border-bottom:0}
-.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}.pwrap{min-width:140px}.pbar{height:20px;background:#eef2f7;border-radius:10px;overflow:hidden;border:1px solid #dbe2ea}.pbar span{display:block;height:100%;background:#16a34a;color:#fff;text-align:center;font-size:11px;line-height:18px;font-weight:800;transition:width .25s}
-.note{font-size:12px;color:var(--muted);line-height:1.55;margin-top:12px;padding:10px 12px;background:#f8fafc;border-radius:9px}
-.footer{text-align:center;color:#98a2b3;font-size:12px;padding:0 15px 25px}
-@media(max-width:700px){.tabs{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.brand{font-size:25px}.panel{padding:17px}}
-.top-builder {
-    position: absolute;
-    top: 18px;
-    right: 20px;
-    background: #16a34a;
-    color: white;
-    font-weight: 800;
-    font-size: 14px;
-    padding: 7px 14px;
-    border-radius: 20px;
-    box-shadow: 0 3px 10px #0003;
-    z-index: 10;
-}
-
-.authbar{position:absolute;right:22px;top:18px;display:flex;gap:8px;align-items:center;z-index:5}.authbar button{padding:8px 12px;border-radius:9px;border:1px solid #d7dee8;background:#fff;cursor:pointer;font-weight:700}.premium-theme{--accent:#7c3aed;--green:#16a34a}.premium-theme .brand{color:#7c3aed}.auth-user{font-size:13px;font-weight:800}.role-badge{padding:5px 9px;border-radius:999px;background:#eef2ff;color:#4f46e5;font-size:11px;font-weight:800}.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:100;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(420px,92vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modal-card h3{margin-top:0}.modal-card input{width:100%;box-sizing:border-box;margin:7px 0;padding:11px;border:1px solid #d7dee8;border-radius:9px}.auth-actions{display:flex;gap:8px;margin-top:12px}.auth-actions button{flex:1;padding:11px;border:0;border-radius:9px;font-weight:800;cursor:pointer}.premium-card{border:1px solid #ddd6fe;background:#faf5ff;padding:14px;border-radius:12px;margin-top:12px}.free-limit{font-size:12px;color:#64748b;margin-top:6px}
-
-/* Visible Login / Register controls */
-.authbar{
-  position:absolute !important;
-  right:22px !important;
-  top:18px !important;
-  display:flex !important;
-  gap:8px !important;
-  align-items:center !important;
-  z-index:9999 !important;
-}
-.authbar button{
-  width:auto !important;
-  min-width:92px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  padding:9px 14px !important;
-  border-radius:10px !important;
-  border:1px solid #d7dee8 !important;
-  background:#fff !important;
-  color:#17346b !important;
-  cursor:pointer !important;
-  font-weight:800 !important;
-  font-size:14px !important;
-  margin:0 !important;
-}
-#loginBtn{display:inline-flex !important;}
-#registerBtn{display:inline-flex !important;}
-#logoutBtn{display:none;}
-@media(max-width:700px){
-  .authbar{right:10px !important;top:10px !important;}
-  .authbar button{min-width:80px !important;padding:8px 9px !important;font-size:12px !important;}
-}
-
-
-/* Profile / Country / Logout */
-.profile-wrap{position:relative;display:none;align-items:center;gap:7px}
-#profileBtn{display:inline-flex!important;width:auto!important;min-width:100px!important;align-items:center;justify-content:center;padding:9px 13px!important;margin:0!important;background:#fff!important;color:#17346b!important;border:1px solid #d7dee8!important;border-radius:10px!important;font-weight:800!important}
-.profile-menu{display:none;position:absolute;right:0;top:46px;width:280px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:15px;box-shadow:0 15px 45px #0002;z-index:10001;color:#172033}
-.profile-menu.show{display:block}
-.profile-menu h4{margin:0 0 10px;font-size:16px}
-.profile-menu .profile-email{font-size:12px;color:#667085;margin-bottom:10px;word-break:break-all}
-.profile-menu label{font-size:12px;margin:8px 0 5px}
-.profile-menu select{width:100%;padding:9px;border:1px solid #d0d5dd;border-radius:8px}
-.profile-menu button{width:100%;margin-top:10px;padding:9px;border-radius:8px}
-@media(max-width:700px){
- .profile-menu{right:-35px;width:250px}
- #profileBtn{min-width:90px!important;font-size:12px!important}
-}
-
+:root{--p:#2563eb;--g:#16a34a;--r:#dc2626;--o:#ea580c;--v:#7c3aed;--ink:#172033;--muted:#667085;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f6f8fc;color:var(--ink)}
+.header{background:linear-gradient(135deg,#123b91,#2563eb,#4f46e5);color:#fff;padding:32px 18px 70px;position:relative}
+.header-inner,.container{max-width:1120px;margin:auto}.brand{font-size:31px;font-weight:800}.tag{opacity:.9;margin-top:7px}
+.builder{position:absolute;right:20px;top:18px;background:var(--g);padding:7px 14px;border-radius:20px;font-weight:800}
+.authbar{position:absolute;right:20px;top:58px;display:flex;gap:7px;align-items:center;z-index:20}.authbar button{width:auto;margin:0;background:#fff;color:#17346b;padding:8px 12px}
+.role{background:#eef2ff;color:#4f46e5;border-radius:20px;padding:6px 9px;font-size:11px;font-weight:800}
+.container{margin-top:-38px;padding:0 14px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#ffffffee;padding:10px;border-radius:18px}
+button{border:0;border-radius:10px;padding:13px;background:var(--p);color:#fff;font-weight:800;cursor:pointer;margin-top:8px}button:disabled{opacity:.5;cursor:not-allowed}
+.tab{background:transparent;color:#475467}.tab.active{background:#eff6ff;color:var(--p)}
+.panel{display:none;background:#fff;margin-top:16px;padding:24px;border-radius:18px;border:1px solid var(--line)}.panel.active{display:block}
+label{display:block;font-weight:700;margin:13px 0 7px;font-size:14px}input,select{width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.status{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:13px}
+table{width:100%;border-collapse:collapse;margin-top:15px}th,td{border-bottom:1px solid var(--line);padding:9px;font-size:13px;text-align:left}th{background:#f8fafc}
+.good{color:var(--g);font-weight:800}.bad{color:var(--r);font-weight:800}.green{background:var(--g)}.red{background:var(--r)}.orange{background:var(--o)}.purple{background:var(--v)}
+.pbar{height:20px;background:#eef2f7;border-radius:10px;overflow:hidden}.pbar span{display:block;height:100%;background:var(--g);color:#fff;text-align:center;font-size:11px;line-height:20px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:100;align-items:center;justify-content:center}.modal.show{display:flex}.card{width:min(420px,92vw);background:#fff;padding:24px;border-radius:18px}.card input{margin:7px 0}.profile{position:relative;display:none}.menu{display:none;position:absolute;right:0;top:45px;background:#fff;color:var(--ink);width:270px;padding:15px;border:1px solid var(--line);border-radius:14px;box-shadow:0 15px 45px #0002}.menu.show{display:block}
+.footer{text-align:center;background:#fff;border-top:1px solid var(--line);padding:20px 10px;font-size:13px;line-height:1.7;color:#98a2b3}.footer strong{color:var(--g)}
+.premium-theme .header{background:linear-gradient(135deg,#4c1d95,#7c3aed,#9333ea)}
+@media(max-width:700px){.tabs,.grid2{grid-template-columns:1fr 1fr}.brand{font-size:24px}.authbar{right:8px;top:55px}.authbar .user{display:none}.panel{padding:17px}}
 </style>
 </head>
 <body>
 <div class="authbar">
-<span id="authUser" class="auth-user"></span>
-<span id="roleBadge" class="role-badge">FREE • 50</span>
-<button id="loginBtn" type="button">🔐 Login</button>
-<button id="registerBtn" type="button">📝 Register</button>
-<div id="profileWrap" class="profile-wrap">
-  <button id="profileBtn" type="button">👤 Profile ▾</button>
-  <div id="profileMenu" class="profile-menu">
-    <h4>👤 Profile Settings</h4>
-    <div id="profileEmail" class="profile-email">Not logged in</div>
-    <label for="countrySelect">🌍 Country</label>
-    <select id="countrySelect">
-      <option value="">Select Country</option>
-      <option>India</option><option>United States</option><option>United Kingdom</option>
-      <option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option>
-      <option>Nepal</option><option>Pakistan</option><option>Australia</option>
-      <option>Canada</option><option>Singapore</option><option>Other</option>
-    </select>
-    <button id="saveProfileBtn" type="button" class="green">💾 Save Profile</button>
-    <button id="logoutBtn" type="button" class="red">🚪 Logout</button>
-  </div>
+<span id="authUser" class="user"></span><span id="roleBadge" class="role">FREE • 50</span>
+<button id="loginBtn">🔐 Login</button><button id="registerBtn">📝 Register</button>
+<div id="profileWrap" class="profile"><button id="profileBtn">👤 Profile ▾</button>
+<div id="profileMenu" class="menu"><h4>👤 Profile Settings</h4><div id="profileEmail"></div>
+<label>🌍 Country</label><select id="country"><option value="">Select Country</option><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select>
+<button id="saveProfile" class="green">💾 Save Profile</button><button id="logout" class="red">🚪 Logout</button></div></div>
 </div>
-</div>
-<div style="position:absolute;left:22px;top:18px;font-size:12px;color:#64748b">Free: 50 operations • Premium: Unlimited</div>
-<div id="authModal" class="modal"><div class="modal-card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="auth-actions"><button id="authSubmit" type="button" class="green">Login</button><button id="authClose" type="button">Close</button></div><div id="authMsg" class="free-limit"></div><div class="premium-card"><b>⭐ Premium</b><br>₹200 / 6 Months • ₹300 / 1 Year<br>Unlimited Compress & Merge</div></div></div>
+<header class="header"><div class="builder">Build by Anwar</div><div class="header-inner"><div class="brand">📄 PDF Utility Hub</div><div class="tag">All-in-one PDF Search, Compression, Merge & ZIP</div></div></header>
 
-<header class="header"><div class="header-inner">
- <div class="top-builder">Build by Anwar</div>
-<div class="brand">📄 PDF Utility Hub</div><div class="tag">All-in-one PDF tools for Search, Compression, Merge & ZIP</div>
-</div></header>
+<div id="authModal" class="modal"><div class="card"><h3 id="authTitle">Login</h3><input id="authEmail" type="email" placeholder="Email"><input id="authPassword" type="password" placeholder="Password"><div class="grid2"><button id="authSubmit" class="green">Login</button><button id="authClose">Close</button></div><div id="authMsg"></div><p>⭐ Premium: ₹200 / 6 Months • ₹300 / 1 Year • Unlimited</p></div></div>
 
-<div class="container">
-<nav class="tabs">
-<button type="button" class="tab active" data-tab="searchPanel">🔎 Search</button>
-<button type="button" class="tab" data-tab="compressPanel">🗜️ Compress</button>
-<button type="button" class="tab" data-tab="mergePanel">🔗 Merge</button>
-<button type="button" class="tab" data-tab="zipPanel">📦 ZIP</button>
+<div class="container"><nav class="tabs">
+<button class="tab active" data-tab="searchPanel">🔎 Search</button><button class="tab" data-tab="compressPanel">🗜️ Compress</button><button class="tab" data-tab="mergePanel">🔗 Merge</button><button class="tab" data-tab="zipPanel">📦 ZIP</button>
 </nav>
 
-<section id="searchPanel" class="panel active">
-<h2>Search PDFs from Excel</h2><div class="subtitle">Excel की पहली sheet के Column A में दिए नाम/Proposal को PDF filename में खोजें।</div>
-<label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple>
-<label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
+<section id="searchPanel" class="panel active"><h2>Search PDFs from Excel</h2><p>Excel Column A के नाम/Proposal को PDF filename में खोजें।</p>
+<label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
 <div class="grid2"><button id="searchBtn">START SEARCH</button><button id="searchStop" class="red" disabled>STOP</button></div>
-<div class="grid2">
-<button id="searchZip" class="green" disabled>📦 DOWNLOAD SELECTED AS ZIP</button>
-<button id="searchMerge" class="purple" disabled>🔗 MERGE SELECTED PDFs</button>
-</div>
-<div id="searchStatus" class="status">Ready</div>
-<table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
-</section>
+<div class="grid2"><button id="searchZip" class="green" disabled>📦 DOWNLOAD ZIP</button><button id="searchMerge" class="purple" disabled>🔗 MERGE SELECTED</button></div>
+<div id="searchStatus" class="status">Ready</div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></section>
 
-<section id="compressPanel" class="panel">
-<h2>Compress Multiple PDFs</h2><div class="subtitle">Target size तक strong compression की कोशिश होगी।</div>
-<label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple>
-<div class="grid2">
-<div><label>Target Maximum Size</label><select id="target">
-<option value="0.09765625">100 KB</option>
-<option value="0.1953125">200 KB</option>
-<option value="0.29296875">300 KB</option>
-<option value="0.48828125">500 KB</option>
-<option value="0.732421875">750 KB</option>
-<option value="1">1 MB</option>
-<option value="2">2 MB</option>
-<option value="5" selected>5 MB</option>
-<option value="10">10 MB</option>
-<option value="20">20 MB</option>
-</select></div>
-<div><label>Quality</label><select id="quality"><option value="extreme">Maximum Compression</option><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div>
-</div>
+<section id="compressPanel" class="panel"><h2>Compress PDFs</h2><p>Text Priority mode text को बेहतर readable रखने की कोशिश करता है; images की quality कम हो सकती है।</p>
+<label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf" multiple>
+<div class="grid2"><div><label>Target</label><select id="target"><option value=".09765625">100 KB</option><option value=".1953125">200 KB</option><option value=".48828125">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option><option value="20">20 MB</option></select></div>
+<div><label>Quality</label><select id="quality"><option value="extreme">Maximum Compression</option><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div></div>
 <div class="grid2"><button id="compressBtn" class="orange">🗜️ COMPRESS ALL</button><button id="compressStop" class="red" disabled>STOP</button></div>
-<div class="grid2">
-<button id="compressZip" class="green" disabled>📦 DOWNLOAD COMPRESSED AS ZIP</button>
-<button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED PDFs</button>
-</div>
-<div id="compressStatus" class="status">Ready — Select PDF files and click COMPRESS ALL.</div>
-<table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
-<div class="note">Important: Text Priority keeps text much sharper by using high-DPI rendering. Images may lose quality. The tool first tries lossless optimization; if the compressed result is larger than the original, the original is kept.</div>
-</section>
+<div class="grid2"><button id="compressZip" class="green" disabled>📦 DOWNLOAD COMPRESSED ZIP</button><button id="compressMerge" class="purple" disabled>🔗 MERGE COMPRESSED</button></div>
+<div id="compressStatus" class="status">Ready</div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Progress</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></section>
 
-<section id="mergePanel" class="panel">
-<h2>Merge PDFs</h2><div class="subtitle">Selected PDFs को एक single PDF में merge करें।</div>
-<label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple>
-<label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf">
-<button id="mergeBtn" class="purple">MERGE & DOWNLOAD</button>
-<div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div>
-</section>
+<section id="mergePanel" class="panel"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf" multiple><label>Output Name</label><input id="mergeName" value="Merged_PDF.pdf"><button id="mergeBtn" class="purple">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div></section>
 
-<section id="zipPanel" class="panel">
-<h2>Make ZIP from PDFs</h2><div class="subtitle">कई PDFs को बिना बदलें एक ZIP file में रखें।</div>
-<label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple>
-<label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip">
-<button id="zipBtn" class="green">CREATE ZIP & DOWNLOAD</button>
-<div id="zipStatus" class="status">Ready — Select PDF files.</div>
-</section>
+<section id="zipPanel" class="panel"><h2>Make ZIP</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf" multiple><label>ZIP Name</label><input id="zipName" value="PDF_Files.zip"><button id="zipBtn" class="green">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready</div></section>
 </div>
+
+<footer class="footer"><div><strong>© 2026 PDF Utility Hub • Build by Anwar</strong></div><div>© All Rights Reserved • Use of this website is subject to applicable terms.<br>Files are processed locally in your browser whenever supported.</div></footer>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-// DOM helper must be declared before any handler uses it.
-const $=id=>document.getElementById(id);
-
-// Replace these values with your Firebase Web App configuration.
-const firebaseConfig={
-  apiKey:"YOUR_API_KEY",
-  authDomain:"YOUR_PROJECT.firebaseapp.com",
-  projectId:"YOUR_PROJECT_ID",
-  storageBucket:"YOUR_PROJECT.appspot.com",
-  messagingSenderId:"YOUR_SENDER_ID",
-  appId:"YOUR_APP_ID"
-};
-const firebaseReady=!Object.values(firebaseConfig).some(v=>String(v).startsWith("YOUR_"));
-let firebaseAuth=null, db=null, currentUser=null, currentRole="free";
-if(firebaseReady){
-  const app=initializeApp(firebaseConfig); firebaseAuth=getAuth(app); db=getFirestore(app);
-  onAuthStateChanged(firebaseAuth,async user=>{
-    currentUser=user; currentRole="free";
-    if(user && db){
-      try{ const snap=await getDoc(doc(db,"admins",user.uid)); if(snap.exists() && snap.data().active!==false) currentRole="admin";
-            else { const ps=await getDoc(doc(db,"premiumUsers",user.uid)); if(ps.exists() && ps.data().active!==false && ps.data().validTill?.toDate?.() > new Date()) currentRole="premium"; }
-      }catch(e){console.warn("Role lookup:",e)}
-    }
-    document.body.classList.toggle("premium-theme",currentRole==="premium");
-    $("authUser").textContent=user?(user.email||""):"";
-    $("roleBadge").textContent=currentRole==="admin"?"ADMIN • UNLIMITED":currentRole==="premium"?"⭐ PREMIUM • UNLIMITED":"FREE • 50";
-    $("loginBtn").style.display=user?"none":"inline-flex"; $("registerBtn").style.display=user?"none":"inline-flex"; setProfileVisibility(user);
-  });
-}
-
-function setProfileVisibility(user){
-  const wrap=$("profileWrap");
-  if(wrap) wrap.style.display=user?"inline-flex":"none";
-  if($("profileEmail")) $("profileEmail").textContent=user?(user.email||""):"Not logged in";
-  if(user){
-    const saved=localStorage.getItem("pdfhub_country_"+user.uid)||"";
-    if($("countrySelect")) $("countrySelect").value=saved;
-  }
-}
-$("profileBtn").onclick=()=>$("profileMenu").classList.toggle("show");
-$("saveProfileBtn").onclick=()=>{
-  if(!currentUser){$("profileMenu").classList.remove("show");return;}
-  localStorage.setItem("pdfhub_country_"+currentUser.uid,$("countrySelect").value);
-  $("profileMenu").classList.remove("show");
-  alert("Profile settings saved.");
-};
-document.addEventListener("click",e=>{
-  const w=$("profileWrap");
-  if(w && !w.contains(e.target)) $("profileMenu").classList.remove("show");
-});
-
-function openAuth(mode){ $("authTitle").textContent=mode==="register"?"Create Account":"Login"; $("authSubmit").textContent=mode==="register"?"Register":"Login"; $("authModal").classList.add("show"); $("authMsg").textContent=firebaseReady?"":"Firebase config is not set yet."; $("authSubmit").dataset.mode=mode; }
-$("loginBtn").onclick=()=>openAuth("login"); $("registerBtn").onclick=()=>openAuth("register"); $("authClose").onclick=()=>$("authModal").classList.remove("show");
-$("logoutBtn").onclick=()=>firebaseAuth&&signOut(firebaseAuth);
-$("authSubmit").onclick=async()=>{
-  if(!firebaseReady){$("authMsg").textContent="Add your Firebase Web App config first.";return;}
-  const email=$("authEmail").value.trim(), pass=$("authPassword").value; if(!email||!pass){$("authMsg").textContent="Enter email and password.";return;}
-  try{ if($("authSubmit").dataset.mode==="register") await createUserWithEmailAndPassword(firebaseAuth,email,pass); else await signInWithEmailAndPassword(firebaseAuth,email,pass); $("authModal").classList.remove("show"); }
-  catch(e){$("authMsg").textContent=e.message;}
-};
-
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
-pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
-const {jsPDF}=window.jspdf; const {PDFDocument}=window.PDFLib;
-window.addEventListener("unhandledrejection",e=>{
-  const msg=e.reason?.message||String(e.reason||"Unknown error");
-  ["compressStatus","mergeStatus","zipStatus","searchStatus"].forEach(id=>{
-    const el=$(id); if(el) el.textContent="Error: "+msg;
-  });
-});
-const download=(blob,name)=>{let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
-const mb=n=>(n/1048576).toFixed(2)+" MB";
-const sizeLabel=n=>n<1048576?(n/1024).toFixed(0)+" KB":(n/1048576).toFixed(2)+" MB";
-let freeOps=Number(localStorage.getItem("pdfhub_free_ops")||0);
-function operationAllowed(){ if(currentRole==="admin"||currentRole==="premium") return true; if(freeOps>=50){alert("Free limit of 50 operations reached. Please Login/Register or buy Premium.");return false;} freeOps++; localStorage.setItem("pdfhub_free_ops",freeOps); $("roleBadge").textContent=`FREE • ${50-freeOps} left`; return true; }
 
+const $=id=>document.getElementById(id);
+const firebaseConfig={apiKey:"AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",authDomain:"pdf-utility-hu.firebaseapp.com",projectId:"pdf-utility-hu",storageBucket:"pdf-utility-hu.firebasestorage.app",messagingSenderId:"838702125905",appId:"1:838702125905:web:8f2d2f7e52e291bfbd7970",measurementId:"G-BZCFEZS2SE"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+let currentUser=null,currentRole="free",freeOps=Number(localStorage.getItem("pdfhub_free_ops")||0);
+
+function updateUI(){
+$("authUser").textContent=currentUser?.email||"";$("roleBadge").textContent=currentRole==="admin"?"ADMIN • UNLIMITED":currentRole==="premium"?"⭐ PREMIUM • UNLIMITED":`FREE • ${Math.max(0,50-freeOps)} LEFT`;
+$("loginBtn").style.display=currentUser?"none":"inline-block";$("registerBtn").style.display=currentUser?"none":"inline-block";$("profileWrap").style.display=currentUser?"block":"none";$("profileEmail").textContent=currentUser?.email||"";document.body.classList.toggle("premium-theme",currentRole==="premium");
+}
+onAuthStateChanged(auth,async u=>{currentUser=u;currentRole="free";if(u){try{const s=await getDoc(doc(db,"users",u.uid));if(s.exists()){const d=s.data();if(d.role==="admin")currentRole="admin";else if(d.role==="premium"&&d.active!==false&&(!d.validTill||d.validTill.toDate()>new Date()))currentRole="premium";$("country").value=d.country||"";}}catch(e){console.warn(e)}}updateUI()});
+function allowed(){if(currentRole!=="free")return true;if(freeOps>=50){alert("Free limit of 50 operations reached.");return false}freeOps++;localStorage.setItem("pdfhub_free_ops",freeOps);updateUI();return true}
+$("profileBtn").onclick=()=>$("profileMenu").classList.toggle("show");document.addEventListener("click",e=>{if(!$("profileWrap").contains(e.target))$("profileMenu").classList.remove("show")});
+$("saveProfile").onclick=async()=>{try{await setDoc(doc(db,"users",currentUser.uid),{email:currentUser.email,country:$("country").value},{merge:true});$("profileMenu").classList.remove("show");alert("Profile saved.")}catch(e){alert(e.message)}};
+$("logout").onclick=()=>signOut(auth);
+function authOpen(mode){$("authTitle").textContent=mode==="register"?"Create Account":"Login";$("authSubmit").textContent=mode==="register"?"Register":"Login";$("authSubmit").dataset.mode=mode;$("authModal").classList.add("show");$("authMsg").textContent=""}
+$("loginBtn").onclick=()=>authOpen("login");$("registerBtn").onclick=()=>authOpen("register");$("authClose").onclick=()=>$("authModal").classList.remove("show");
+$("authSubmit").onclick=async()=>{try{let e=$("authEmail").value.trim(),p=$("authPassword").value;if(!e||!p)throw Error("Enter email and password.");if($("authSubmit").dataset.mode==="register"){let c=await createUserWithEmailAndPassword(auth,e,p);await setDoc(doc(db,"users",c.user.uid),{email:e,role:"free",plan:"free",country:"",operationsUsed:0},{merge:true})}else await signInWithEmailAndPassword(auth,e,p);$("authModal").classList.remove("show")}catch(e){$("authMsg").textContent=e.message}};
 
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(t.dataset.tab).classList.add("active")});
+const {PDFDocument}=window.PDFLib,download=(b,n)=>{let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)},sz=n=>n<1048576?(n/1024).toFixed(0)+" KB":(n/1048576).toFixed(2)+" MB";
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
 
-let found=[],searchStopped=false;
-function refresh(){
- const has=found.some(x=>x.checked);
- $("searchZip").disabled=!has;
- $("searchMerge").disabled=!has;
-}
-$("searchStop").onclick=()=>{searchStopped=true;$("searchStatus").textContent="Stopping..."};
+let found=[],stopSearch=false;
+function searchRefresh(){let h=found.some(x=>x.checked);$("searchZip").disabled=!h;$("searchMerge").disabled=!h}
+$("searchStop").onclick=()=>stopSearch=true;
+$("searchBtn").onclick=async()=>{if(!allowed())return;let files=[...$("searchPdfs").files],ef=$("searchExcel").files[0];if(!files.length||!ef)return alert("Select PDFs and Excel.");found=[];stopSearch=false;$("searchRows").innerHTML="";$("searchBtn").disabled=true;$("searchStop").disabled=false;try{let wb=XLSX.read(await ef.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),names=rows.map(r=>String(r[0]||"").trim()).filter(Boolean);if(names[0]&&/proposal|search/i.test(names[0]))names.shift();let f=0,n=0;for(let name of names){if(stopSearch)break;let file=files.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;let item={file,checked:false};found.push(item);tr.innerHTML="<td></td><td>"+name+"</td><td class=good>FOUND</td><td>"+file.name+"</td>";let c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;searchRefresh()};tr.cells[0].appendChild(c)}else{n++;tr.innerHTML="<td></td><td>"+name+"</td><td class=bad>NOT FOUND</td><td></td>"}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processing ${Math.round(((f+n)/names.length)*100)}% | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=stopSearch?" | STOPPED":" | COMPLETE"}catch(e){$("searchStatus").textContent="Error: "+e.message}$("searchBtn").disabled=false;$("searchStop").disabled=true;searchRefresh()};
+$("searchZip").onclick=async()=>{let a=found.filter(x=>x.checked),z=new JSZip();a.forEach(x=>z.file(x.file.name,x.file));$("searchStatus").textContent="Processing 50% — ZIP...";download(await z.generateAsync({type:"blob"}),"Selected_PDFs.zip");$("searchStatus").textContent="Processing 100% — ZIP downloaded."};
+$("searchMerge").onclick=async()=>{let a=found.filter(x=>x.checked),o=await PDFDocument.create();for(let i=0;i<a.length;i++){ $("searchStatus").textContent=`Processing ${Math.round(i/a.length*100)}% — Merge`;let s=await PDFDocument.load(await a[i].file.arrayBuffer());(await o.copyPages(s,s.getPageIndices())).forEach(p=>o.addPage(p))}download(new Blob([await o.save()],{type:"application/pdf"}),"Selected_Merged_PDF.pdf");$("searchStatus").textContent="Processing 100% — Merge downloaded."};
 
-$("searchZip").onclick=async()=>{
- let a=found.filter(x=>x.checked);
- if(!a.length)return;
- let z=new JSZip();
- a.forEach(x=>z.file(x.file.name,x.file));
- $("searchStatus").textContent="Creating ZIP...";
- download(await z.generateAsync({type:"blob"}),"Selected_PDFs.zip");
- $("searchStatus").textContent=a.length+" PDF(s) saved in ZIP.";
-};
+const profiles={extreme:[150,.65],strong:[180,.78],medium:[200,.84],light:[220,.9]};
+async function compress(file,dpi,q,progress){let data=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise,doc=null;for(let i=1;i<=pdf.numPages;i++){let page=await pdf.getPage(i),scale=dpi/72,v=page.getViewport({scale}),c=document.createElement("canvas");c.width=Math.ceil(v.width);c.height=Math.ceil(v.height);let ctx=c.getContext("2d");ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);await page.render({canvasContext:ctx,viewport:v}).promise;let jpg=c.toDataURL("image/jpeg",q),w=v.width/scale,h=v.height/scale;if(!doc)doc=new jspdf.jsPDF({unit:"pt",format:[w,h],compress:true});else doc.addPage([w,h]);doc.addImage(jpg,"JPEG",0,0,w,h,undefined,"FAST");progress(Math.round(i/pdf.numPages*100));await new Promise(r=>setTimeout(r,0))}return doc.output("blob")}
 
-$("searchMerge").onclick=async()=>{
- let a=found.filter(x=>x.checked);
- if(!a.length)return;
- $("searchMerge").disabled=true;
- try{
-   $("searchStatus").textContent="Merging selected PDFs...";
-   const merged=await PDFDocument.create();
-   for(let i=0;i<a.length;i++){
-     $("searchStatus").textContent=`Merging ${i+1} of ${a.length}: ${a[i].file.name}`;
-     const src=await PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true});
-     const pages=await merged.copyPages(src,src.getPageIndices());
-     pages.forEach(p=>merged.addPage(p));
-     await new Promise(r=>setTimeout(r,0));
-   }
-   const bytes=await merged.save({useObjectStreams:true});
-   download(new Blob([bytes],{type:"application/pdf"}),"Selected_Merged_PDF.pdf");
-   $("searchStatus").textContent=a.length+" selected PDF(s) merged and downloaded.";
- }catch(e){
-   $("searchStatus").textContent="Merge error: "+e.message;
- }
- refresh();
-};
-$("searchBtn").onclick=async()=>{
- found=[];searchStopped=false;$("searchRows").innerHTML="";let fs=[...$("searchPdfs").files],ef=$("searchExcel").files[0];
- if(!fs.length||!ef)return alert("Please select PDF files and Excel file.");$("searchBtn").disabled=true;$("searchStop").disabled=false;
- try{let wb=XLSX.read(await ef.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""}),names=rows.map(r=>String(r[0]||"").trim()).filter(Boolean);if(names[0]&&/proposal|search/i.test(names[0]))names.shift();let f=0,n=0;
- for(let name of names){if(searchStopped)break;let file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;let item={file,checked:false};found.push(item);let c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;refresh()};tr.innerHTML="<td></td><td>"+name+"</td><td class='good'>FOUND</td><td>"+file.name+"</td>";tr.cells[0].appendChild(c)}else{n++;tr.innerHTML="<td></td><td>"+name+"</td><td class='bad'>NOT FOUND</td><td></td>"}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processed ${f+n} | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=searchStopped?" | STOPPED":" | COMPLETE"}catch(e){$("searchStatus").textContent="Error: "+e.message}$("searchBtn").disabled=false;$("searchStop").disabled=true;refresh()};
+let compressed=[];
+$("compressStop").onclick=()=>window.compStop=true;
+$("compressBtn").onclick=async()=>{if(!allowed())return;let fs=[...$("compressFiles").files];if(!fs.length)return alert("Select PDFs.");window.compStop=false;compressed=[];$("compressRows").innerHTML="";$("compressBtn").disabled=true;for(let i=0;i<fs.length;i++){if(window.compStop)break;let f=fs[i],tr=document.createElement("tr");tr.innerHTML=`<td>${f.name}</td><td>${sz(f.size)}</td><td>Processing...</td><td><div class=pbar><span>0%</span></div></td><td>...</td><td></td>`;$("compressRows").appendChild(tr);let [dpi,q]=profiles[$("quality").value],b=await compress(f,dpi,q,p=>{tr.cells[3].firstElementChild.firstElementChild.style.width=p+"%";tr.cells[3].firstElementChild.firstElementChild.textContent=p+"%";$("compressStatus").textContent=`Processing ${Math.round(((i+p/100)/fs.length)*100)}% — ${f.name}`});let out=b.size<f.size?b:f,name=f.name.replace(/\.pdf$/i,"")+"_compressed.pdf";compressed.push({name,blob:out});tr.cells[2].textContent=sz(out.size);tr.cells[4].textContent=out===f?"Original kept":out.size<=Number($("target").value)*1048576?"TARGET OK":"Reduced";tr.cells[4].className=out===f?"bad":"good";let d=document.createElement("button");d.textContent="⬇️ Download";d.className="green";d.onclick=()=>download(out,name);tr.cells[5].appendChild(d);await new Promise(r=>setTimeout(r,0))}$("compressStatus").textContent=`Processing 100% — ${compressed.length} PDF(s) ready.`;$("compressBtn").disabled=false};
+$("compressZip").onclick=async()=>{let z=new JSZip();compressed.forEach(x=>z.file(x.name,x.blob));download(await z.generateAsync({type:"blob"}),"Compressed_PDFs.zip");$("compressStatus").textContent="Processing 100% — ZIP downloaded."};
+$("compressMerge").onclick=async()=>{let o=await PDFDocument.create();for(let x of compressed){let s=await PDFDocument.load(await x.blob.arrayBuffer());(await o.copyPages(s,s.getPageIndices())).forEach(p=>o.addPage(p))}download(new Blob([await o.save()],{type:"application/pdf"}),"Compressed_Merged_PDF.pdf");$("compressStatus").textContent="Processing 100% — Merge downloaded."};
 
-const profiles={
-  // Text Priority: high DPI keeps printed/scanned text much sharper.
-  // Images may lose quality before text becomes difficult to read.
-  extreme:[
-    {dpi:150,q:.72},{dpi:135,q:.66},{dpi:120,q:.60},{dpi:105,q:.54},{dpi:90,q:.48}
-  ],
-  strong:[
-    {dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70},{dpi:130,q:.64},{dpi:115,q:.58},{dpi:100,q:.52}
-  ],
-  medium:[
-    {dpi:200,q:.86},{dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70},{dpi:130,q:.64}
-  ],
-  light:[
-    {dpi:220,q:.90},{dpi:200,q:.86},{dpi:180,q:.82},{dpi:160,q:.76},{dpi:145,q:.70}
-  ]
-};
-
-// Text-first compression strategy.
-// First try lossless PDF re-save so selectable text, fonts and vectors are preserved.
-// Only if that does not reduce the file do we rasterize pages at high DPI.
-async function makeCompressed(file,opt,onProgress){
-  const data=await file.arrayBuffer();
-
-  try{
-    const src=await PDFDocument.load(data,{ignoreEncryption:true});
-    const out=await PDFDocument.create();
-    const pages=await out.copyPages(src,src.getPageIndices());
-    pages.forEach(p=>out.addPage(p));
-    const bytes=await out.save({useObjectStreams:true,addDefaultPage:false,compress:true});
-    const lossless=new Blob([bytes],{type:"application/pdf"});
-    if(lossless.size<file.size) return lossless;
-  }catch(e){
-    console.warn("Lossless optimization skipped:",e);
-  }
-
-  if(onProgress) onProgress(5);
-  const pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;
-  let doc=null;
-
-  for(let pno=1;pno<=pdf.numPages;pno++){
-    if(onProgress) onProgress(10 + Math.round(((pno-1) / pdf.numPages) * 85));
-    await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
-    const page=await pdf.getPage(pno);
-    const scale=opt.dpi/72;
-    const viewport=page.getViewport({scale});
-    const pageW=viewport.width/scale;
-    const pageH=viewport.height/scale;
-
-    const canvas=document.createElement("canvas");
-    canvas.width=Math.max(1,Math.ceil(viewport.width));
-    canvas.height=Math.max(1,Math.ceil(viewport.height));
-    const ctx=canvas.getContext("2d",{alpha:false});
-    ctx.fillStyle="#fff";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    await page.render({canvasContext:ctx,viewport,background:"white"}).promise;
-    if(onProgress) onProgress(10 + Math.round((pno / pdf.numPages) * 85));
-    await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
-    const jpg=canvas.toDataURL("image/jpeg",opt.q);
-
-    if(!doc){
-      doc=new jsPDF({unit:"pt",format:[pageW,pageH],compress:true,putOnlyUsedFonts:true});
-    }else{
-      doc.addPage([pageW,pageH]);
-    }
-    doc.addImage(jpg,"JPEG",0,0,pageW,pageH,undefined,"FAST");
-    canvas.width=1;
-    canvas.height=1;
-    await new Promise(r=>setTimeout(r,0));
-  }
-  if(onProgress) onProgress(98);
-  const result=doc.output("blob");
-  if(onProgress) onProgress(100);
-  return result;
-}
-
-let compStop=false, compressedResults=[];
-$("compressStop").onclick=()=>{
-  compStop=true;
-  $("compressStatus").textContent="Stopping after current PDF...";
-};
-function refreshCompressionActions(){
-  const has=compressedResults.length>0;
-  $("compressZip").disabled=!has;
-  $("compressMerge").disabled=!has;
-}
-$("compressZip").onclick=async()=>{
-  if(!compressedResults.length)return;
-  $("compressStatus").textContent="Creating ZIP...";
-  const z=new JSZip();
-  compressedResults.forEach(x=>z.file(x.name,x.blob));
-  const blob=await z.generateAsync({
-    type:"blob",
-    compression:"DEFLATE",
-    compressionOptions:{level:9}
-  });
-  const targetLabel=$("target").selectedOptions[0].textContent.trim().replace(/\s+/g,"_");
-  download(blob,`Compressed_PDFs_${targetLabel}.zip`);
-  $("compressStatus").textContent=`ZIP downloaded — ${compressedResults.length} PDF(s).`;
-};
-$("compressMerge").onclick=async()=>{
-  if(!compressedResults.length)return;
-  $("compressMerge").disabled=true;
-  try{
-    $("compressStatus").textContent="Merging compressed PDFs...";
-    const out=await PDFDocument.create();
-    for(let i=0;i<compressedResults.length;i++){
-      $("compressStatus").textContent=`Merging ${i+1} of ${compressedResults.length}: ${compressedResults[i].name}`;
-      const src=await PDFDocument.load(await compressedResults[i].blob.arrayBuffer(),{ignoreEncryption:true});
-      const pages=await out.copyPages(src,src.getPageIndices());
-      pages.forEach(p=>out.addPage(p));
-      await new Promise(r=>setTimeout(r,0));
-    }
-    const bytes=await out.save({useObjectStreams:true});
-    download(new Blob([bytes],{type:"application/pdf"}),"Compressed_Merged_PDF.pdf");
-    $("compressStatus").textContent=`Merged PDF downloaded — ${compressedResults.length} PDF(s).`;
-  }catch(e){
-    $("compressStatus").textContent="Merge error: "+e.message;
-  }
-  refreshCompressionActions();
-};
-$("compressBtn").onclick=async()=>{
- if(!operationAllowed())return;
-  let files=[...$("compressFiles").files];
-  if(!files.length)return alert("Select PDFs.");
-  let target=Number($("target").value)*1048576,prof=$("quality").value;
-  compStop=false;
-  compressedResults=[];
-  $("compressBtn").disabled=true;
-  $("compressStop").disabled=false;
-  $("compressRows").innerHTML="";
-  refreshCompressionActions();
-  let done=0;
-  try{
-    for(let file of files){
-      if(compStop)break;
-      let tr=document.createElement("tr");
-      tr.innerHTML=`<td>${file.name}</td><td>${sizeLabel(file.size)}</td><td>Processing...</td><td><div class="pwrap"><div class="pbar"><span style="width:0%">0%</span></div></div></td><td>...</td><td></td>`;
-      $("compressRows").appendChild(tr);
-
-      let best=null;
-      const attempts=profiles[prof].length;
-      let attemptNo=0;
-      for(let opt of profiles[prof]){
-        if(compStop)break;
-        attemptNo++;
-        const pct=Math.min(95,Math.round(((attemptNo-1)/attempts)*10));
-        tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${pct}%">${pct}%</span></div></div>`;
-        await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
-        let b=await makeCompressed(file,opt,p=>{
-          tr.cells[3].innerHTML=`<div class="pwrap"><div class="pbar"><span style="width:${p}%">${p}%</span></div></div>`;
-        });
-        if(!best||b.size<best.size)best=b;
-        if(b.size<=target){
-          tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';
-          break;
-        }
-        await new Promise(r=>setTimeout(r,0));
-      }
-
-      // Critical protection: never replace an original with a larger compressed PDF.
-      let finalBlob=best && best.size<file.size ? best : file;
-      let finalName=file.name.replace(/\.pdf$/i,"")+"_compressed.pdf";
-      compressedResults.push({name:finalName,blob:finalBlob});
-
-      tr.cells[2].textContent=sizeLabel(finalBlob.size);
-      tr.cells[3].innerHTML='<div class="pwrap"><div class="pbar"><span style="width:100%">100%</span></div></div>';
-      const downloadBtn=document.createElement("button");
-      downloadBtn.type="button";
-      downloadBtn.className="green";
-      downloadBtn.textContent="⬇️ Download";
-      downloadBtn.style.marginTop="0";
-      downloadBtn.style.padding="7px 10px";
-      downloadBtn.style.fontSize="12px";
-      downloadBtn.onclick=()=>download(finalBlob,finalName);
-      tr.cells[5].appendChild(downloadBtn);
-      if(finalBlob===file){
-        tr.cells[4].textContent="Original kept";
-        tr.cells[4].className="bad";
-      }else if(finalBlob.size<=target){
-        tr.cells[4].textContent="TARGET OK";
-        tr.cells[4].className="good";
-      }else{
-        tr.cells[4].textContent="Reduced, target not reached";
-        tr.cells[4].className="good";
-      }
-
-      done++;
-      $("compressStatus").textContent=`Compressed ${done}/${files.length}`;
-      await new Promise(r=>setTimeout(r,0));
-    }
-    $("compressStatus").textContent=done
-      ? `DONE — ${done} PDF(s) ready. Choose ZIP or MERGE below.`
-      : "No file processed.";
-  }catch(e){
-    $("compressStatus").textContent="Error: "+e.message;
-  }
-  $("compressBtn").disabled=false;
-  $("compressStop").disabled=true;
-  refreshCompressionActions();
-};
-$("mergeBtn").onclick=async()=>{
- let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");if(!operationAllowed())return;$("mergeBtn").disabled=true;try{let out=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Merging ${i+1}/${fs.length}`;let src=await PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(src,src.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save({useObjectStreams:true})],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete."}catch(e){$("mergeStatus").textContent="Error: "+e.message}$("mergeBtn").disabled=false};
-
-$("zipBtn").onclick=async()=>{
- let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");if(!operationAllowed())return;let z=new JSZip();fs.forEach(f=>z.file(f.name,f));$("zipStatus").textContent="Creating ZIP...";let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`};
+$("mergeBtn").onclick=async()=>{if(!allowed())return;let fs=[...$("mergeFiles").files];if(fs.length<2)return alert("Select at least 2 PDFs.");$("mergeBtn").disabled=true;let o=await PDFDocument.create();for(let i=0;i<fs.length;i++){ $("mergeStatus").textContent=`Processing ${Math.round(i/fs.length*100)}% — Merging ${i+1}/${fs.length}`;let s=await PDFDocument.load(await fs[i].arrayBuffer());(await o.copyPages(s,s.getPageIndices())).forEach(p=>o.addPage(p));await new Promise(r=>setTimeout(r,0))}let n=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(n))n+=".pdf";download(new Blob([await o.save()],{type:"application/pdf"}),n);$("mergeStatus").textContent="Processing 100% — Merge complete.";$("mergeBtn").disabled=false};
+$("zipBtn").onclick=async()=>{if(!allowed())return;let fs=[...$("zipFiles").files];if(!fs.length)return alert("Select PDFs.");$("zipBtn").disabled=true;let z=new JSZip();for(let i=0;i<fs.length;i++){z.file(fs[i].name,fs[i]);$("zipStatus").textContent=`Processing ${Math.round(i/fs.length*90)}% — Adding ${i+1}/${fs.length}`;await new Promise(r=>setTimeout(r,0))}let n=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(n))n+=".zip";$("zipStatus").textContent="Processing 95% — Creating ZIP...";download(await z.generateAsync({type:"blob"}),n);$("zipStatus").textContent="Processing 100% — ZIP downloaded.";$("zipBtn").disabled=false};
 </script>
-    <footer style="
-    text-align:center;
-    width:100%;
-    padding:20px 10px;
-    margin-top:30px;
-    background:#ffffff;
-    border-top:1px solid #e5e7eb;
-    box-sizing:border-box;
-    font-size:13px;
-    line-height:1.7;
-">
-    <div>
-        <span style="color:#86efac;font-weight:600;">
-            © 2026 PDF Utility Hub
-        </span>
-        <span style="color:#98a2b3;"> • </span>
-        <strong style="color:#16a34a;font-weight:800;">
-            Build by Anwar
-        </strong>
-    </div>
-
-    <div style="color:#98a2b3;font-size:11px;margin-top:5px;">
-        © All Rights Reserved • Use of this website is subject to applicable terms.
-        Files are processed locally in your browser whenever supported.
-    </div>
-</footer>
-</body></html>
+</body>
+</html>

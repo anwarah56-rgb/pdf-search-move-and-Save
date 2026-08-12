@@ -373,6 +373,8 @@ let found = [];
 let stopSearch = false;
 let compressedResults = [];
 let selectedPlan = '6';
+let resetRequestCount = 0;
+let lastResetTime = 0;
 
 const PAGE_LIMITS = { 
     guest: 20, 
@@ -419,7 +421,7 @@ window.switchToRegister = function() {
 };
 
 // =============================================
-// FORGOT PASSWORD - DIRECT SEND WITHOUT EMAIL CHECK
+// FORGOT PASSWORD - WITH RATE LIMITING
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -427,6 +429,7 @@ window.showForgotPassword = function() {
     document.getElementById('loginStatus').style.display = 'none';
     document.getElementById('resetEmail').value = '';
     document.getElementById('resetEmail').focus();
+    resetRequestCount = 0;
 };
 
 window.hideForgotPassword = function() {
@@ -448,6 +451,19 @@ window.sendResetLink = async function() {
         return;
     }
     
+    // Rate limiting - prevent too many requests
+    const now = Date.now();
+    if (now - lastResetTime < 30000) { // 30 seconds cooldown
+        showLoginStatus('⏳ Please wait 30 seconds before sending another request.', 'info');
+        return;
+    }
+    
+    resetRequestCount++;
+    if (resetRequestCount > 3) {
+        showLoginStatus('❌ Too many requests. Please try again after 15 minutes.', 'error');
+        return;
+    }
+    
     try {
         const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
         const originalText = btn.textContent;
@@ -455,10 +471,10 @@ window.sendResetLink = async function() {
         btn.textContent = '⏳ Sending...';
         showLoginStatus('⏳ Sending reset link to ' + email + '...', 'info');
         
-        // DIRECT SEND - WITHOUT CHECKING IF EMAIL EXISTS
-        // Firebase automatically checks and sends email if account exists
+        // Send reset email
         await sendPasswordResetEmail(auth, email);
         
+        lastResetTime = now;
         showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
         document.getElementById('resetEmail').value = '';
         btn.disabled = false;
@@ -475,7 +491,7 @@ window.sendResetLink = async function() {
         btn.textContent = '📧 Send Reset Link';
         
         if (error.code === 'auth/too-many-requests') {
-            showLoginStatus('❌ Too many requests. Please try again later.', 'error');
+            showLoginStatus('❌ Too many requests. Please wait 15 minutes and try again.', 'error');
         } else if (error.code === 'auth/user-not-found') {
             showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
         } else {
@@ -1079,8 +1095,7 @@ window.createZip = async function() {
 
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);
-console.log('📧 Forgot Password: Enter email to receive reset link');
-console.log('⚠️ If you get "No account found", please register first.');
+console.log('📧 Forgot Password: Rate limiting enabled - 30 seconds cooldown');
 </script>
 </body>
 </html>

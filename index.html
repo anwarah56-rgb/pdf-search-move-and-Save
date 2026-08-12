@@ -12,11 +12,11 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#172033;transition:background 0.5s}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#172033}
 button,input,select{font:inherit}
 
 /* Admin Theme */
-body.admin-theme{background:#e8edf5;color:#172033}
+body.admin-theme{background:#e8edf5}
 body.admin-theme .header{background:linear-gradient(135deg,#1a2a4a,#2a4a7a 62%,#3a5a8a)!important}
 body.admin-theme .stat,body.admin-theme .tools-card,body.admin-theme .activity-card,body.admin-theme .workspace .box,
 body.admin-theme .tool,body.admin-theme .dropdown,body.admin-theme .drop-head,body.admin-theme .drop-item,
@@ -38,23 +38,14 @@ body.admin-theme .authbar .light{background:#2a4a7a;color:#ffffff}
 body.admin-theme .footer{background:#1a2a4a}
 body.admin-theme .footer b{color:#6a9ad0}
 body.admin-theme .drop-item:hover{background:#e8edf5}
-body.admin-theme .drop-item.danger{color:#dc2626}
 body.admin-theme .modal-tools button{background:#e8edf5;color:#344054}
 body.admin-theme .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
-body.admin-theme .qr-box{background:#ffffff;border-color:#d0d8e0}
-body.admin-theme .qr-box small{color:#667085}
 body.admin-theme .premium-banner{background:linear-gradient(110deg,#e8f0ff,#f0e8ff);border-color:#c0d0e8}
 body.admin-theme .premium-banner h2{color:#172033}
 body.admin-theme .premium-banner p{color:#475467}
-body.admin-theme .modal-actions button[style*="background:#e5e7eb"]{background:#d0d8e0!important;color:#172033!important}
-body.admin-theme .premium-overlay .modal-card{background:#ffffff}
-body.admin-theme .premium-overlay .modal-card p{color:#172033}
-body.admin-theme .premium-overlay .modal-card div[style*="background:#f8fafc"]{background:#f0f4fa!important;color:#172033}
-body.admin-theme .premium-overlay .modal-card div[style*="background:#f8fafc"] span{color:#172033}
-body.admin-theme .admin-title{color:#1a4a7a}
 
 /* Premium Theme */
-body.premium-theme{background:#f0ecf5;color:#172033}
+body.premium-theme{background:#f0ecf5}
 body.premium-theme .header{background:linear-gradient(135deg,#2a1a4a,#4a2a7a 62%,#5a3a8a)!important}
 body.premium-theme .stat,body.premium-theme .tools-card,body.premium-theme .activity-card,body.premium-theme .workspace .box,
 body.premium-theme .tool,body.premium-theme .dropdown,body.premium-theme .drop-head,body.premium-theme .drop-item,
@@ -76,23 +67,13 @@ body.premium-theme .authbar .light{background:#4a2a7a;color:#ffffff}
 body.premium-theme .footer{background:#2a1a4a}
 body.premium-theme .footer b{color:#9a7ad0}
 body.premium-theme .drop-item:hover{background:#f0ecf5}
-body.premium-theme .drop-item.danger{color:#dc2626}
 body.premium-theme .modal-tools button{background:#f0ecf5;color:#344054}
 body.premium-theme .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
-body.premium-theme .qr-box{background:#ffffff;border-color:#d8d0e0}
-body.premium-theme .qr-box small{color:#667085}
 body.premium-theme .premium-banner{background:linear-gradient(110deg,#f0e8ff,#f8e8f0);border-color:#d8c0e8}
 body.premium-theme .premium-banner h2{color:#172033}
 body.premium-theme .premium-banner p{color:#475467}
-body.premium-theme .modal-actions button[style*="background:#e5e7eb"]{background:#d8d0e0!important;color:#172033!important}
-body.premium-theme .premium-overlay .modal-card{background:#ffffff}
-body.premium-theme .premium-overlay .modal-card p{color:#172033}
-body.premium-theme .premium-overlay .modal-card div[style*="background:#f8fafc"]{background:#f4f0fa!important;color:#172033}
-body.premium-theme .premium-overlay .modal-card div[style*="background:#f8fafc"] span{color:#172033}
-body.premium-theme .premium-title{color:#4a2a7a}
 
-/* Common Styles */
-.header{background:linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8);color:#fff;padding:16px 28px 28px;transition:background 0.5s}
+.header{background:linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8);color:#fff;padding:16px 28px 28px}
 .header-inner,.container{max-width:1450px;margin:auto}
 .top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
 .brandbox{display:flex;align-items:center;gap:12px}
@@ -101,16 +82,15 @@ body.premium-theme .premium-title{color:#4a2a7a}
 .tag{font-size:13px;opacity:.85}
 .builder{background:#16a34a;border-radius:22px;padding:8px 15px;font-weight:800;font-size:13px}
 .authbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.authbar button{border:1px solid #ffffff55;background:#ffffff12;color:#fff;padding:9px 13px;border-radius:9px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap;transition:all 0.2s}
+.authbar button{border:1px solid #ffffff55;background:#ffffff12;color:#fff;padding:9px 13px;border-radius:9px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap}
 .authbar .light{background:#fff;color:#12325f}
-.authbar .light:hover{opacity:0.85}
 .user-menu{position:relative;display:none}
 .user-btn{display:flex;align-items:center;gap:8px;background:#ffffff12;color:#fff;border:1px solid #ffffff44;border-radius:10px;padding:8px 11px;cursor:pointer;font-weight:800}
 .role{background:#7c3aed;color:#fff;border-radius:20px;padding:3px 7px;font-size:10px}
 .dropdown{display:none;position:absolute;right:0;top:46px;width:260px;background:#fff;color:#172033;border-radius:14px;box-shadow:0 18px 50px #0003;padding:10px;z-index:30}
 .dropdown.show{display:block}
 .drop-head{padding:10px;border-bottom:1px solid #e5e7eb;margin-bottom:6px}
-.drop-email{font-size:12px;color:#667085;overflow:hidden;text-overflow:ellipsis}
+.drop-email{font-size:12px;color:#667085}
 .drop-item{width:100%;border:0;background:#fff;text-align:left;padding:11px;border-radius:9px;cursor:pointer;font-size:13px}
 .drop-item:hover{background:#f3f6fb}
 .drop-item.danger{color:#dc2626}
@@ -119,7 +99,7 @@ body.premium-theme .premium-title{color:#4a2a7a}
 .hero p{margin:5px 0 0;opacity:.84;font-size:13px}
 .container{padding:0 18px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
-.stat,.tools-card,.activity-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 6px 22px #12264d0b;transition:background 0.5s,border-color 0.5s}
+.stat,.tools-card,.activity-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 6px 22px #12264d0b}
 .stat{padding:17px;display:flex;gap:12px}
 .icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none}
 .i-blue{background:#e8f0ff}
@@ -134,7 +114,7 @@ body.premium-theme .premium-title{color:#4a2a7a}
 .tools-card{padding:20px;margin-top:15px}
 .section-title{font-size:20px;font-weight:850;margin:0 0 15px}
 .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.tool{border:1px solid #e2e6ee;border-radius:15px;padding:16px;transition:border-color 0.5s,background 0.5s}
+.tool{border:1px solid #e2e6ee;border-radius:15px;padding:16px}
 .tool h3{margin:8px 0 6px;font-size:16px}
 .tool p{margin:0;color:#667085;font-size:12px;line-height:1.55;min-height:38px}
 .tool button{margin-top:13px;width:100%;border:0;border-radius:9px;color:#fff;padding:10px;font-weight:800;cursor:pointer}
@@ -144,19 +124,18 @@ body.premium-theme .premium-title{color:#4a2a7a}
 .orangebtn{background:#f28a17}
 .workspace{display:none;margin-top:15px}
 .workspace.active{display:block}
-.workspace .box{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px;transition:background 0.5s,border-color 0.5s}
+.workspace .box{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.tab{border:1px solid #dbe1ea;background:#fff;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer;color:#475467;transition:all 0.3s}
+.tab{border:1px solid #dbe1ea;background:#fff;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer;color:#475467}
 .tab.active{background:#eaf1ff;color:#1463e6;border-color:#bfd3ff}
 label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}
-input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;outline:none;transition:border-color 0.3s}
-input:focus,select:focus{border-color:#1463e6;box-shadow:0 0 0 3px rgba(20,99,230,0.1)}
+input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;outline:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .action{width:100%;border:0;border-radius:9px;padding:11px;color:#fff;font-weight:850;cursor:pointer;margin-top:9px}
-.status{padding:11px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px;margin-top:11px;font-size:13px;transition:background 0.5s}
+.status{padding:11px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px;margin-top:11px;font-size:13px}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 th,td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:12px;text-align:left}
-th{background:#f8fafc;transition:background 0.5s}
+th{background:#f8fafc}
 .good{color:#16a34a;font-weight:800}
 .bad{color:#dc2626;font-weight:800}
 .lower{display:grid;grid-template-columns:1fr;gap:15px;margin-top:15px}
@@ -164,12 +143,12 @@ th{background:#f8fafc;transition:background 0.5s}
 .activity-table{width:100%;border-collapse:collapse}
 .activity-table td,.activity-table th{padding:10px;border-bottom:1px solid #e5e7eb;font-size:12px}
 .complete{color:#16a34a;font-weight:800}
-.premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;transition:background 0.5s,border-color 0.5s}
+.premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
 .premium-banner h2{margin:0 0 5px;font-size:19px}
 .premium-banner p{margin:0;color:#667085;font-size:12px}
 .plan-actions{display:flex;gap:8px;flex-wrap:wrap}
 .plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
-.footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px;transition:background 0.5s}
+.footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px}
 .footer b{color:#69d18a}
 .modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center;padding:20px;overflow:auto}
 .modal.show{display:flex}
@@ -181,7 +160,7 @@ th{background:#f8fafc;transition:background 0.5s}
 .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
 .register-container{max-width:420px;margin:0 auto;padding:5px 0}
 .register-container .social-login{display:flex;gap:12px;justify-content:center;margin:16px 0}
-.register-container .social-btn{flex:1;padding:10px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+.register-container .social-btn{flex:1;padding:10px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
 .register-container .social-btn:hover{background:#f8fafc;border-color:#1463e6}
 .register-container .social-btn .icon{font-size:18px}
 .register-container .social-btn.facebook .icon{color:#1877f2}
@@ -189,14 +168,14 @@ th{background:#f8fafc;transition:background 0.5s}
 .register-container .social-btn.sso .icon{color:#6d42e8}
 .register-container .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0}
 .register-container .auth-divider hr{flex:1;border:0;border-top:1px solid #e5e7eb}
-.register-container .auth-divider span{color:#667085;font-size:12px;white-space:nowrap}
+.register-container .auth-divider span{color:#667085;font-size:12px}
 .register-container .form-group{margin-bottom:14px}
 .register-container .form-group label{display:block;font-size:12px;font-weight:600;color:#475467;margin-bottom:4px}
-.register-container .form-group input{width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px;background:#fff;outline:none;transition:border-color 0.3s}
+.register-container .form-group input{width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px;background:#fff;outline:none}
 .register-container .form-group input:focus{border-color:#1463e6;box-shadow:0 0 0 3px rgba(20,99,230,0.1)}
-.register-container .register-btn{width:100%;padding:12px;background:#1463e6;color:#fff;border:0;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;transition:background 0.2s;margin-top:6px}
+.register-container .register-btn{width:100%;padding:12px;background:#1463e6;color:#fff;border:0;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;margin-top:6px}
 .register-container .register-btn:hover{background:#0b4fb0}
-.register-container .register-btn:disabled{opacity:0.6;cursor:not-allowed}
+.register-container .register-btn:disabled{opacity:0.6}
 .register-container .login-link{text-align:center;margin-top:14px;font-size:13px;color:#475467}
 .register-container .login-link a{color:#1463e6;font-weight:600;cursor:pointer;text-decoration:none}
 .register-container .login-link a:hover{text-decoration:underline}
@@ -213,8 +192,20 @@ th{background:#f8fafc;transition:background 0.5s}
 .user-badge.premium{background:#4a2a7a;color:#fff}
 .user-badge.registered{background:#1463e6;color:#fff}
 .user-badge.guest{background:#6b7280;color:#fff}
-.admin-title{color:#1a4a7a}
-.premium-title{color:#4a2a7a}
+.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0;word-break:break-all}
+.qr-wrap{display:flex;justify-content:center;margin:12px 0}
+.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}
+.qr-box small{display:block;color:#667085;margin-top:7px}
+.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}
+.payment-plan strong{font-size:18px}
+.premium-overlay{position:fixed;inset:0;background:#0b173bcc;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.premium-overlay.show{display:flex}
+.premium-overlay .modal-card{max-width:380px;width:100%}
+.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}
+.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}
+.payment-minimized .modal-card>*:not(.modal-head){display:none}
+.payment-minimized .modal-head h3{font-size:13px}
+.payment-minimized .modal-tools button{width:28px;height:28px}
 @media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.modal{padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:13px}.modal-head h3{font-size:16px}.modal-tools button{width:32px;height:32px}.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
 </style>
@@ -226,19 +217,19 @@ th{background:#f8fafc;transition:background 0.5s}
 <div class="builder">⭐ Build by Anwar</div>
 <div class="authbar">
 <div id="userMenu" class="user-menu">
-<button id="userBtn" class="user-btn">👤 <span id="userShort">Account</span> <span id="role" class="role">GUEST</span> ▾</button>
+<button id="userBtn" class="user-btn" onclick="toggleDropdown()">👤 <span id="userShort">Account</span> <span id="role" class="role">GUEST</span> ▾</button>
 <div id="dropdown" class="dropdown">
 <div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div><div style="margin-top:6px" id="dropPlan">👤 GUEST — 20 PAGES</div></div>
-<button class="drop-item" id="profileBtn">⚙️ Account Settings</button>
-<button class="drop-item" id="premiumMenuBtn">⭐ Upgrade to Premium</button>
-<button class="drop-item" id="adminBtn" style="display:none">🛡️ Admin Dashboard</button>
-<button class="drop-item danger" id="logoutBtn">🚪 Logout</button>
+<button class="drop-item" onclick="openProfile()">⚙️ Account Settings</button>
+<button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade to Premium</button>
+<button class="drop-item" id="adminBtn" style="display:none" onclick="alert('Admin Dashboard')">🛡️ Admin Dashboard</button>
+<button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
 </div></div>
 <div class="auth-buttons">
-<button id="loginBtn" class="light">🔐 Login</button>
-<button id="registerBtn" class="light">✨ Register</button>
-<button id="adminLoginBtn" class="light">🛡️ Admin Login</button>
-<button id="settingsBtn" class="light">⚙️ Settings</button>
+<button id="loginBtn" class="light" onclick="showLogin()">🔐 Login</button>
+<button id="registerBtn" class="light" onclick="showRegister()">✨ Register</button>
+<button id="adminLoginBtn" class="light" onclick="showAdminLogin()">🛡️ Admin Login</button>
+<button id="settingsBtn" class="light" onclick="openSettings()">⚙️ Settings</button>
 </div>
 </div></div>
 <div class="hero"><h1 id="welcomeTitle">👋 Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, compress, merge and ZIP your PDF files directly in your browser.</p></div>
@@ -254,22 +245,22 @@ th{background:#f8fafc;transition:background 0.5s}
 
 <section class="premium-banner">
 <div><h2>⭐ Go Premium — Work Without Limits</h2><p>👤 Guest: 20 pages &nbsp;•&nbsp; 📝 Registered: 50 pages &nbsp;•&nbsp; ⭐ Premium/Admin: Unlimited</p></div>
-<div class="plan-actions"><button class="plan-btn purplebtn" id="premium6">₹400 / 6 Months</button><button class="plan-btn orangebtn" id="premium12">₹700 / 1 Year</button></div>
+<div class="plan-actions"><button class="plan-btn purplebtn" onclick="openPayment('6')">₹400 / 6 Months</button><button class="plan-btn orangebtn" onclick="openPayment('12')">₹700 / 1 Year</button></div>
 </section>
 
 <section class="tools-card"><h2 class="section-title">PDF Workspace</h2><div class="tools">
-<div class="tool"><div class="icon i-blue">🔎</div><h3>PDF Search</h3><p>Search PDF files from Excel using names or proposals.</p><button class="bluebtn" data-open="search">Open Tool →</button></div>
-<div class="tool"><div class="icon i-green">🗜️</div><h3>Compress PDF</h3><p>Compress multiple PDF files toward your selected target size.</p><button class="greenbtn" data-open="compress">Open Tool →</button></div>
-<div class="tool"><div class="icon i-purple">🔗</div><h3>Merge PDF</h3><p>Merge multiple PDF files into one PDF document.</p><button class="purplebtn" data-open="merge">Open Tool →</button></div>
-<div class="tool"><div class="icon i-orange">📦</div><h3>Create ZIP</h3><p>Create a ZIP file from multiple PDF files.</p><button class="orangebtn" data-open="zip">Open Tool →</button></div>
+<div class="tool"><div class="icon i-blue">🔎</div><h3>PDF Search</h3><p>Search PDF files from Excel using names or proposals.</p><button class="bluebtn" onclick="openTool('search')">Open Tool →</button></div>
+<div class="tool"><div class="icon i-green">🗜️</div><h3>Compress PDF</h3><p>Compress multiple PDF files toward your selected target size.</p><button class="greenbtn" onclick="openTool('compress')">Open Tool →</button></div>
+<div class="tool"><div class="icon i-purple">🔗</div><h3>Merge PDF</h3><p>Merge multiple PDF files into one PDF document.</p><button class="purplebtn" onclick="openTool('merge')">Open Tool →</button></div>
+<div class="tool"><div class="icon i-orange">📦</div><h3>Create ZIP</h3><p>Create a ZIP file from multiple PDF files.</p><button class="orangebtn" onclick="openTool('zip')">Open Tool →</button></div>
 </div></section>
 
 <section class="workspace" id="workspace"><div class="box">
-<div class="tabs"><button class="tab active" data-tool="search">🔎 Search</button><button class="tab" data-tool="compress">🗜️ Compress</button><button class="tab" data-tool="merge">🔗 Merge</button><button class="tab" data-tool="zip">📦 ZIP</button></div>
-<div id="tool-search"><h2>Search PDFs from Excel</h2><label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls"><div class="grid2"><button class="action bluebtn" id="searchBtn">START SEARCH</button><button class="action" style="background:#dc2626" id="searchStop" disabled>STOP</button></div><div class="grid2"><button class="action greenbtn" id="searchZip" disabled>DOWNLOAD SELECTED ZIP</button><button class="action purplebtn" id="searchMerge" disabled>MERGE SELECTED</button></div><div id="searchStatus" class="status">Ready</div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></div>
-<div id="tool-compress" style="display:none"><h2>Compress Multiple PDFs</h2><label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple><div class="grid2"><div><label>Target Maximum Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div><div><label>Quality</label><select id="quality"><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div></div><div class="grid2"><button class="action orangebtn" id="compressBtn">COMPRESS ALL</button><button class="action" style="background:#dc2626" id="compressStop" disabled>STOP</button></div><div class="grid2"><button class="action greenbtn" id="compressZip" disabled>DOWNLOAD COMPRESSED ZIP</button><button class="action purplebtn" id="compressMerge" disabled>MERGE COMPRESSED</button></div><div id="compressStatus" class="status">Ready — Select PDF files.</div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></div>
-<div id="tool-merge" style="display:none"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple><label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf"><button class="action purplebtn" id="mergeBtn">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div></div>
-<div id="tool-zip" style="display:none"><h2>Create ZIP from PDFs</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple><label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip"><button class="action greenbtn" id="zipBtn">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready — Select PDF files.</div></div>
+<div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
+<div id="tool-search"><h2>Search PDFs from Excel</h2><label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls"><div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">DOWNLOAD SELECTED ZIP</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">MERGE SELECTED</button></div><div id="searchStatus" class="status">Ready</div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></div>
+<div id="tool-compress" style="display:none"><h2>Compress Multiple PDFs</h2><label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple><div class="grid2"><div><label>Target Maximum Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div><div><label>Quality</label><select id="quality"><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div></div><div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">DOWNLOAD COMPRESSED ZIP</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">MERGE COMPRESSED</button></div><div id="compressStatus" class="status">Ready — Select PDF files.</div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></div>
+<div id="tool-merge" style="display:none"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple><label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf"><button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div></div>
+<div id="tool-zip" style="display:none"><h2>Create ZIP from PDFs</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple><label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip"><button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready — Select PDF files.</div></div>
 </div></section>
 
 <section class="lower"><div class="activity-card"><h2 class="section-title">Recent Activity</h2><table class="activity-table"><thead><tr><th>Tool</th><th>Details</th><th>Status</th><th>Time</th></tr></thead><tbody id="activityBody"><tr><td>—</td><td>No activity yet</td><td>—</td><td>—</td></tr></tbody></table></div></section>
@@ -278,170 +269,159 @@ th{background:#f8fafc;transition:background 0.5s}
 
 <!-- REGISTER MODAL -->
 <div class="modal" id="authModal"><div class="modal-card">
-<div class="modal-head"><h3>📝 Create your account</h3><div class="modal-tools"><button id="authClose" class="close-pay">✕</button></div></div>
+<div class="modal-head"><h3>📝 Create your account</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
 <div class="register-container">
   <div class="social-login">
-    <button class="social-btn facebook" id="fbLoginBtn"><span class="icon">f</span> Facebook</button>
-    <button class="social-btn google" id="googleRegisterBtn"><span class="icon">G</span> Google</button>
-    <button class="social-btn sso" id="ssoLoginBtn"><span class="icon">🔑</span> SSO</button>
+    <button class="social-btn facebook" onclick="showRegStatus('Facebook login coming soon!','info')"><span class="icon">f</span> Facebook</button>
+    <button class="social-btn google" onclick="showRegStatus('Google login coming soon!','info')"><span class="icon">G</span> Google</button>
+    <button class="social-btn sso" onclick="showRegStatus('SSO login coming soon!','info')"><span class="icon">🔑</span> SSO</button>
   </div>
   <div class="auth-divider"><hr><span>or sign up with email</span><hr></div>
   <div class="form-group"><label>Full Name</label><input id="regName" type="text" placeholder="Enter your full name"></div>
   <div class="form-group"><label>Email Address</label><input id="regEmail" type="email" placeholder="Enter your email address"></div>
   <div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Create a password (min 6 characters)"></div>
   <div id="regStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" id="regSubmitBtn">📝 Sign up</button>
-  <div class="login-link">Already member? <a id="switchToLogin">Log in</a></div>
+  <button class="register-btn" onclick="handleRegister()">📝 Sign up</button>
+  <div class="login-link">Already member? <a onclick="switchToLogin()">Log in</a></div>
   <div class="terms-text">By creating an account, you agree to PDF Utility Hub <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></div>
 </div>
 </div></div>
 
 <!-- LOGIN MODAL -->
 <div class="modal" id="loginModal"><div class="modal-card">
-<div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button id="loginModalClose" class="close-pay">✕</button></div></div>
+<div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
 <div class="register-container">
   <div class="social-login">
-    <button class="social-btn facebook" id="fbLoginBtn2"><span class="icon">f</span> Facebook</button>
-    <button class="social-btn google" id="googleLoginBtn2"><span class="icon">G</span> Google</button>
-    <button class="social-btn sso" id="ssoLoginBtn2"><span class="icon">🔑</span> SSO</button>
+    <button class="social-btn facebook" onclick="showLoginStatus('Facebook login coming soon!','info')"><span class="icon">f</span> Facebook</button>
+    <button class="social-btn google" onclick="showLoginStatus('Google login coming soon!','info')"><span class="icon">G</span> Google</button>
+    <button class="social-btn sso" onclick="showLoginStatus('SSO login coming soon!','info')"><span class="icon">🔑</span> SSO</button>
   </div>
   <div class="auth-divider"><hr><span>or login with email</span><hr></div>
   <div class="form-group"><label>Email Address</label><input id="loginEmail" type="email" placeholder="Enter your email address"></div>
   <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter your password"></div>
-  <div style="text-align:right;margin-bottom:12px"><a id="forgotPassLink" style="color:#1463e6;cursor:pointer;font-size:12px;text-decoration:none">🔑 Forgot Password?</a></div>
+  <div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#1463e6;cursor:pointer;font-size:12px">🔑 Forgot Password?</a></div>
   <div id="forgotBox" style="display:none;margin-bottom:12px">
     <div class="form-group"><label>Email for reset</label><input id="resetEmail" type="email" placeholder="Enter your email"></div>
-    <button id="sendResetBtn" class="register-btn" style="background:#f28a17">📧 Send Reset Link</button>
+    <button class="register-btn" style="background:#f28a17" onclick="sendResetLink()">📧 Send Reset Link</button>
   </div>
   <div id="loginStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" id="loginSubmitBtn">🔐 Login</button>
-  <div class="login-link">Don't have an account? <a id="switchToRegister">Sign up</a></div>
+  <button class="register-btn" onclick="handleLogin()">🔐 Login</button>
+  <div class="login-link">Don't have an account? <a onclick="switchToRegister()">Sign up</a></div>
 </div>
 </div></div>
 
 <!-- Settings Modal -->
-<div class="modal" id="settingsModal"><div class="modal-card"><div class="modal-head"><h3>⚙️ Settings</h3><div class="modal-tools"><button id="closeSettings" class="close-pay">✕</button></div></div><label>Country</label><select id="settingsCountry"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><button id="saveSettings" class="action greenbtn">SAVE SETTINGS</button><div id="settingsMsg" class="status">Choose your country and save.</div></div></div>
+<div class="modal" id="settingsModal"><div class="modal-card"><div class="modal-head"><h3>⚙️ Settings</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div><label>Country</label><select id="settingsCountry"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><button class="action greenbtn" onclick="saveSettings()">SAVE SETTINGS</button><div id="settingsMsg" class="status">Choose your country and save.</div></div></div>
 
-<div class="modal" id="profileModal"><div class="modal-card"><h3>⚙️ Account Settings</h3><label>Country</label><select id="countrySelect"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><div class="modal-actions"><button id="saveProfile" class="greenbtn">Save</button><button id="closeProfile" style="background:#e5e7eb">Close</button></div></div></div>
+<div class="modal" id="profileModal"><div class="modal-card"><h3>⚙️ Account Settings</h3><label>Country</label><select id="countrySelect"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="greenbtn" onclick="saveProfile()">Save</button><button style="background:#e5e7eb;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer" onclick="hideAllModals()">Close</button></div></div></div>
 
-<div class="modal" id="paymentModal"><div class="modal-card" id="paymentCard"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button id="minPayment" title="Minimize">—</button><button id="closePaymentTop" class="close-pay" title="Close">✕</button></div></div><div id="paymentDetails"></div><label>UPI ID</label><div class="upi" id="upiText">md.anwar18@ybl</div><div class="qr-wrap"><div class="qr-box"><div id="upiQr"></div><small>Scan to pay with any UPI app</small></div></div><div class="modal-actions"><button id="copyUpi" class="greenbtn">COPY UPI</button><button id="upiPay" class="purplebtn">OPEN UPI APP</button></div><label>Transaction ID / UTR</label><input id="utr" placeholder="Enter payment transaction ID"><button id="submitPayment" class="action bluebtn">SUBMIT PAYMENT FOR APPROVAL</button><div id="paymentMsg" class="status">Payment will be activated after admin verification.</div><button id="closePayment" class="action" style="background:#e5e7eb;color:#111">Close</button></div></div>
+<div class="modal" id="paymentModal"><div class="modal-card" id="paymentCard"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button onclick="toggleMinimize()">—</button><button class="close-pay" onclick="hideAllModals()">✕</button></div></div><div id="paymentDetails"></div><label>UPI ID</label><div class="upi" id="upiText">md.anwar18@ybl</div><div class="qr-wrap"><div class="qr-box"><div id="upiQr"></div><small>Scan to pay with any UPI app</small></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="greenbtn" onclick="copyUPI()">COPY UPI</button><button class="purplebtn" onclick="openUPIApp()">OPEN UPI APP</button></div><label>Transaction ID / UTR</label><input id="utr" placeholder="Enter payment transaction ID"><button class="action bluebtn" onclick="submitPayment()">SUBMIT PAYMENT FOR APPROVAL</button><div id="paymentMsg" class="status">Payment will be activated after admin verification.</div><button class="action" style="background:#e5e7eb;color:#111" onclick="hideAllModals()">Close</button></div></div>
 
-<div class="premium-overlay" id="premiumPopup"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Required</h3><div class="modal-tools"><button id="closePremiumPopup" class="close-pay">✕</button></div></div><p style="font-size:14px;color:#475467;margin:12px 0">You have reached your page limit.</p><div style="background:#f8fafc;border-radius:12px;padding:16px;margin:12px 0"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>👤 Guest</span><span>20 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>📝 Registered</span><span>50 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>⭐ Premium</span><span>♾️ Unlimited</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#1a4a7a;font-weight:800"><span>👑 Admin</span><span>♾️ Unlimited</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0"><button id="popupPremium6" class="action purplebtn">₹400 / 6 Months</button><button id="popupPremium12" class="action orangebtn">₹700 / 1 Year</button></div><button id="popupClose" class="action" style="background:#e5e7eb;color:#111">Close</button></div></div>
+<div class="premium-overlay" id="premiumPopup"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Required</h3><div class="modal-tools"><button class="close-pay" onclick="hidePremiumPopup()">✕</button></div></div><p style="font-size:14px;color:#475467;margin:12px 0">You have reached your page limit.</p><div style="background:#f8fafc;border-radius:12px;padding:16px;margin:12px 0"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>👤 Guest</span><span>20 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>📝 Registered</span><span>50 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>⭐ Premium</span><span>♾️ Unlimited</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#1a4a7a;font-weight:800"><span>👑 Admin</span><span>♾️ Unlimited</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0"><button class="action purplebtn" onclick="openPayment('6');hidePremiumPopup()">₹400 / 6 Months</button><button class="action orangebtn" onclick="openPayment('12');hidePremiumPopup()">₹700 / 1 Year</button></div><button class="action" style="background:#e5e7eb;color:#111" onclick="hidePremiumPopup()">Close</button></div></div>
 
-<script>
-// =============================================
-// COMPLETE JAVASCRIPT
-// =============================================
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+  }
+}
+</script>
 
-const $ = id => document.getElementById(id);
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, updateProfile, signOut,
+  sendPasswordResetEmail
+} from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
-// ====== USER STATE ======
-let currentUser = null;
-let userRole = 'guest'; // guest, registered, premium, admin
-let pageUsage = 0;
-const PAGE_LIMITS = {
-    guest: 20,
-    registered: 50,
-    premium: Infinity,
-    admin: Infinity
+const firebaseConfig = {
+  apiKey: "AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",
+  authDomain: "pdf-utility-hu.firebaseapp.com",
+  projectId: "pdf-utility-hu",
+  storageBucket: "pdf-utility-hu.firebasestorage.app",
+  messagingSenderId: "838702125905",
+  appId: "1:838702125905:web:8f2d2f7e52e291bfbd7970",
+  measurementId: "G-BZCFEZS2SE"
 };
 
-// ====== MODAL FUNCTIONS ======
-function showRegisterModal() {
-    $('authModal').classList.add('show');
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-function showLoginModal() {
-    $('loginModal').classList.add('show');
-}
+// =============================================
+// 👑 ADMIN UID - YOUR UID IS ADDED HERE
+// =============================================
+const ADMIN_UIDS = [
+  "O2TjdGUFfdaET03CLusJehrgsNu2"  // Your UID
+];
+// =============================================
 
-function hideAllModals() {
+// =============================================
+// GLOBAL VARIABLES
+// =============================================
+let currentUser = null;
+let currentRole = 'guest';
+let pageUsage = 0;
+let found = [];
+let stopSearch = false;
+let compressedResults = [];
+let selectedPlan = '6';
+
+const PAGE_LIMITS = { 
+    guest: 20, 
+    registered: 50, 
+    premium: Infinity, 
+    admin: Infinity 
+};
+
+const ROLE_DISPLAY = {
+    guest: { label: '👤 GUEST', badge: 'guest', note: '20 pages limit', plan: 'Free' },
+    registered: { label: '📝 REGISTERED', badge: 'registered', note: '50 pages limit', plan: 'Free' },
+    premium: { label: '⭐ PREMIUM', badge: 'premium', note: '♾️ Unlimited Access', plan: '♾️ Unlimited' },
+    admin: { label: '👑 ADMIN', badge: 'admin', note: '♾️ Unlimited Access', plan: '♾️ Unlimited' }
+};
+
+// =============================================
+// MAKE FUNCTIONS GLOBAL FOR HTML onclick
+// =============================================
+window.showRegister = function() { 
+    document.getElementById('authModal').classList.add('show'); 
+};
+
+window.showLogin = function() { 
+    document.getElementById('loginModal').classList.add('show'); 
+};
+
+window.showAdminLogin = function() { 
+    showLogin(); 
+    showLoginStatus('🔐 Enter admin credentials from Firebase', 'info');
+};
+
+window.hideAllModals = function() {
     document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
-}
+};
 
-// ====== UPDATE UI ======
-function updateUI() {
-    const isLoggedIn = currentUser !== null;
-    const role = userRole;
-    const limit = PAGE_LIMITS[role] || 20;
-    const isUnlimited = limit === Infinity;
-    
-    // Show/Hide buttons
-    $('loginBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
-    $('registerBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
-    $('adminLoginBtn').style.display = (isLoggedIn && role === 'admin') ? 'none' : 'inline-block';
-    $('userMenu').style.display = isLoggedIn ? 'block' : 'none';
-    
-    // User info
-    const displayName = currentUser?.name || currentUser?.email?.split('@')[0] || 'Account';
-    $('userShort').textContent = displayName;
-    $('userEmail').textContent = currentUser?.email || '';
-    
-    // Role badge
-    const roleMap = {
-        'admin': { label: '👑 ADMIN', badge: 'admin', note: '♾️ Unlimited Access' },
-        'premium': { label: '⭐ PREMIUM', badge: 'premium', note: '♾️ Unlimited Access' },
-        'registered': { label: '📝 REGISTERED', badge: 'registered', note: '📝 50 pages limit' },
-        'guest': { label: '👤 GUEST', badge: 'guest', note: '👤 20 pages limit' }
-    };
-    const roleInfo = roleMap[role] || roleMap['guest'];
-    
-    $('accountType').textContent = roleInfo.label;
-    $('accountNote').textContent = roleInfo.note;
-    
-    // Plan
-    $('planValue').textContent = isUnlimited ? '♾️ Unlimited' : 'Free';
-    $('planValue').style.color = isUnlimited ? '#16a34a' : '#172033';
-    $('planNote').textContent = isUnlimited ? '♾️ Unlimited Access' : '₹400 / 6 Months';
-    
-    // Header role
-    const roleDisplay = role === 'admin' ? 'ADMIN' : role === 'premium' ? 'PREMIUM' : role === 'registered' ? 'USER' : 'GUEST';
-    $('role').textContent = roleDisplay;
-    $('role').style.background = role === 'admin' ? '#1a4a7a' : role === 'premium' ? '#4a2a7a' : role === 'registered' ? '#1463e6' : '#6b7280';
-    
-    // Dropdown plan
-    const planText = role === 'admin' ? '👑 ADMIN — UNLIMITED' : 
-                    role === 'premium' ? '⭐ PREMIUM — UNLIMITED' : 
-                    role === 'registered' ? '📝 REGISTERED — 50 PAGES' : '👤 GUEST — 20 PAGES';
-    $('dropPlan').textContent = planText;
-    
-    // Premium menu
-    $('premiumMenuBtn').style.display = (role === 'premium' || role === 'admin') ? 'none' : 'block';
-    $('adminBtn').style.display = role === 'admin' ? 'block' : 'none';
-    
-    // Dropdown name with badge
-    const badge = role === 'admin' ? ' <span class="user-badge admin">👑 ADMIN</span>' :
-                  role === 'premium' ? ' <span class="user-badge premium">⭐ PREMIUM</span>' :
-                  role === 'registered' ? ' <span class="user-badge registered">📝 USER</span>' :
-                  ' <span class="user-badge guest">👤 GUEST</span>';
-    $('dropName').innerHTML = displayName + badge;
-    
-    // Pages
-    $('opsValue').innerHTML = isUnlimited ? `${pageUsage} <small>/ ♾️</small>` : `${pageUsage} <small>/ ${limit}</small>`;
-    $('opsBar').style.width = isUnlimited ? '100%' : Math.min(100, (pageUsage / limit) * 100) + '%';
-    $('opsNote').textContent = isUnlimited ? '♾️ Unlimited pages' : `${Math.max(0, limit - pageUsage)} pages remaining`;
-    
-    // Welcome message
-    if (isLoggedIn) {
-        const welcomeEmoji = role === 'admin' ? '👑' : role === 'premium' ? '⭐' : '👤';
-        $('welcomeTitle').textContent = `${welcomeEmoji} Welcome, ${displayName}!`;
-        $('welcomeText').textContent = `🔐 Logged in as ${currentUser.email} | ${role.toUpperCase()} | ${isUnlimited ? '♾️ Unlimited' : role === 'registered' ? '📝 50 pages' : '👤 20 pages'}`;
-    } else {
-        $('welcomeTitle').textContent = '👋 Welcome to PDF Utility Hub';
-        $('welcomeText').textContent = 'Search, compress, merge and ZIP your PDF files directly in your browser.';
-    }
-    
-    // Apply theme
-    document.body.classList.remove('admin-theme', 'premium-theme');
-    if (role === 'admin') document.body.classList.add('admin-theme');
-    else if (role === 'premium') document.body.classList.add('premium-theme');
-}
+window.switchToLogin = function() { 
+    hideAllModals(); 
+    showLogin(); 
+};
 
-// ====== REGISTER ======
-function handleRegister() {
-    const name = $('regName').value.trim();
-    const email = $('regEmail').value.trim();
-    const password = $('regPassword').value;
+window.switchToRegister = function() { 
+    hideAllModals(); 
+    showRegister(); 
+};
+
+// =============================================
+// FIREBASE AUTH - REGISTER
+// =============================================
+window.handleRegister = async function() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
     
     if (!name || !email || !password) {
         showRegStatus('Please fill all fields.', 'error');
@@ -452,325 +432,425 @@ function handleRegister() {
         return;
     }
     
-    // Save user
-    currentUser = { name: name, email: email, password: password };
-    userRole = 'registered';
-    pageUsage = 0;
-    
-    showRegStatus('✅ Registration successful! Welcome, ' + name + '!', 'success');
-    $('regName').value = '';
-    $('regEmail').value = '';
-    $('regPassword').value = '';
-    
-    setTimeout(() => {
-        hideAllModals();
-        updateUI();
-        addActivity('Register', `${email} (REGISTERED)`);
-    }, 1500);
-}
+    try {
+        const btn = document.querySelector('#authModal .register-btn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Creating...';
+        showRegStatus('Creating account...', 'info');
+        
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await updateProfile(user, { displayName: name });
+        
+        await setDoc(doc(db, 'users', user.uid), {
+            name: name,
+            email: email,
+            role: 'registered',
+            createdAt: new Date()
+        });
+        
+        showRegStatus('✅ Account created successfully! Welcome, ' + name + '!', 'success');
+        btn.textContent = '✅ Done!';
+        
+        setTimeout(() => {
+            hideAllModals();
+            btn.disabled = false;
+            btn.textContent = '📝 Sign up';
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+        }, 1500);
+        
+    } catch (error) {
+        showRegStatus('❌ ' + error.message, 'error');
+        const btn = document.querySelector('#authModal .register-btn');
+        btn.disabled = false;
+        btn.textContent = '📝 Sign up';
+    }
+};
 
-function showRegStatus(message, type) {
-    const el = $('regStatus');
-    el.textContent = message;
-    el.className = 'status-msg ' + type;
-    el.style.display = 'block';
-}
-
-// ====== LOGIN ======
-function handleLogin() {
-    const email = $('loginEmail').value.trim();
-    const password = $('loginPassword').value;
+// =============================================
+// FIREBASE AUTH - LOGIN
+// =============================================
+window.handleLogin = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
     
     if (!email || !password) {
         showLoginStatus('Please enter email and password.', 'error');
         return;
     }
     
-    // Check if admin
-    if (email === 'admin@pdfhub.com' && password === 'admin123') {
-        currentUser = { name: 'Admin', email: email };
-        userRole = 'admin';
+    try {
+        const btn = document.querySelector('#loginModal .register-btn:last-of-type');
+        btn.disabled = true;
+        btn.textContent = '⏳ Logging in...';
+        showLoginStatus('Logging in...', 'info');
+        
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        showLoginStatus('✅ Login successful! Welcome, ' + (user.displayName || email.split('@')[0]) + '!', 'success');
+        btn.textContent = '✅ Done!';
+        
+        setTimeout(() => {
+            hideAllModals();
+            btn.disabled = false;
+            btn.textContent = '🔐 Login';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }, 1500);
+        
+    } catch (error) {
+        showLoginStatus('❌ ' + error.message, 'error');
+        const btn = document.querySelector('#loginModal .register-btn:last-of-type');
+        btn.disabled = false;
+        btn.textContent = '🔐 Login';
+    }
+};
+
+// =============================================
+// FIREBASE AUTH - LOGOUT
+// =============================================
+window.logoutUser = async function() {
+    try {
+        await signOut(auth);
+        document.getElementById('dropdown').classList.remove('show');
+        addActivity('Logout', (currentUser?.email || 'User') + ' logged out');
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+};
+
+// =============================================
+// FIREBASE AUTH - FORGOT PASSWORD
+// =============================================
+window.showForgotPassword = function() {
+    document.getElementById('forgotBox').style.display = 'block';
+    document.querySelector('#loginModal .register-btn:last-of-type').style.display = 'none';
+};
+
+window.sendResetLink = async function() {
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) {
+        showLoginStatus('Please enter your email address.', 'error');
+        return;
+    }
+    try {
+        await sendPasswordResetEmail(auth, email);
+        showLoginStatus('✅ Password reset link sent to ' + email, 'success');
+        document.getElementById('resetEmail').value = '';
+        setTimeout(() => {
+            document.getElementById('forgotBox').style.display = 'none';
+            document.querySelector('#loginModal .register-btn:last-of-type').style.display = 'block';
+        }, 3000);
+    } catch (error) {
+        showLoginStatus('❌ ' + error.message, 'error');
+    }
+};
+
+// =============================================
+// FIREBASE AUTH STATE
+// =============================================
+onAuthStateChanged(auth, async (user) => {
+    console.log('🔐 Auth state changed:', user ? user.email : 'No user');
+    
+    if (user) {
+        currentUser = user;
+        currentRole = 'registered';
         pageUsage = 0;
-        showLoginStatus('✅ Admin login successful!', 'success');
+        
+        // FIRST CHECK: Is user in admin UID list?
+        if (ADMIN_UIDS.includes(user.uid)) {
+            currentRole = 'admin';
+            console.log('👑✅ ADMIN found in UID list! Email:', user.email);
+        } else {
+            // SECOND CHECK: Check Firestore
+            try {
+                console.log('🔍 Checking admin status in Firestore for:', user.uid);
+                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+                if (adminDoc.exists() && adminDoc.data().active !== false) {
+                    currentRole = 'admin';
+                    console.log('👑✅ ADMIN found in Firestore! Email:', user.email);
+                } else {
+                    // THIRD CHECK: Check premium
+                    console.log('🔍 Checking premium status for:', user.uid);
+                    const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
+                    if (premiumDoc.exists() && premiumDoc.data().active !== false && 
+                        premiumDoc.data().validTill?.toDate?.() > new Date()) {
+                        currentRole = 'premium';
+                        console.log('⭐ PREMIUM user confirmed! Email:', user.email);
+                    } else {
+                        currentRole = 'registered';
+                        console.log('📝 REGISTERED user. Email:', user.email);
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Error checking user role:', error);
+                currentRole = 'registered';
+            }
+        }
+        
+        console.log('✅ Final Role:', currentRole);
+        updateUI();
+        addActivity('Login', user.email + ' (' + currentRole.toUpperCase() + ')');
+        
     } else {
-        currentUser = { name: email.split('@')[0], email: email };
-        userRole = 'registered';
+        currentUser = null;
+        currentRole = 'guest';
         pageUsage = 0;
-        showLoginStatus('✅ Login successful! Welcome back!', 'success');
+        console.log('👤 Guest user');
+        updateUI();
+    }
+});
+
+// =============================================
+// UPDATE UI
+// =============================================
+function updateUI() {
+    console.log('🔄 Updating UI... Role:', currentRole);
+    
+    const isLoggedIn = currentUser !== null;
+    const role = currentRole;
+    const limit = PAGE_LIMITS[role] || 20;
+    const isUnlimited = limit === Infinity;
+    const roleInfo = ROLE_DISPLAY[role] || ROLE_DISPLAY['guest'];
+    
+    // Show/Hide buttons
+    document.getElementById('loginBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
+    document.getElementById('registerBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
+    document.getElementById('adminLoginBtn').style.display = (isLoggedIn && role === 'admin') ? 'none' : 'inline-block';
+    document.getElementById('userMenu').style.display = isLoggedIn ? 'block' : 'none';
+    
+    // User info
+    const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Account';
+    document.getElementById('userShort').textContent = displayName;
+    document.getElementById('userEmail').textContent = currentUser?.email || '';
+    
+    // Account Type
+    document.getElementById('accountType').textContent = roleInfo.label;
+    document.getElementById('accountNote').textContent = roleInfo.note;
+    
+    // Plan
+    document.getElementById('planValue').textContent = roleInfo.plan;
+    document.getElementById('planValue').style.color = isUnlimited ? '#16a34a' : '#172033';
+    document.getElementById('planNote').textContent = isUnlimited ? '♾️ Unlimited Access' : '₹400 / 6 Months';
+    
+    // Header Role
+    const roleDisplay = role === 'admin' ? 'ADMIN' : 
+                       role === 'premium' ? 'PREMIUM' : 
+                       role === 'registered' ? 'USER' : 'GUEST';
+    document.getElementById('role').textContent = roleDisplay;
+    document.getElementById('role').style.background = role === 'admin' ? '#1a4a7a' : 
+                                                      role === 'premium' ? '#4a2a7a' : 
+                                                      role === 'registered' ? '#1463e6' : '#6b7280';
+    
+    // Dropdown Plan
+    const planText = role === 'admin' ? '👑 ADMIN — UNLIMITED' : 
+                    role === 'premium' ? '⭐ PREMIUM — UNLIMITED' : 
+                    role === 'registered' ? '📝 REGISTERED — 50 PAGES' : '👤 GUEST — 20 PAGES';
+    document.getElementById('dropPlan').textContent = planText;
+    
+    document.getElementById('premiumMenuBtn').style.display = (role === 'premium' || role === 'admin') ? 'none' : 'block';
+    document.getElementById('adminBtn').style.display = role === 'admin' ? 'block' : 'none';
+    
+    // Dropdown Name with Badge
+    const badge = role === 'admin' ? ' <span class="user-badge admin">👑 ADMIN</span>' :
+                  role === 'premium' ? ' <span class="user-badge premium">⭐ PREMIUM</span>' :
+                  role === 'registered' ? ' <span class="user-badge registered">📝 USER</span>' :
+                  ' <span class="user-badge guest">👤 GUEST</span>';
+    document.getElementById('dropName').innerHTML = displayName + badge;
+    
+    // Pages
+    document.getElementById('opsValue').innerHTML = isUnlimited ? 
+        pageUsage + ' <small>/ ♾️</small>' : 
+        pageUsage + ' <small>/ ' + limit + '</small>';
+    document.getElementById('opsBar').style.width = isUnlimited ? '100%' : Math.min(100, (pageUsage / limit) * 100) + '%';
+    document.getElementById('opsNote').textContent = isUnlimited ? '♾️ Unlimited pages' : 
+        Math.max(0, limit - pageUsage) + ' pages remaining';
+    
+    // Welcome
+    if (isLoggedIn) {
+        const welcomeEmoji = role === 'admin' ? '👑' : 
+                            role === 'premium' ? '⭐' : '👤';
+        document.getElementById('welcomeTitle').textContent = welcomeEmoji + ' Welcome, ' + displayName + '!';
+        document.getElementById('welcomeText').textContent = '🔐 Logged in as ' + currentUser.email + 
+            ' | ' + role.toUpperCase() + 
+            ' | ' + (isUnlimited ? '♾️ Unlimited' : 
+                    role === 'registered' ? '📝 50 pages' : '👤 20 pages');
+    } else {
+        document.getElementById('welcomeTitle').textContent = '👋 Welcome to PDF Utility Hub';
+        document.getElementById('welcomeText').textContent = 'Search, compress, merge and ZIP your PDF files directly in your browser.';
     }
     
-    $('loginEmail').value = '';
-    $('loginPassword').value = '';
+    // Theme
+    document.body.classList.remove('admin-theme', 'premium-theme');
+    if (role === 'admin') document.body.classList.add('admin-theme');
+    else if (role === 'premium') document.body.classList.add('premium-theme');
     
-    setTimeout(() => {
-        hideAllModals();
-        updateUI();
-        addActivity('Login', `${email} (${userRole.toUpperCase()})`);
-    }, 1500);
+    console.log('✅ UI Updated - Account Type:', document.getElementById('accountType').textContent);
+    console.log('✅ Plan:', document.getElementById('planValue').textContent);
+    console.log('✅ Pages:', document.getElementById('opsValue').innerHTML);
 }
 
-function showLoginStatus(message, type) {
-    const el = $('loginStatus');
+// =============================================
+// STATUS MESSAGES
+// =============================================
+function showRegStatus(message, type) {
+    const el = document.getElementById('regStatus');
     el.textContent = message;
     el.className = 'status-msg ' + type;
     el.style.display = 'block';
 }
 
-// ====== LOGOUT ======
-function handleLogout() {
-    const email = currentUser?.email || 'User';
-    currentUser = null;
-    userRole = 'guest';
-    pageUsage = 0;
-    $('dropdown').classList.remove('show');
-    addActivity('Logout', `${email} logged out`);
-    updateUI();
+function showLoginStatus(message, type) {
+    const el = document.getElementById('loginStatus');
+    el.textContent = message;
+    el.className = 'status-msg ' + type;
+    el.style.display = 'block';
 }
 
-// ====== FORGOT PASSWORD ======
-function showForgotPassword() {
-    $('forgotBox').style.display = 'block';
-    $('loginSubmitBtn').style.display = 'none';
-}
-
-function sendResetLink() {
-    const email = $('resetEmail').value.trim();
-    if (!email) {
-        showLoginStatus('Please enter your email address.', 'error');
-        return;
-    }
-    showLoginStatus('✅ Password reset link sent to ' + email, 'success');
-    $('resetEmail').value = '';
-    setTimeout(() => {
-        $('forgotBox').style.display = 'none';
-        $('loginSubmitBtn').style.display = 'block';
-    }, 3000);
-}
-
-// ====== ACTIVITY ======
+// =============================================
+// ACTIVITY
+// =============================================
 function addActivity(tool, detail) {
-    const b = $('activityBody');
+    const b = document.getElementById('activityBody');
     if (b.children.length === 1 && b.children[0].children[1]?.textContent === 'No activity yet') {
         b.innerHTML = '';
     }
     const tr = document.createElement('tr');
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    tr.innerHTML = `<td>${tool}</td><td>${detail}</td><td class="complete">✓ Completed</td><td>${time}</td>`;
+    tr.innerHTML = '<td>' + tool + '</td><td>' + detail + '</td><td class="complete">✓ Completed</td><td>' + time + '</td>';
     b.prepend(tr);
 }
 
-// ====== PREMIUM PAYMENT ======
-function openPayment(plan) {
-    const amount = plan === '6' ? '400' : '700';
-    const duration = plan === '6' ? '6 Months' : '1 Year';
-    $('paymentDetails').innerHTML = `<div class="payment-plan"><strong>₹${amount}</strong> / ${duration}<br><small>Unlimited PDF tools</small></div>`;
-    $('upiText').textContent = 'md.anwar18@ybl';
-    $('paymentMsg').textContent = 'Payment will be activated after admin verification.';
-    $('paymentModal').classList.add('show');
-    $('upiQr').innerHTML = '';
-    new QRCode($('upiQr'), {
-        text: `upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=${amount}&cu=INR`,
-        width: 190,
-        height: 190
-    });
-}
-
-// ====== TOOL OPEN ======
-function openTool(t) {
-    $('workspace').classList.add('active');
-    document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tool === t));
-    ['search', 'compress', 'merge', 'zip'].forEach(x => $('tool-' + x).style.display = x === t ? 'block' : 'none');
-    $('workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 // =============================================
-// EVENT LISTENERS
+// DROPDOWN
 // =============================================
+window.toggleDropdown = function() {
+    document.getElementById('dropdown').classList.toggle('show');
+};
 
-// Login Button
-$('loginBtn').addEventListener('click', showLoginModal);
-
-// Register Button
-$('registerBtn').addEventListener('click', showRegisterModal);
-
-// Admin Login Button
-$('adminLoginBtn').addEventListener('click', function() {
-    showLoginModal();
-    showLoginStatus('🔐 Enter admin credentials (admin@pdfhub.com / admin123)', 'info');
-});
-
-// Close buttons
-$('authClose').addEventListener('click', hideAllModals);
-$('loginModalClose').addEventListener('click', hideAllModals);
-
-// Switch between modals
-$('switchToLogin').addEventListener('click', function(e) {
-    e.preventDefault();
-    hideAllModals();
-    showLoginModal();
-});
-$('switchToRegister').addEventListener('click', function(e) {
-    e.preventDefault();
-    hideAllModals();
-    showRegisterModal();
-});
-
-// Register submit
-$('regSubmitBtn').addEventListener('click', handleRegister);
-
-// Login submit
-$('loginSubmitBtn').addEventListener('click', handleLogin);
-
-// Enter key support
-$('regPassword').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleRegister();
-});
-$('loginPassword').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleLogin();
-});
-
-// Forgot password
-$('forgotPassLink').addEventListener('click', showForgotPassword);
-$('sendResetBtn').addEventListener('click', sendResetLink);
-
-// Logout
-$('logoutBtn').addEventListener('click', handleLogout);
-
-// User dropdown
-$('userBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    $('dropdown').classList.toggle('show');
-});
 document.addEventListener('click', function(e) {
-    const dropdown = $('dropdown');
-    const userMenu = $('userMenu');
+    const dropdown = document.getElementById('dropdown');
+    const userMenu = document.getElementById('userMenu');
     if (dropdown && userMenu && !userMenu.contains(e.target)) {
         dropdown.classList.remove('show');
     }
 });
 
-// Settings
-$('settingsBtn').addEventListener('click', function() {
+// =============================================
+// SETTINGS & PROFILE
+// =============================================
+window.openSettings = function() {
     const c = localStorage.getItem('pdfhub_country') || 'India';
-    $('settingsCountry').value = c;
-    $('settingsModal').classList.add('show');
-});
-$('closeSettings').addEventListener('click', function() {
-    $('settingsModal').classList.remove('show');
-});
-$('saveSettings').addEventListener('click', function() {
-    const c = $('settingsCountry').value;
-    localStorage.setItem('pdfhub_country', c);
-    $('countryValue').textContent = c;
-    $('settingsMsg').textContent = '✅ Settings saved successfully.';
-    $('settingsMsg').style.color = '#166534';
-    setTimeout(() => $('settingsModal').classList.remove('show'), 1000);
-});
+    document.getElementById('settingsCountry').value = c;
+    document.getElementById('settingsModal').classList.add('show');
+};
 
-// Profile
-$('profileBtn').addEventListener('click', function() {
-    $('dropdown').classList.remove('show');
+window.saveSettings = function() {
+    const c = document.getElementById('settingsCountry').value;
+    localStorage.setItem('pdfhub_country', c);
+    document.getElementById('countryValue').textContent = c;
+    document.getElementById('settingsMsg').textContent = '✅ Settings saved successfully.';
+    document.getElementById('settingsMsg').style.color = '#166534';
+    setTimeout(() => document.getElementById('settingsModal').classList.remove('show'), 1000);
+};
+
+window.openProfile = function() {
+    document.getElementById('dropdown').classList.remove('show');
     const c = localStorage.getItem('pdfhub_country') || 'India';
-    $('countrySelect').value = c;
-    $('profileModal').classList.add('show');
-});
-$('closeProfile').addEventListener('click', function() {
-    $('profileModal').classList.remove('show');
-});
-$('saveProfile').addEventListener('click', function() {
-    const c = $('countrySelect').value;
-    localStorage.setItem('pdfhub_country', c);
-    $('countryValue').textContent = c;
-    $('profileModal').classList.remove('show');
-});
+    document.getElementById('countrySelect').value = c;
+    document.getElementById('profileModal').classList.add('show');
+};
 
-// Premium
-$('premium6').addEventListener('click', function() { openPayment('6'); });
-$('premium12').addEventListener('click', function() { openPayment('12'); });
-$('premiumMenuBtn').addEventListener('click', function() {
-    $('dropdown').classList.remove('show');
+window.saveProfile = function() {
+    const c = document.getElementById('countrySelect').value;
+    localStorage.setItem('pdfhub_country', c);
+    document.getElementById('countryValue').textContent = c;
+    document.getElementById('profileModal').classList.remove('show');
+};
+
+// =============================================
+// PREMIUM PAYMENT
+// =============================================
+window.openPayment = function(plan) {
+    selectedPlan = plan;
+    const amount = plan === '6' ? '400' : '700';
+    const duration = plan === '6' ? '6 Months' : '1 Year';
+    document.getElementById('paymentDetails').innerHTML = '<div class="payment-plan"><strong>₹' + amount + '</strong> / ' + duration + '<br><small>Unlimited PDF tools</small></div>';
+    document.getElementById('upiText').textContent = 'md.anwar18@ybl';
+    document.getElementById('paymentMsg').textContent = 'Payment will be activated after admin verification.';
+    document.getElementById('paymentModal').classList.add('show');
+    document.getElementById('upiQr').innerHTML = '';
+    new QRCode(document.getElementById('upiQr'), {
+        text: 'upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=' + amount + '&cu=INR',
+        width: 190,
+        height: 190
+    });
+};
+
+window.openPremium = function() {
+    document.getElementById('dropdown').classList.remove('show');
     openPayment('6');
-});
+};
 
-// Payment modal
-$('closePayment').addEventListener('click', function() {
-    $('paymentModal').classList.remove('show');
-});
-$('closePaymentTop').addEventListener('click', function() {
-    $('paymentModal').classList.remove('show');
-});
-$('minPayment').addEventListener('click', function() {
-    $('paymentModal').classList.toggle('payment-minimized');
-});
-$('copyUpi').addEventListener('click', function() {
+window.toggleMinimize = function() {
+    document.getElementById('paymentModal').classList.toggle('payment-minimized');
+};
+
+window.copyUPI = function() {
     navigator.clipboard.writeText('md.anwar18@ybl').then(function() {
-        $('paymentMsg').textContent = '✅ UPI ID copied!';
-        $('paymentMsg').style.color = '#166534';
+        document.getElementById('paymentMsg').textContent = '✅ UPI ID copied!';
+        document.getElementById('paymentMsg').style.color = '#166534';
     });
-});
-$('upiPay').addEventListener('click', function() {
+};
+
+window.openUPIApp = function() {
     const amt = document.querySelector('#paymentDetails .payment-plan strong')?.textContent?.replace('₹', '') || '400';
-    location.href = `upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=${amt}&cu=INR`;
-});
+    location.href = 'upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=' + amt + '&cu=INR';
+};
 
-// Premium popup
-$('closePremiumPopup').addEventListener('click', function() {
-    $('premiumPopup').classList.remove('show');
-});
-$('popupClose').addEventListener('click', function() {
-    $('premiumPopup').classList.remove('show');
-});
-$('popupPremium6').addEventListener('click', function() {
-    $('premiumPopup').classList.remove('show');
-    openPayment('6');
-});
-$('popupPremium12').addEventListener('click', function() {
-    $('premiumPopup').classList.remove('show');
-    openPayment('12');
-});
+window.submitPayment = function() {
+    const utr = document.getElementById('utr').value.trim();
+    if (!utr) {
+        document.getElementById('paymentMsg').textContent = 'Please enter Transaction ID.';
+        document.getElementById('paymentMsg').style.color = '#991b1b';
+        return;
+    }
+    document.getElementById('paymentMsg').textContent = '✅ Payment request submitted. Admin will verify it.';
+    document.getElementById('paymentMsg').style.color = '#166534';
+    document.getElementById('utr').value = '';
+};
 
-// Tool open
-document.querySelectorAll('[data-open]').forEach(function(b) {
-    b.addEventListener('click', function() {
-        openTool(this.dataset.open);
+window.hidePremiumPopup = function() {
+    document.getElementById('premiumPopup').classList.remove('show');
+};
+
+// =============================================
+// TOOL FUNCTIONS
+// =============================================
+window.openTool = function(t) {
+    document.getElementById('workspace').classList.add('active');
+    document.querySelectorAll('.tab').forEach(x => {
+        x.classList.toggle('active', x.textContent.includes(t.charAt(0).toUpperCase() + t.slice(1)));
     });
-});
-document.querySelectorAll('.tab').forEach(function(b) {
-    b.addEventListener('click', function() {
-        openTool(this.dataset.tool);
+    ['search','compress','merge','zip'].forEach(x => {
+        document.getElementById('tool-' + x).style.display = x === t ? 'block' : 'none';
     });
-});
+    document.getElementById('workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
-// Social buttons (placeholder)
-$('fbLoginBtn').addEventListener('click', function() { showRegStatus('Facebook login coming soon!', 'info'); });
-$('fbLoginBtn2').addEventListener('click', function() { showLoginStatus('Facebook login coming soon!', 'info'); });
-$('googleRegisterBtn').addEventListener('click', function() { showRegStatus('Google login coming soon!', 'info'); });
-$('googleLoginBtn2').addEventListener('click', function() { showLoginStatus('Google login coming soon!', 'info'); });
-$('ssoLoginBtn').addEventListener('click', function() { showRegStatus('SSO login coming soon!', 'info'); });
-$('ssoLoginBtn2').addEventListener('click', function() { showLoginStatus('SSO login coming soon!', 'info'); });
-
-// ====== SEARCH TOOL ======
-let found = [];
-let stopSearch = false;
-
-function refreshSearch() {
-    const h = found.some(x => x.checked);
-    $('searchZip').disabled = !h;
-    $('searchMerge').disabled = !h;
-}
-
-$('searchStop').addEventListener('click', function() {
-    stopSearch = true;
-    $('searchStatus').textContent = 'Stopping...';
-});
-
-$('searchBtn').addEventListener('click', async function() {
+// =============================================
+// SEARCH TOOL
+// =============================================
+window.startSearch = async function() {
     found = [];
     stopSearch = false;
-    $('searchRows').innerHTML = '';
-    const fs = [...$('searchPdfs').files];
-    const ef = $('searchExcel').files[0];
+    document.getElementById('searchRows').innerHTML = '';
+    const fs = [...document.getElementById('searchPdfs').files];
+    const ef = document.getElementById('searchExcel').files[0];
     if (!fs.length || !ef) {
         alert('Select PDF files and Excel file.');
         return;
@@ -789,30 +869,41 @@ $('searchBtn').addEventListener('click', async function() {
             const tr = document.createElement('tr');
             if (file) {
                 f++;
-                const item = { file, checked: false };
+                const item = { file: file, checked: false };
                 found.push(item);
-                tr.innerHTML = `<td></td><td>${name}</td><td class="good">✅ FOUND</td><td>${file.name}</td>`;
+                tr.innerHTML = '<td></td><td>' + name + '</td><td class="good">✅ FOUND</td><td>' + file.name + '</td>';
                 const c = document.createElement('input');
                 c.type = 'checkbox';
                 c.onchange = function() { item.checked = c.checked; refreshSearch(); };
                 tr.cells[0].appendChild(c);
             } else {
                 n++;
-                tr.innerHTML = `<td></td><td>${name}</td><td class="bad">❌ NOT FOUND</td><td></td>`;
+                tr.innerHTML = '<td></td><td>' + name + '</td><td class="bad">❌ NOT FOUND</td><td></td>';
             }
-            $('searchRows').appendChild(tr);
-            $('searchStatus').textContent = `Processed ${f + n} | Found ${f} | Not Found ${n}`;
+            document.getElementById('searchRows').appendChild(tr);
+            document.getElementById('searchStatus').textContent = 'Processed ' + (f + n) + ' | Found ' + f + ' | Not Found ' + n;
             await new Promise(r => setTimeout(r, 0));
         }
-        $('searchStatus').textContent += (stopSearch ? ' | STOPPED' : ' | COMPLETE');
-        addActivity('PDF Search', `Found ${f} / ${names.length}`);
+        document.getElementById('searchStatus').textContent += (stopSearch ? ' | STOPPED' : ' | COMPLETE');
+        addActivity('PDF Search', 'Found ' + f + ' / ' + names.length);
     } catch (e) {
-        $('searchStatus').textContent = 'Error: ' + e.message;
+        document.getElementById('searchStatus').textContent = 'Error: ' + e.message;
     }
     refreshSearch();
-});
+};
 
-$('searchZip').addEventListener('click', async function() {
+window.stopSearch = function() {
+    stopSearch = true;
+    document.getElementById('searchStatus').textContent = 'Stopping...';
+};
+
+function refreshSearch() {
+    const h = found.some(x => x.checked);
+    document.getElementById('searchZip').disabled = !h;
+    document.getElementById('searchMerge').disabled = !h;
+}
+
+window.downloadSearchZip = async function() {
     const a = found.filter(x => x.checked);
     if (!a.length) return;
     const z = new JSZip();
@@ -827,9 +918,9 @@ $('searchZip').addEventListener('click', async function() {
     aTag.remove();
     setTimeout(() => URL.revokeObjectURL(url), 3000);
     addActivity('PDF Search', 'Selected PDFs ZIP');
-});
+};
 
-$('searchMerge').addEventListener('click', async function() {
+window.mergeSearchResults = async function() {
     const a = found.filter(x => x.checked);
     if (!a.length) return;
     const out = await PDFDocument.create();
@@ -846,28 +937,33 @@ $('searchMerge').addEventListener('click', async function() {
     aTag.click();
     aTag.remove();
     setTimeout(() => URL.revokeObjectURL(url), 3000);
-    addActivity('PDF Search', `${a.length} PDFs merged`);
-});
+    addActivity('PDF Search', a.length + ' PDFs merged');
+};
 
-// ====== COMPRESS TOOL ======
-let compressedResults = [];
+// =============================================
+// COMPRESS TOOL
+// =============================================
+function size(n) {
+    return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
+}
 
-$('compressBtn').addEventListener('click', async function() {
-    const fs = [...$('compressFiles').files];
+window.stopCompress = function() { /* placeholder */ };
+
+window.compressFiles = async function() {
+    const fs = [...document.getElementById('compressFiles').files];
     if (!fs.length) {
         alert('Select PDFs.');
         return;
     }
-    $('compressRows').innerHTML = '';
+    document.getElementById('compressRows').innerHTML = '';
     compressedResults = [];
     
     try {
         for (const file of fs) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${file.name}</td><td>${size(file.size)}</td><td>⏳ Processing...</td><td>...</td><td></td>`;
-            $('compressRows').appendChild(tr);
+            tr.innerHTML = '<td>' + file.name + '</td><td>' + size(file.size) + '</td><td>⏳ Processing...</td><td>...</td><td></td>';
+            document.getElementById('compressRows').appendChild(tr);
             
-            // Simple compression using pdf-lib
             const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
             const compressed = await pdfDoc.save();
             const blob = new Blob([compressed], { type: 'application/pdf' });
@@ -876,7 +972,7 @@ $('compressBtn').addEventListener('click', async function() {
             tr.cells[2].textContent = size(final.size);
             tr.cells[3].textContent = final === file ? 'Original kept' : '✅ Reduced';
             const name = file.name.replace(/\.pdf$/i, '') + '_compressed.pdf';
-            compressedResults.push({ name, blob: final });
+            compressedResults.push({ name: name, blob: final });
             
             const btn = document.createElement('button');
             btn.textContent = '⬇️ Download';
@@ -893,20 +989,16 @@ $('compressBtn').addEventListener('click', async function() {
             };
             tr.cells[4].appendChild(btn);
         }
-        $('compressStatus').textContent = `✅ DONE — ${compressedResults.length} PDF(s) ready.`;
-        addActivity('Compress PDF', `${compressedResults.length} PDF(s) processed`);
-        $('compressZip').disabled = false;
-        $('compressMerge').disabled = false;
+        document.getElementById('compressStatus').textContent = '✅ DONE — ' + compressedResults.length + ' PDF(s) ready.';
+        addActivity('Compress PDF', compressedResults.length + ' PDF(s) processed');
+        document.getElementById('compressZip').disabled = false;
+        document.getElementById('compressMerge').disabled = false;
     } catch (e) {
-        $('compressStatus').textContent = 'Error: ' + e.message;
+        document.getElementById('compressStatus').textContent = 'Error: ' + e.message;
     }
-});
+};
 
-function size(n) {
-    return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
-}
-
-$('compressZip').addEventListener('click', async function() {
+window.downloadCompressedZip = async function() {
     const z = new JSZip();
     compressedResults.forEach(x => z.file(x.name, x.blob));
     const blob = await z.generateAsync({ type: 'blob' });
@@ -918,9 +1010,9 @@ $('compressZip').addEventListener('click', async function() {
     aTag.click();
     aTag.remove();
     setTimeout(() => URL.revokeObjectURL(url), 3000);
-});
+};
 
-$('compressMerge').addEventListener('click', async function() {
+window.mergeCompressed = async function() {
     const out = await PDFDocument.create();
     for (const x of compressedResults) {
         const s = await PDFDocument.load(await x.blob.arrayBuffer(), { ignoreEncryption: true });
@@ -935,11 +1027,13 @@ $('compressMerge').addEventListener('click', async function() {
     aTag.click();
     aTag.remove();
     setTimeout(() => URL.revokeObjectURL(url), 3000);
-});
+};
 
-// ====== MERGE TOOL ======
-$('mergeBtn').addEventListener('click', async function() {
-    const fs = [...$('mergeFiles').files];
+// =============================================
+// MERGE TOOL
+// =============================================
+window.mergePDFs = async function() {
+    const fs = [...document.getElementById('mergeFiles').files];
     if (fs.length < 2) {
         alert('Select at least 2 PDFs.');
         return;
@@ -950,7 +1044,7 @@ $('mergeBtn').addEventListener('click', async function() {
             const s = await PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption: true });
             (await out.copyPages(s, s.getPageIndices())).forEach(p => out.addPage(p));
         }
-        let name = $('mergeName').value || 'Merged_PDF.pdf';
+        let name = document.getElementById('mergeName').value || 'Merged_PDF.pdf';
         if (!/\.pdf$/i.test(name)) name += '.pdf';
         const blob = new Blob([await out.save()], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -961,23 +1055,25 @@ $('mergeBtn').addEventListener('click', async function() {
         aTag.click();
         aTag.remove();
         setTimeout(() => URL.revokeObjectURL(url), 3000);
-        $('mergeStatus').textContent = '✅ Merge complete.';
-        addActivity('Merge PDF', `${fs.length} files merged`);
+        document.getElementById('mergeStatus').textContent = '✅ Merge complete.';
+        addActivity('Merge PDF', fs.length + ' files merged');
     } catch (e) {
-        $('mergeStatus').textContent = 'Error: ' + e.message;
+        document.getElementById('mergeStatus').textContent = 'Error: ' + e.message;
     }
-});
+};
 
-// ====== ZIP TOOL ======
-$('zipBtn').addEventListener('click', async function() {
-    const fs = [...$('zipFiles').files];
+// =============================================
+// ZIP TOOL
+// =============================================
+window.createZip = async function() {
+    const fs = [...document.getElementById('zipFiles').files];
     if (!fs.length) {
         alert('Select PDFs.');
         return;
     }
     const z = new JSZip();
     fs.forEach(f => z.file(f.name, f));
-    let name = $('zipName').value || 'PDF_Files.zip';
+    let name = document.getElementById('zipName').value || 'PDF_Files.zip';
     if (!/\.zip$/i.test(name)) name += '.zip';
     const blob = await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
     const url = URL.createObjectURL(blob);
@@ -988,15 +1084,13 @@ $('zipBtn').addEventListener('click', async function() {
     aTag.click();
     aTag.remove();
     setTimeout(() => URL.revokeObjectURL(url), 3000);
-    $('zipStatus').textContent = `✅ ${fs.length} PDF(s) saved in ZIP.`;
-    addActivity('Create ZIP', `${fs.length} PDF(s) zipped`);
-});
+    document.getElementById('zipStatus').textContent = '✅ ' + fs.length + ' PDF(s) saved in ZIP.';
+    addActivity('Create ZIP', fs.length + ' PDF(s) zipped');
+};
 
-// ====== INIT ======
-updateUI();
 console.log('✅ PDF Utility Hub loaded successfully!');
-console.log('🔐 Login with: any email/password (min 6 chars)');
-console.log('👑 Admin: admin@pdfhub.com / admin123');
+console.log('👑 Admin UIDs:', ADMIN_UIDS);
+console.log('🔐 Firebase Authentication enabled');
 </script>
 </body>
 </html>

@@ -147,7 +147,6 @@ th{background:#f8fafc}
 .payment-minimized .modal-card>*:not(.modal-head){display:none}
 .payment-minimized .modal-head h3{font-size:13px}
 .payment-minimized .modal-tools button{width:28px;height:28px}
-/* Admin Theme */
 body.admin-theme{background:#e8edf5}
 body.admin-theme .header{background:linear-gradient(135deg,#1a2a4a,#2a4a7a 62%,#3a5a8a)!important}
 body.admin-theme .stat,body.admin-theme .tools-card,body.admin-theme .activity-card,body.admin-theme .workspace .box,
@@ -524,8 +523,12 @@ window.logoutUser = async function() {
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
-    document.querySelector('#loginModal .register-btn:last-of-type').style.display = 'none';
+    // Hide login button temporarily
+    const loginBtn = document.querySelector('#loginModal .register-btn:last-of-type');
+    if (loginBtn) loginBtn.style.display = 'none';
     document.getElementById('loginStatus').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+    document.getElementById('resetEmail').focus();
 };
 
 window.sendResetLink = async function() {
@@ -536,36 +539,55 @@ window.sendResetLink = async function() {
         return;
     }
     
-    // Check if email exists in Firebase
+    // Validate email format
+    if (!email.includes('@') || !email.includes('.')) {
+        showLoginStatus('❌ Please enter a valid email address.', 'error');
+        return;
+    }
+    
     try {
-        showLoginStatus('⏳ Checking email...', 'info');
+        // Show loading
+        const btn = document.querySelector('#forgotBox .register-btn');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '⏳ Sending...';
+        showLoginStatus('⏳ Checking email and sending reset link...', 'info');
         
-        // First check if email exists
+        // First check if email exists in Firebase
         const methods = await fetchSignInMethodsForEmail(auth, email);
         
         if (methods.length === 0) {
-            showLoginStatus('❌ No account found with this email address.', 'error');
+            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
             return;
         }
         
-        // Send reset email
-        showLoginStatus('⏳ Sending reset link...', 'info');
+        // Send password reset email
         await sendPasswordResetEmail(auth, email, {
             url: window.location.href,
             handleCodeInApp: false
         });
         
-        showLoginStatus('✅ Password reset link sent to ' + email + '! Check your inbox/spam folder.', 'success');
+        showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
         document.getElementById('resetEmail').value = '';
+        btn.disabled = false;
+        btn.textContent = originalText;
         
+        // Auto close after 5 seconds
         setTimeout(() => {
             document.getElementById('forgotBox').style.display = 'none';
-            document.querySelector('#loginModal .register-btn:last-of-type').style.display = 'block';
+            const loginBtn = document.querySelector('#loginModal .register-btn:last-of-type');
+            if (loginBtn) loginBtn.style.display = 'block';
             document.getElementById('loginStatus').style.display = 'none';
-        }, 5000);
+        }, 6000);
         
     } catch (error) {
         console.error('Reset error:', error);
+        const btn = document.querySelector('#forgotBox .register-btn');
+        btn.disabled = false;
+        btn.textContent = '📧 Send Reset Link';
+        
         if (error.code === 'auth/too-many-requests') {
             showLoginStatus('❌ Too many requests. Please try again later.', 'error');
         } else if (error.code === 'auth/user-not-found') {
@@ -1119,6 +1141,7 @@ console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UIDs:', ADMIN_UIDS);
 console.log('🔐 Firebase Authentication enabled');
 console.log('📧 Forgot Password: Enter email to receive reset link');
+console.log('📧 Reset link will be sent to your registered email address');
 </script>
 </body>
 </html>

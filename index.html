@@ -158,8 +158,8 @@ async function checkPageLimit(files, action){
 }
 function updateUI(){
  $("accountType").textContent=currentRole.toUpperCase();
- $("planValue").textContent=unlimited?"Unlimited":"Free";
- $("planNote").textContent=unlimited?"Unlimited Access":"Premium: ₹200 / 6 Months";
+ $("planValue").textContent=currentRole==="admin"||currentRole==="premium"?"Unlimited":"Free";
+ $("planNote").textContent=currentRole==="admin"||currentRole==="premium"?"Unlimited Access":"Premium: ₹200 / 6 Months";
  $("role").textContent=currentRole==="admin"?"ADMIN":currentRole==="premium"?"PREMIUM":"FREE";
  $("role").style.background=currentRole==="admin"?"#111827":currentRole==="premium"?"#7c3aed":"#475569";
  $("dropPlan").textContent=(currentRole==="admin"?"ADMIN ACCESS":currentRole==="premium"?"PREMIUM — UNLIMITED":"FREE — 50 OPERATIONS");
@@ -185,6 +185,23 @@ onAuthStateChanged(auth,async u=>{
  $("welcomeTitle").textContent=u?(u.displayName?"Welcome, "+u.displayName+"!":"Welcome!"):"Welcome to PDF Utility Hub";
  updateUI();
 });
+
+// ===== FIX: Toggle dropdown on user button click =====
+$("userBtn").onclick = function(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById("dropdown");
+  dropdown.classList.toggle("show");
+};
+
+// ===== FIX: Close dropdown when clicking outside =====
+document.addEventListener("click", function(e) {
+  const dropdown = document.getElementById("dropdown");
+  const userMenu = document.getElementById("userMenu");
+  if (dropdown && userMenu && !userMenu.contains(e.target)) {
+    dropdown.classList.remove("show");
+  }
+});
+
 function authOpen(mode){
  $("authTitle").textContent=mode==="register"?"Create Account":mode==="admin"?"Admin Login":"Login";
  $("authSubmit").textContent=mode==="register"?"Send OTP":mode==="admin"?"Admin Login":"Login";
@@ -192,120 +209,4 @@ function authOpen(mode){
  $("authName").style.display=mode==="register"?"block":"none";
  $("authPhone").style.display=mode==="register"?"block":"none";
  $("otpBox").style.display="none";
- $("authOtp").value="";
- $("authMsg").textContent="";
- $("authSubmit").disabled=false;
- $("authModal").classList.add("show");
-}
-
-$("loginBtn").onclick=()=>authOpen("login");
-$("registerBtn").onclick=()=>authOpen("register");
-$("adminLoginBtn").onclick=()=>authOpen("admin");
-$("authClose").onclick=()=>$("authModal").classList.remove("show");
-$("authCancel").onclick=()=>$("authModal").classList.remove("show");
-$("logoutBtn").onclick=()=>signOut(auth);
-
-let phoneConfirmation=null, recaptchaVerifier=null, pendingRegistration=null;
-
-async function sendRegistrationOtp(){
- const n=$("authName").value.trim(), phone=$("authPhone").value.trim(), e=$("authEmail").value.trim(), p=$("authPassword").value;
- if(!n||!phone||!e||!p){$("authMsg").textContent="Enter name, mobile, email and password.";return}
- if(!/^\+[1-9]\d{7,14}$/.test(phone)){$("authMsg").textContent="Use mobile with country code, e.g. +919876543210.";return}
- try{
-   if(recaptchaVerifier){try{recaptchaVerifier.clear()}catch(x){}}
-   recaptchaVerifier=new RecaptchaVerifier(auth,"recaptcha-container",{size:"invisible"});
-   phoneConfirmation=await signInWithPhoneNumber(auth,phone,recaptchaVerifier);
-   pendingRegistration={name:n,phone,email:e,password:p};
-   $("otpBox").style.display="block";
-   $("authSubmit").disabled=true;
-   $("authMsg").textContent="OTP sent to "+phone+". Enter the 6-digit OTP.";
- }catch(x){
-   $("authMsg").textContent="OTP could not be sent: "+x.message;
- }
-}
-
-$("authSubmit").onclick=async()=>{
- const mode=$("authSubmit").dataset.mode;
- if(mode==="register"){await sendRegistrationOtp();return}
- const e=$("authEmail").value.trim(),p=$("authPassword").value;
- if(!e||!p){$("authMsg").textContent="Enter email and password.";return}
- try{
-   await signInWithEmailAndPassword(auth,e,p);
-   $("authModal").classList.remove("show");
- }catch(x){$("authMsg").textContent=x.message}
-};
-
-$("verifyOtp").onclick=async()=>{
- if(!phoneConfirmation||!pendingRegistration){$("authMsg").textContent="Please request OTP first.";return}
- const code=$("authOtp").value.trim();
- if(!/^\d{6}$/.test(code)){$("authMsg").textContent="Enter the 6-digit OTP.";return}
- try{
-   const result=await phoneConfirmation.confirm(code);
-   const user=result.user;
-   const cred=EmailAuthProvider.credential(pendingRegistration.email,pendingRegistration.password);
-   await user.linkWithCredential(cred);
-   await updateProfile(user,{displayName:pendingRegistration.name});
-   currentName=pendingRegistration.name;
-   $("authMsg").textContent="Registration Successful — Welcome, "+pendingRegistration.name+"!";
-   setTimeout(()=>{$("authModal").classList.remove("show")},700);
- }catch(x){
-   $("authMsg").textContent="Registration/OTP verification failed: "+x.message;
- }
-};
-
-$("settingsBtn").onclick=()=>{
- const c=localStorage.getItem("pdfhub_country_"+(currentUser?.uid||"guest"))||"India";
- if($("settingsCountry"))$("settingsCountry").value=c;
- $("settingsModal").classList.add("show");
-};
-$("closeSettings").onclick=()=>$("settingsModal").classList.remove("show");
-$("saveSettings").onclick=()=>{
- const c=$("settingsCountry").value;
- localStorage.setItem("pdfhub_country_"+(currentUser?.uid||"guest"),c);
- if($("countryValue"))$("countryValue").textContent=c;
- if($("profileCountry"))$("profileCountry").textContent=c+" 🌍";
- $("settingsMsg").textContent="Settings saved successfully.";
- $("settingsModal").classList.remove("show");
-};
-
-$("profileBtn").onclick=()=>{$("dropdown").classList.remove("show");$("profileModal").classList.add("show");$("countrySelect").value=localStorage.getItem("pdfhub_country_"+(currentUser?.uid||""))||"India"};
-$("closeProfile").onclick=()=>$("profileModal").classList.remove("show");
-$("saveProfile").onclick=()=>{localStorage.setItem("pdfhub_country_"+(currentUser?.uid||"guest"),$("countrySelect").value);$("countryValue").textContent=$("countrySelect").value;$("profileModal").classList.remove("show")};
-function openPayment(plan){
- selectedPlan=plan;
- const amount=plan==="6"?"200":"300";
- $("paymentDetails").innerHTML=plan==="6"?'<div class="payment-plan"><strong>₹200</strong> / 6 Months<br><small>Unlimited PDF tools</small></div>':'<div class="payment-plan"><strong>₹300</strong> / 1 Year<br><small>Unlimited PDF tools</small></div>';
- $("upiText").textContent=UPI_ID;
- $("paymentMsg").textContent="Payment will be activated after admin verification.";
- $("paymentModal").classList.add("show");
- $("upiQr").innerHTML="";
- new QRCode($("upiQr"),{text:`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=PDF%20Utility%20Hub&am=${amount}&cu=INR`,width:190,height:190});
-}
-$("premium6").onclick=()=>openPayment("6");
-$("premium12").onclick=()=>openPayment("12");
-$("premiumMenuBtn").onclick=()=>{openPayment("6");$("dropdown").classList.remove("show")};
-function closePaymentModal(){$("paymentModal").classList.remove("show");$("paymentModal").classList.remove("payment-minimized")}
-function minimizePayment(){$("paymentModal").classList.add("payment-minimized")}
-function restorePayment(){$("paymentModal").classList.remove("payment-minimized")}
-$("closePayment").onclick=closePaymentModal;
-$("closePaymentTop").onclick=closePaymentModal;
-$("minPayment").onclick=()=>{$("paymentModal").classList.contains("payment-minimized")?restorePayment():minimizePayment()};$("paymentCard").onclick=e=>{if($("paymentModal").classList.contains("payment-minimized")&&!e.target.closest(".modal-tools"))restorePayment()};
-$("paymentModal").addEventListener("click",e=>{if(e.target===$("paymentModal")&&!$("paymentModal").classList.contains("payment-minimized"))closePaymentModal()});
-$("copyUpi").onclick=async()=>{await navigator.clipboard.writeText(UPI_ID);$("paymentMsg").textContent="✓ UPI ID copied."};
-$("upiPay").onclick=()=>{location.href=`upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=PDF%20Utility%20Hub&am=${selectedPlan==="6"?"200":"300"}&cu=INR`};
-$("submitPayment").onclick=async()=>{if(!currentUser){$("paymentMsg").textContent="Please login first.";return}const utr=$("utr").value.trim();if(!utr){$("paymentMsg").textContent="Enter Transaction ID / UTR.";return}try{await setDoc(doc(db,"paymentRequests",currentUser.uid+"_"+Date.now()),{uid:currentUser.uid,email:currentUser.email,plan:selectedPlan==="6"?"6 Months":"1 Year",amount:selectedPlan==="6"?200:300,utr,status:"pending",createdAt:new Date()});$("paymentMsg").className="status success";$("paymentMsg").textContent="✓ Payment request submitted. Admin will verify it.";$("utr").value=""}catch(e){$("paymentMsg").textContent="Could not submit request: "+e.message}};
-function openTool(t){$("workspace").classList.add("active");document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.tool===t));["search","compress","merge","zip"].forEach(x=>$("tool-"+x).style.display=x===t?"block":"none");$("workspace").scrollIntoView({behavior:"smooth",block:"start"})}
-document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openTool(b.dataset.open));document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>openTool(b.dataset.tool));
-let found=[],stopSearch=false;function refreshSearch(){const h=found.some(x=>x.checked);$("searchZip").disabled=!h;$("searchMerge").disabled=!h}
-$("searchStop").onclick=()=>{stopSearch=true;$("searchStatus").textContent="Stopping..."};
-$("searchBtn").onclick=async()=>{found=[];stopSearch=false;$("searchRows").innerHTML="";const fs=[...$("searchPdfs").files],ef=$("searchExcel").files[0];if(!fs.length||!ef){alert("Select PDF files and Excel file.");return}if(!(await checkPageLimit(fs,"PDF Search")))return;try{const wb=XLSX.read(await ef.arrayBuffer(),{type:"array"}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""});let names=rows.map(r=>String(r[0]||"").trim()).filter(Boolean);if(names[0]&&/proposal|search/i.test(names[0]))names.shift();let f=0,n=0;for(const name of names){if(stopSearch)break;const file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase())),tr=document.createElement("tr");if(file){f++;const item={file,checked:false};found.push(item);tr.innerHTML=`<td></td><td>${name}</td><td class="good">FOUND</td><td>${file.name}</td>`;const c=document.createElement("input");c.type="checkbox";c.onchange=()=>{item.checked=c.checked;refreshSearch()};tr.cells[0].appendChild(c)}else{n++;tr.innerHTML=`<td></td><td>${name}</td><td class="bad">NOT FOUND</td><td></td>`}$("searchRows").appendChild(tr);$("searchStatus").textContent=`Processed ${f+n} | Found ${f} | Not Found ${n}`;await new Promise(r=>setTimeout(r,0))}$("searchStatus").textContent+=(stopSearch?" | STOPPED":" | COMPLETE");addActivity("PDF Search",`Found ${f} / ${names.length}`)}catch(e){$("searchStatus").textContent="Error: "+e.message}refreshSearch()};
-$("searchZip").onclick=async()=>{const a=found.filter(x=>x.checked);if(!a.length)return;const z=new JSZip();a.forEach(x=>z.file(x.file.name,x.file));download(await z.generateAsync({type:"blob"}),"Selected_PDFs.zip");addActivity("PDF Search","Selected PDFs ZIP")};
-$("searchMerge").onclick=async()=>{const a=found.filter(x=>x.checked);if(!a.length)return;const out=await PDFDocument.create();for(const x of a){const s=await PDFDocument.load(await x.file.arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p))}download(new Blob([await out.save()],{type:"application/pdf"}),"Selected_Merged_PDF.pdf");addActivity("PDF Search",`${a.length} PDFs merged`)};
-async function compressOne(file,quality){const data=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:new Uint8Array(data)}).promise;let q=quality==="light"?.86:quality==="medium"?.72:.58,dpi=quality==="light"?150:quality==="medium"?125:105;const {jsPDF}=window.jspdf;let out=null;for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i),scale=dpi/72,v=page.getViewport({scale}),c=document.createElement("canvas");c.width=Math.ceil(v.width);c.height=Math.ceil(v.height);const ctx=c.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);await page.render({canvasContext:ctx,viewport:v,background:"white"}).promise;const jpg=c.toDataURL("image/jpeg",q);if(!out)out=new jsPDF({unit:"pt",format:[v.width/scale,v.height/scale],compress:true});else out.addPage([v.width/scale,v.height/scale]);out.addImage(jpg,"JPEG",0,0,v.width/scale,v.height/scale,undefined,"FAST");c.width=1;c.height=1}return out.output("blob")}
-$("compressBtn").onclick=async()=>{const fs=[...$("compressFiles").files];if(!fs.length){alert("Select PDFs.");return}if(!(await checkPageLimit(fs,"Compress PDF")))return;$("compressRows").innerHTML="";let results=[];try{for(const file of fs){const tr=document.createElement("tr");tr.innerHTML=`<td>${file.name}</td><td>${size(file.size)}</td><td>Processing...</td><td>...</td><td></td>`;$("compressRows").appendChild(tr);const b=await compressOne(file,$("quality").value),final=b.size<file.size?b:file;tr.cells[2].textContent=size(final.size);tr.cells[3].textContent=final===file?"Original kept":"Reduced";const name=file.name.replace(/\.pdf$/i,"")+"_compressed.pdf";results.push({name,blob:final});const btn=document.createElement("button");btn.textContent="Download";btn.className="action greenbtn";btn.onclick=()=>download(final,name);tr.cells[4].appendChild(btn)}$("compressStatus").textContent=`DONE — ${results.length} PDF(s) ready.`;addActivity("Compress PDF",`${results.length} PDF(s) processed`);$("compressZip").disabled=false;$("compressMerge").disabled=false;window._compressedResults=results}catch(e){$("compressStatus").textContent="Error: "+e.message}};
-$("compressZip").onclick=async()=>{const z=new JSZip();window._compressedResults.forEach(x=>z.file(x.name,x.blob));download(await z.generateAsync({type:"blob"}),"Compressed_PDFs.zip")};
-$("compressMerge").onclick=async()=>{const out=await PDFDocument.create();for(const x of window._compressedResults){const s=await PDFDocument.load(await x.blob.arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p))}download(new Blob([await out.save()],{type:"application/pdf"}),"Compressed_Merged_PDF.pdf")};
-$("mergeBtn").onclick=async()=>{const fs=[...$("mergeFiles").files];if(fs.length<2){alert("Select at least 2 PDFs.");return}if(!(await checkPageLimit(fs,"Merge PDF")))return;try{const out=await PDFDocument.create();for(const f of fs){const s=await PDFDocument.load(await f.arrayBuffer(),{ignoreEncryption:true});(await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p))}let name=$("mergeName").value||"Merged_PDF.pdf";if(!/\.pdf$/i.test(name))name+=".pdf";download(new Blob([await out.save()],{type:"application/pdf"}),name);$("mergeStatus").textContent="Merge complete.";addActivity("Merge PDF",`${fs.length} files merged`)}catch(e){$("mergeStatus").textContent="Error: "+e.message}};
-$("zipBtn").onclick=async()=>{const fs=[...$("zipFiles").files];if(!fs.length){alert("Select PDFs.");return}if(!(await checkPageLimit(fs,"Create ZIP")))return;const z=new JSZip();fs.forEach(f=>z.file(f.name,f));let name=$("zipName").value||"PDF_Files.zip";if(!/\.zip$/i.test(name))name+=".zip";download(await z.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:9}}),name);$("zipStatus").textContent=`${fs.length} PDF(s) saved in ZIP.`;addActivity("Create ZIP",`${fs.length} PDF(s) zipped`)};
-</script>
-</body></html>
+ $

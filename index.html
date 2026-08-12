@@ -338,8 +338,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, updateProfile, signOut,
-  sendPasswordResetEmail,
-  fetchSignInMethodsForEmail
+  sendPasswordResetEmail
 } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -420,7 +419,7 @@ window.switchToRegister = function() {
 };
 
 // =============================================
-// FORGOT PASSWORD
+// FORGOT PASSWORD - DIRECT SEND WITHOUT EMAIL CHECK
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -454,19 +453,10 @@ window.sendResetLink = async function() {
         const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Checking email and sending reset link...', 'info');
+        showLoginStatus('⏳ Sending reset link to ' + email + '...', 'info');
         
-        // Check if email exists
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        
-        if (methods.length === 0) {
-            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
-            btn.disabled = false;
-            btn.textContent = originalText;
-            return;
-        }
-        
-        // Send reset email
+        // DIRECT SEND - WITHOUT CHECKING IF EMAIL EXISTS
+        // Firebase automatically checks and sends email if account exists
         await sendPasswordResetEmail(auth, email);
         
         showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
@@ -1090,6 +1080,7 @@ window.createZip = async function() {
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);
 console.log('📧 Forgot Password: Enter email to receive reset link');
+console.log('⚠️ If you get "No account found", please register first.');
 </script>
 </body>
 </html>

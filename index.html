@@ -294,13 +294,24 @@ body.premium-theme .premium-banner p{color:#475467}
   <div class="auth-divider"><hr><span>or login with email</span><hr></div>
   <div class="form-group"><label>Email Address</label><input id="loginEmail" type="email" placeholder="Enter your email address"></div>
   <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter your password"></div>
-  <div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#1463e6;cursor:pointer;font-size:12px">🔑 Forgot Password?</a></div>
-  <div id="forgotBox" style="display:none;margin-bottom:12px">
-    <div class="form-group"><label>Email for reset</label><input id="resetEmail" type="email" placeholder="Enter your email"></div>
-    <button class="register-btn" style="background:#f28a17" onclick="sendResetLink()">📧 Send Reset Link</button>
+  
+  <!-- Forgot Password Link -->
+  <div style="text-align:right;margin-bottom:12px">
+    <a onclick="showForgotPassword()" style="color:#1463e6;cursor:pointer;font-size:12px;text-decoration:none">🔑 Forgot Password?</a>
   </div>
+  
+  <!-- Forgot Password Box - Shows when clicked -->
+  <div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border-radius:9px;border:1px solid #e5e7eb">
+    <div class="form-group" style="margin-bottom:8px">
+      <label style="font-size:13px;font-weight:600;color:#475467">📧 Email for reset</label>
+      <input id="resetEmail" type="email" placeholder="Enter your registered email address" style="width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px;outline:none">
+    </div>
+    <button class="register-btn" style="background:#f28a17;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button>
+    <button class="register-btn" style="background:#e5e7eb;color:#172033;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button>
+  </div>
+  
   <div id="loginStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" onclick="handleLogin()">🔐 Login</button>
+  <button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">🔐 Login</button>
   <div class="login-link">Don't have an account? <a onclick="switchToRegister()">Sign up</a></div>
 </div>
 </div></div>
@@ -349,12 +360,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // =============================================
-// 👑 ADMIN UID - YOUR UID IS ADDED HERE
+// 👑 ADMIN UID
 // =============================================
 const ADMIN_UIDS = [
-  "O2TjdGUFfdaET03CLusJehrgsNu2"  // Your UID
+  "O2TjdGUFfdaET03CLusJehrgsNu2"
 ];
-// =============================================
 
 // =============================================
 // GLOBAL VARIABLES
@@ -382,7 +392,7 @@ const ROLE_DISPLAY = {
 };
 
 // =============================================
-// MAKE FUNCTIONS GLOBAL FOR HTML onclick
+// MODAL FUNCTIONS
 // =============================================
 window.showRegister = function() { 
     document.getElementById('authModal').classList.add('show'); 
@@ -409,6 +419,83 @@ window.switchToLogin = function() {
 window.switchToRegister = function() { 
     hideAllModals(); 
     showRegister(); 
+};
+
+// =============================================
+// FORGOT PASSWORD FUNCTIONS
+// =============================================
+window.showForgotPassword = function() {
+    document.getElementById('forgotBox').style.display = 'block';
+    document.getElementById('loginSubmitBtn').style.display = 'none';
+    document.getElementById('loginStatus').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+    document.getElementById('resetEmail').focus();
+};
+
+window.hideForgotPassword = function() {
+    document.getElementById('forgotBox').style.display = 'none';
+    document.getElementById('loginSubmitBtn').style.display = 'block';
+    document.getElementById('loginStatus').style.display = 'none';
+};
+
+window.sendResetLink = async function() {
+    const email = document.getElementById('resetEmail').value.trim();
+    
+    if (!email) {
+        showLoginStatus('❌ Please enter your email address.', 'error');
+        return;
+    }
+    
+    if (!email.includes('@') || !email.includes('.')) {
+        showLoginStatus('❌ Please enter a valid email address.', 'error');
+        return;
+    }
+    
+    try {
+        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '⏳ Sending...';
+        showLoginStatus('⏳ Checking email...', 'info');
+        
+        // Check if email exists
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        
+        if (methods.length === 0) {
+            showLoginStatus('❌ No account found with this email address.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+        }
+        
+        // Send reset email
+        await sendPasswordResetEmail(auth, email, {
+            url: window.location.href,
+            handleCodeInApp: false
+        });
+        
+        showLoginStatus('✅ Password reset link sent to ' + email + '! Check your inbox/spam folder.', 'success');
+        document.getElementById('resetEmail').value = '';
+        btn.disabled = false;
+        btn.textContent = originalText;
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            hideForgotPassword();
+        }, 5000);
+        
+    } catch (error) {
+        console.error('Reset error:', error);
+        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
+        btn.disabled = false;
+        btn.textContent = '📧 Send Reset Link';
+        
+        if (error.code === 'auth/too-many-requests') {
+            showLoginStatus('❌ Too many requests. Please try again later.', 'error');
+        } else {
+            showLoginStatus('❌ ' + error.message, 'error');
+        }
+    }
 };
 
 // =============================================
@@ -478,7 +565,7 @@ window.handleLogin = async function() {
     }
     
     try {
-        const btn = document.querySelector('#loginModal .register-btn:last-of-type');
+        const btn = document.getElementById('loginSubmitBtn');
         btn.disabled = true;
         btn.textContent = '⏳ Logging in...';
         showLoginStatus('Logging in...', 'info');
@@ -499,7 +586,7 @@ window.handleLogin = async function() {
         
     } catch (error) {
         showLoginStatus('❌ ' + error.message, 'error');
-        const btn = document.querySelector('#loginModal .register-btn:last-of-type');
+        const btn = document.getElementById('loginSubmitBtn');
         btn.disabled = false;
         btn.textContent = '🔐 Login';
     }
@@ -519,86 +606,6 @@ window.logoutUser = async function() {
 };
 
 // =============================================
-// FIREBASE AUTH - FORGOT PASSWORD - FIXED
-// =============================================
-window.showForgotPassword = function() {
-    document.getElementById('forgotBox').style.display = 'block';
-    // Hide login button temporarily
-    const loginBtn = document.querySelector('#loginModal .register-btn:last-of-type');
-    if (loginBtn) loginBtn.style.display = 'none';
-    document.getElementById('loginStatus').style.display = 'none';
-    document.getElementById('resetEmail').value = '';
-    document.getElementById('resetEmail').focus();
-};
-
-window.sendResetLink = async function() {
-    const email = document.getElementById('resetEmail').value.trim();
-    
-    if (!email) {
-        showLoginStatus('❌ Please enter your email address.', 'error');
-        return;
-    }
-    
-    // Validate email format
-    if (!email.includes('@') || !email.includes('.')) {
-        showLoginStatus('❌ Please enter a valid email address.', 'error');
-        return;
-    }
-    
-    try {
-        // Show loading
-        const btn = document.querySelector('#forgotBox .register-btn');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Checking email and sending reset link...', 'info');
-        
-        // First check if email exists in Firebase
-        const methods = await fetchSignInMethodsForEmail(auth, email);
-        
-        if (methods.length === 0) {
-            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
-            btn.disabled = false;
-            btn.textContent = originalText;
-            return;
-        }
-        
-        // Send password reset email
-        await sendPasswordResetEmail(auth, email, {
-            url: window.location.href,
-            handleCodeInApp: false
-        });
-        
-        showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
-        document.getElementById('resetEmail').value = '';
-        btn.disabled = false;
-        btn.textContent = originalText;
-        
-        // Auto close after 5 seconds
-        setTimeout(() => {
-            document.getElementById('forgotBox').style.display = 'none';
-            const loginBtn = document.querySelector('#loginModal .register-btn:last-of-type');
-            if (loginBtn) loginBtn.style.display = 'block';
-            document.getElementById('loginStatus').style.display = 'none';
-        }, 6000);
-        
-    } catch (error) {
-        console.error('Reset error:', error);
-        const btn = document.querySelector('#forgotBox .register-btn');
-        btn.disabled = false;
-        btn.textContent = '📧 Send Reset Link';
-        
-        if (error.code === 'auth/too-many-requests') {
-            showLoginStatus('❌ Too many requests. Please try again later.', 'error');
-        } else if (error.code === 'auth/user-not-found') {
-            showLoginStatus('❌ No account found with this email address.', 'error');
-        } else {
-            showLoginStatus('❌ ' + error.message, 'error');
-        }
-    }
-};
-
-// =============================================
 // FIREBASE AUTH STATE
 // =============================================
 onAuthStateChanged(auth, async (user) => {
@@ -609,41 +616,29 @@ onAuthStateChanged(auth, async (user) => {
         currentRole = 'registered';
         pageUsage = 0;
         
-        // FIRST CHECK: Is user in admin UID list?
         if (ADMIN_UIDS.includes(user.uid)) {
             currentRole = 'admin';
-            console.log('👑✅ ADMIN found in UID list! Email:', user.email);
+            console.log('👑✅ ADMIN found! Email:', user.email);
         } else {
-            // SECOND CHECK: Check Firestore
             try {
-                console.log('🔍 Checking admin status in Firestore for:', user.uid);
                 const adminDoc = await getDoc(doc(db, 'admins', user.uid));
                 if (adminDoc.exists() && adminDoc.data().active !== false) {
                     currentRole = 'admin';
-                    console.log('👑✅ ADMIN found in Firestore! Email:', user.email);
                 } else {
-                    // THIRD CHECK: Check premium
-                    console.log('🔍 Checking premium status for:', user.uid);
                     const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
                     if (premiumDoc.exists() && premiumDoc.data().active !== false && 
                         premiumDoc.data().validTill?.toDate?.() > new Date()) {
                         currentRole = 'premium';
-                        console.log('⭐ PREMIUM user confirmed! Email:', user.email);
-                    } else {
-                        currentRole = 'registered';
-                        console.log('📝 REGISTERED user. Email:', user.email);
                     }
                 }
             } catch (error) {
-                console.warn('⚠️ Error checking user role:', error);
-                currentRole = 'registered';
+                console.warn('Error checking role:', error);
             }
         }
         
         console.log('✅ Final Role:', currentRole);
         updateUI();
         addActivity('Login', user.email + ' (' + currentRole.toUpperCase() + ')');
-        
     } else {
         currentUser = null;
         currentRole = 'guest';
@@ -657,89 +652,60 @@ onAuthStateChanged(auth, async (user) => {
 // UPDATE UI
 // =============================================
 function updateUI() {
-    console.log('🔄 Updating UI... Role:', currentRole);
-    
     const isLoggedIn = currentUser !== null;
     const role = currentRole;
     const limit = PAGE_LIMITS[role] || 20;
     const isUnlimited = limit === Infinity;
     const roleInfo = ROLE_DISPLAY[role] || ROLE_DISPLAY['guest'];
     
-    // Show/Hide buttons
     document.getElementById('loginBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
     document.getElementById('registerBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
     document.getElementById('adminLoginBtn').style.display = (isLoggedIn && role === 'admin') ? 'none' : 'inline-block';
     document.getElementById('userMenu').style.display = isLoggedIn ? 'block' : 'none';
     
-    // User info
     const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Account';
     document.getElementById('userShort').textContent = displayName;
     document.getElementById('userEmail').textContent = currentUser?.email || '';
     
-    // Account Type
     document.getElementById('accountType').textContent = roleInfo.label;
     document.getElementById('accountNote').textContent = roleInfo.note;
     
-    // Plan
     document.getElementById('planValue').textContent = roleInfo.plan;
     document.getElementById('planValue').style.color = isUnlimited ? '#16a34a' : '#172033';
     document.getElementById('planNote').textContent = isUnlimited ? '♾️ Unlimited Access' : '₹400 / 6 Months';
     
-    // Header Role
-    const roleDisplay = role === 'admin' ? 'ADMIN' : 
-                       role === 'premium' ? 'PREMIUM' : 
-                       role === 'registered' ? 'USER' : 'GUEST';
+    const roleDisplay = role === 'admin' ? 'ADMIN' : role === 'premium' ? 'PREMIUM' : role === 'registered' ? 'USER' : 'GUEST';
     document.getElementById('role').textContent = roleDisplay;
-    document.getElementById('role').style.background = role === 'admin' ? '#1a4a7a' : 
-                                                      role === 'premium' ? '#4a2a7a' : 
-                                                      role === 'registered' ? '#1463e6' : '#6b7280';
+    document.getElementById('role').style.background = role === 'admin' ? '#1a4a7a' : role === 'premium' ? '#4a2a7a' : role === 'registered' ? '#1463e6' : '#6b7280';
     
-    // Dropdown Plan
-    const planText = role === 'admin' ? '👑 ADMIN — UNLIMITED' : 
-                    role === 'premium' ? '⭐ PREMIUM — UNLIMITED' : 
-                    role === 'registered' ? '📝 REGISTERED — 50 PAGES' : '👤 GUEST — 20 PAGES';
+    const planText = role === 'admin' ? '👑 ADMIN — UNLIMITED' : role === 'premium' ? '⭐ PREMIUM — UNLIMITED' : role === 'registered' ? '📝 REGISTERED — 50 PAGES' : '👤 GUEST — 20 PAGES';
     document.getElementById('dropPlan').textContent = planText;
     
     document.getElementById('premiumMenuBtn').style.display = (role === 'premium' || role === 'admin') ? 'none' : 'block';
     document.getElementById('adminBtn').style.display = role === 'admin' ? 'block' : 'none';
     
-    // Dropdown Name with Badge
     const badge = role === 'admin' ? ' <span class="user-badge admin">👑 ADMIN</span>' :
                   role === 'premium' ? ' <span class="user-badge premium">⭐ PREMIUM</span>' :
                   role === 'registered' ? ' <span class="user-badge registered">📝 USER</span>' :
                   ' <span class="user-badge guest">👤 GUEST</span>';
     document.getElementById('dropName').innerHTML = displayName + badge;
     
-    // Pages
-    document.getElementById('opsValue').innerHTML = isUnlimited ? 
-        pageUsage + ' <small>/ ♾️</small>' : 
-        pageUsage + ' <small>/ ' + limit + '</small>';
+    document.getElementById('opsValue').innerHTML = isUnlimited ? pageUsage + ' <small>/ ♾️</small>' : pageUsage + ' <small>/ ' + limit + '</small>';
     document.getElementById('opsBar').style.width = isUnlimited ? '100%' : Math.min(100, (pageUsage / limit) * 100) + '%';
-    document.getElementById('opsNote').textContent = isUnlimited ? '♾️ Unlimited pages' : 
-        Math.max(0, limit - pageUsage) + ' pages remaining';
+    document.getElementById('opsNote').textContent = isUnlimited ? '♾️ Unlimited pages' : Math.max(0, limit - pageUsage) + ' pages remaining';
     
-    // Welcome
     if (isLoggedIn) {
-        const welcomeEmoji = role === 'admin' ? '👑' : 
-                            role === 'premium' ? '⭐' : '👤';
+        const welcomeEmoji = role === 'admin' ? '👑' : role === 'premium' ? '⭐' : '👤';
         document.getElementById('welcomeTitle').textContent = welcomeEmoji + ' Welcome, ' + displayName + '!';
-        document.getElementById('welcomeText').textContent = '🔐 Logged in as ' + currentUser.email + 
-            ' | ' + role.toUpperCase() + 
-            ' | ' + (isUnlimited ? '♾️ Unlimited' : 
-                    role === 'registered' ? '📝 50 pages' : '👤 20 pages');
+        document.getElementById('welcomeText').textContent = '🔐 Logged in as ' + currentUser.email + ' | ' + role.toUpperCase() + ' | ' + (isUnlimited ? '♾️ Unlimited' : role === 'registered' ? '📝 50 pages' : '👤 20 pages');
     } else {
         document.getElementById('welcomeTitle').textContent = '👋 Welcome to PDF Utility Hub';
         document.getElementById('welcomeText').textContent = 'Search, compress, merge and ZIP your PDF files directly in your browser.';
     }
     
-    // Theme
     document.body.classList.remove('admin-theme', 'premium-theme');
     if (role === 'admin') document.body.classList.add('admin-theme');
     else if (role === 'premium') document.body.classList.add('premium-theme');
-    
-    console.log('✅ UI Updated - Account Type:', document.getElementById('accountType').textContent);
-    console.log('✅ Plan:', document.getElementById('planValue').textContent);
-    console.log('✅ Pages:', document.getElementById('opsValue').innerHTML);
 }
 
 // =============================================
@@ -996,7 +962,7 @@ function size(n) {
     return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
 }
 
-window.stopCompress = function() { /* placeholder */ };
+window.stopCompress = function() {};
 
 window.compressFiles = async function() {
     const fs = [...document.getElementById('compressFiles').files];
@@ -1138,10 +1104,7 @@ window.createZip = async function() {
 };
 
 console.log('✅ PDF Utility Hub loaded successfully!');
-console.log('👑 Admin UIDs:', ADMIN_UIDS);
-console.log('🔐 Firebase Authentication enabled');
-console.log('📧 Forgot Password: Enter email to receive reset link');
-console.log('📧 Reset link will be sent to your registered email address');
+console.log('👑 Admin UID:', ADMIN_UIDS);
 </script>
 </body>
 </html>

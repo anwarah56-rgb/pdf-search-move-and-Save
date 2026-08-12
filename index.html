@@ -422,7 +422,7 @@ window.switchToRegister = function() {
 };
 
 // =============================================
-// FORGOT PASSWORD - FIXED
+// FORGOT PASSWORD - FIXED WITH ACTION CODE SETTINGS
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -458,11 +458,25 @@ window.sendResetLink = async function() {
         btn.textContent = '⏳ Sending...';
         showLoginStatus('⏳ Sending reset link...', 'info');
         
-        // FIX: Use handleCodeInApp: true and proper action code settings
-        await sendPasswordResetEmail(auth, email, {
-            url: window.location.href,
-            handleCodeInApp: true
-        });
+        // FIRST CHECK: Check if email exists
+        const methods = await fetchSignInMethodsForEmail(auth, email);
+        
+        if (methods.length === 0) {
+            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+        }
+        
+        // Use actionCodeSettings with multiple fallback URLs
+        const actionCodeSettings = {
+            url: 'https://pdf-utility-hu.firebaseapp.com/__/auth/action?mode=resetPassword',
+            handleCodeInApp: false,
+            iOS: { bundleId: 'com.pdfutilityhub.app' },
+            android: { packageName: 'com.pdfutilityhub.app', installApp: false }
+        };
+        
+        await sendPasswordResetEmail(auth, email, actionCodeSettings);
         
         showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
         document.getElementById('resetEmail').value = '';
@@ -484,7 +498,7 @@ window.sendResetLink = async function() {
         } else if (error.code === 'auth/user-not-found') {
             showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
         } else if (error.code === 'auth/unauthorized-continue-uri') {
-            showLoginStatus('❌ Please add this domain to Firebase Console > Authentication > Authorized domains', 'error');
+            showLoginStatus('❌ Please add localhost to Firebase Console > Authentication > Authorized domains', 'error');
         } else {
             showLoginStatus('❌ ' + error.message, 'error');
         }
@@ -1091,6 +1105,11 @@ window.createZip = async function() {
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);
 console.log('📧 Forgot Password: Enter email to receive reset link');
+
+// Check if running on localhost
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('⚠️ Running on localhost - Make sure localhost is added to Firebase Authorized Domains');
+}
 </script>
 </body>
 </html>

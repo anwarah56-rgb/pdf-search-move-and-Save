@@ -116,97 +116,146 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 
 <div class="modal" id="paymentModal"><div class="modal-card" id="paymentCard"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button id="minPayment" title="Minimize">—</button><button id="closePaymentTop" class="close-pay" title="Close">✕</button></div></div><div id="paymentDetails"></div><label>UPI ID</label><div class="upi" id="upiText">md.anwar18@ybl</div><div class="qr-wrap"><div class="qr-box"><div id="upiQr"></div><small>Scan to pay with any UPI app</small></div></div><div class="modal-actions"><button id="copyUpi" class="greenbtn">COPY UPI</button><button id="upiPay" class="purplebtn">OPEN UPI APP</button></div><label>Transaction ID / UTR</label><input id="utr" placeholder="Enter payment transaction ID"><button id="submitPayment" class="action bluebtn">SUBMIT PAYMENT FOR APPROVAL</button><div id="paymentMsg" class="status">Payment will be activated after admin verification.</div><button id="closePayment" class="action" style="background:#e5e7eb;color:#111">Close</button></div></div>
 
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,updateProfile,signOut,PhoneAuthProvider,EmailAuthProvider,RecaptchaVerifier,signInWithPhoneNumber} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
-pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
-const {PDFDocument}=window.PDFLib,$=id=>document.getElementById(id);
-const firebaseConfig={apiKey:"AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",authDomain:"pdf-utility-hu.firebaseapp.com",projectId:"pdf-utility-hu",storageBucket:"pdf-utility-hu.firebasestorage.app",messagingSenderId:"838702125905",appId:"1:838702125905:web:8f2d2f7e52e291bfbd7970",measurementId:"G-BZCFEZS2SE"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-let currentUser=null,currentRole="free",selectedPlan="6",currentName="";
-let pageUsage=Number(localStorage.getItem("pdfhub_guest_pages")||0);
-const UPI_ID="md.anwar18@ybl";
-const download=(blob,name)=>{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
-const size=n=>n<1048576?Math.round(n/1024)+" KB":(n/1048576).toFixed(2)+" MB";
-const pageLimit=()=>currentRole==="admin"||currentRole==="premium"?Infinity:(currentUser?50:20);
-const pageKey=()=>currentUser?"pdfhub_pages_"+currentUser.uid:"pdfhub_guest_pages";
-const savePageUsage=()=>localStorage.setItem(pageKey(),pageUsage);
-const updatePageUsage=()=>{const lim=pageLimit();$("opsValue").innerHTML=lim===Infinity?`${pageUsage} <small>/ Unlimited</small>`:`${pageUsage} <small>/ ${lim} pages</small>`;$("opsBar").style.width=lim===Infinity?"100%":Math.min(100,(pageUsage/lim)*100)+"%";$("opsNote").textContent=lim===Infinity?"Unlimited PDF pages":`${Math.max(0,lim-pageUsage)} pages remaining`};
-async function checkPageLimit(files, action){
- const lim=pageLimit();
- if(lim===Infinity)return true;
- if(!files.length)return false;
- let total=0;
- try{
-  for(const file of files){
-   const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
-   const pages=pdf.numPages;
-   if(pages>lim){
-    alert(`${file.name} has ${pages} pages. Your ${currentUser?"registered":"guest"} account allows maximum ${lim} pages per PDF.`);
-    return false;
-   }
-   total+=pages;
-  }
- }catch(e){alert("Could not read PDF page count: "+e.message);return false}
- if(pageUsage+total>lim){
-  alert(`Page limit reached. This ${currentUser?"registered":"guest"} account has ${lim} total pages available for PDF processing.`);
-  return false;
- }
- pageUsage+=total;savePageUsage();updatePageUsage();return true;
-}
-function updateUI(){
- $("accountType").textContent=currentRole.toUpperCase();
- $("planValue").textContent=currentRole==="admin"||currentRole==="premium"?"Unlimited":"Free";
- $("planNote").textContent=currentRole==="admin"||currentRole==="premium"?"Unlimited Access":"Premium: ₹200 / 6 Months";
- $("role").textContent=currentRole==="admin"?"ADMIN":currentRole==="premium"?"PREMIUM":"FREE";
- $("role").style.background=currentRole==="admin"?"#111827":currentRole==="premium"?"#7c3aed":"#475569";
- $("dropPlan").textContent=(currentRole==="admin"?"ADMIN ACCESS":currentRole==="premium"?"PREMIUM — UNLIMITED":"FREE — 50 OPERATIONS");
- $("premiumMenuBtn").style.display=currentRole==="premium"||currentRole==="admin"?"none":"block";
- $("adminBtn").style.display=currentRole==="admin"?"block":"none";
- $("adminLoginBtn").style.display=currentRole==="admin"?"none":"inline-block";
- updatePageUsage();
-}
-function addActivity(tool,detail){const b=$("activityBody");if(b.children.length===1&&b.children[0].children[1]?.textContent==="No activity yet")b.innerHTML="";const tr=document.createElement("tr");tr.innerHTML=`<td>${tool}</td><td>${detail}</td><td class="complete">✓ Completed</td><td>${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td>`;b.prepend(tr)}
-onAuthStateChanged(auth,async u=>{
- currentUser=u;currentRole="free";
- currentName=u?.displayName||"";
- pageUsage=Number(localStorage.getItem(u?"pdfhub_pages_"+u.uid:"pdfhub_guest_pages")||0);
- if(u){try{const a=await getDoc(doc(db,"admins",u.uid));if(a.exists()&&a.data().active!==false)currentRole="admin";else{const p=await getDoc(doc(db,"premiumUsers",u.uid));if(p.exists()&&p.data().active!==false&&p.data().validTill?.toDate?.()>new Date())currentRole="premium"}}catch(e){console.warn(e)}}
- $("loginBtn").style.display=u?"none":"inline-block";
- $("registerBtn").style.display=u?"none":"inline-block";
- $("adminLoginBtn").style.display=currentRole==="admin"?"none":"inline-block";
- $("settingsBtn").style.display="inline-block";
- $("userMenu").style.display=u?"block":"none";
- $("userEmail").textContent=u?.email||"";
- $("dropName").textContent=u?.displayName||u?.email?.split("@")[0]||"Account";
- $("userShort").textContent=u?.displayName||u?.email?.split("@")[0]||"Account";
- $("welcomeTitle").textContent=u?(u.displayName?"Welcome, "+u.displayName+"!":"Welcome!"):"Welcome to PDF Utility Hub";
- updateUI();
-});
+<script>
+// First define all helper functions and variables outside module
+const UPI_ID = "md.anwar18@ybl";
+const $ = id => document.getElementById(id);
 
-// ===== FIX: Toggle dropdown on user button click =====
-$("userBtn").onclick = function(e) {
-  e.stopPropagation();
-  const dropdown = document.getElementById("dropdown");
-  dropdown.classList.toggle("show");
+// Download function
+const download = (blob, name) => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 };
 
-// ===== FIX: Close dropdown when clicking outside =====
-document.addEventListener("click", function(e) {
-  const dropdown = document.getElementById("dropdown");
-  const userMenu = document.getElementById("userMenu");
-  if (dropdown && userMenu && !userMenu.contains(e.target)) {
-    dropdown.classList.remove("show");
-  }
-});
+const size = n => n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(2) + " MB";
 
-function authOpen(mode){
- $("authTitle").textContent=mode==="register"?"Create Account":mode==="admin"?"Admin Login":"Login";
- $("authSubmit").textContent=mode==="register"?"Send OTP":mode==="admin"?"Admin Login":"Login";
- $("authSubmit").dataset.mode=mode;
- $("authName").style.display=mode==="register"?"block":"none";
- $("authPhone").style.display=mode==="register"?"block":"none";
- $("otpBox").style.display="none";
- $
+// Global variables
+let currentUser = null;
+let currentRole = "free";
+let selectedPlan = "6";
+let currentName = "";
+let pageUsage = Number(localStorage.getItem("pdfhub_guest_pages") || 0);
+let found = [];
+let stopSearch = false;
+
+// Import Firebase modules
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, PhoneAuthProvider, EmailAuthProvider, RecaptchaVerifier, signInWithPhoneNumber} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore, doc, getDoc, setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+
+const {PDFDocument} = window.PDFLib;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",
+  authDomain: "pdf-utility-hu.firebaseapp.com",
+  projectId: "pdf-utility-hu",
+  storageBucket: "pdf-utility-hu.firebasestorage.app",
+  messagingSenderId: "838702125905",
+  appId: "1:838702125905:web:8f2d2f7e52e291bfbd7970",
+  measurementId: "G-BZCFEZS2SE"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Helper functions
+const pageLimit = () => currentRole === "admin" || currentRole === "premium" ? Infinity : (currentUser ? 50 : 20);
+const pageKey = () => currentUser ? "pdfhub_pages_" + currentUser.uid : "pdfhub_guest_pages";
+const savePageUsage = () => localStorage.setItem(pageKey(), pageUsage);
+
+const updatePageUsage = () => {
+  const lim = pageLimit();
+  $("opsValue").innerHTML = lim === Infinity ? `${pageUsage} <small>/ Unlimited</small>` : `${pageUsage} <small>/ ${lim} pages</small>`;
+  $("opsBar").style.width = lim === Infinity ? "100%" : Math.min(100, (pageUsage / lim) * 100) + "%";
+  $("opsNote").textContent = lim === Infinity ? "Unlimited PDF pages" : `${Math.max(0, lim - pageUsage)} pages remaining`;
+};
+
+async function checkPageLimit(files, action) {
+  const lim = pageLimit();
+  if (lim === Infinity) return true;
+  if (!files.length) return false;
+  let total = 0;
+  try {
+    for (const file of files) {
+      const pdf = await pdfjsLib.getDocument({data: new Uint8Array(await file.arrayBuffer())}).promise;
+      const pages = pdf.numPages;
+      if (pages > lim) {
+        alert(`${file.name} has ${pages} pages. Your ${currentUser ? "registered" : "guest"} account allows maximum ${lim} pages per PDF.`);
+        return false;
+      }
+      total += pages;
+    }
+  } catch (e) {
+    alert("Could not read PDF page count: " + e.message);
+    return false;
+  }
+  if (pageUsage + total > lim) {
+    alert(`Page limit reached. This ${currentUser ? "registered" : "guest"} account has ${lim} total pages available for PDF processing.`);
+    return false;
+  }
+  pageUsage += total;
+  savePageUsage();
+  updatePageUsage();
+  return true;
+}
+
+function updateUI() {
+  $("accountType").textContent = currentRole.toUpperCase();
+  $("planValue").textContent = currentRole === "admin" || currentRole === "premium" ? "Unlimited" : "Free";
+  $("planNote").textContent = currentRole === "admin" || currentRole === "premium" ? "Unlimited Access" : "Premium: ₹200 / 6 Months";
+  $("role").textContent = currentRole === "admin" ? "ADMIN" : currentRole === "premium" ? "PREMIUM" : "FREE";
+  $("role").style.background = currentRole === "admin" ? "#111827" : currentRole === "premium" ? "#7c3aed" : "#475569";
+  $("dropPlan").textContent = (currentRole === "admin" ? "ADMIN ACCESS" : currentRole === "premium" ? "PREMIUM — UNLIMITED" : "FREE — 50 OPERATIONS");
+  $("premiumMenuBtn").style.display = currentRole === "premium" || currentRole === "admin" ? "none" : "block";
+  $("adminBtn").style.display = currentRole === "admin" ? "block" : "none";
+  $("adminLoginBtn").style.display = currentRole === "admin" ? "none" : "inline-block";
+  updatePageUsage();
+}
+
+function addActivity(tool, detail) {
+  const b = $("activityBody");
+  if (b.children.length === 1 && b.children[0].children[1]?.textContent === "No activity yet") b.innerHTML = "";
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${tool}</td><td>${detail}</td><td class="complete">✓ Completed</td><td>${new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}</td>`;
+  b.prepend(tr);
+}
+
+function refreshSearch() {
+  const h = found.some(x => x.checked);
+  $("searchZip").disabled = !h;
+  $("searchMerge").disabled = !h;
+}
+
+function openTool(t) {
+  $("workspace").classList.add("active");
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x.dataset.tool === t));
+  ["search", "compress", "merge", "zip"].forEach(x => $("tool-" + x).style.display = x === t ? "block" : "none");
+  $("workspace").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+function authOpen(mode) {
+  $("authTitle").textContent = mode === "register" ? "Create Account" : mode === "admin" ? "Admin Login" : "Login";
+  $("authSubmit").textContent = mode === "register" ? "Send OTP" : mode === "admin" ? "Admin Login" : "Login";
+  $("authSubmit").dataset.mode = mode;
+  $("authName").style.display = mode === "register" ? "block" : "none";
+  $("authPhone").style.display = mode === "register" ? "block" : "none";
+  $("otpBox").style.display = "none";
+  $("authOtp").value = "";
+  $("authMsg").textContent = "";
+  $("authSubmit").disabled = false;
+  $("authModal").classList.add("show");
+}
+
+function openPayment(plan) {
+  selectedPlan = plan;
+  const amount = plan === "6" ? "300" : "500";
+  $("paymentDetails").innerHTML = plan === "6" ? '<div class="payment-plan"><strong>₹200</strong>

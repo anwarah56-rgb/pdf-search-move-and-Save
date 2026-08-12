@@ -340,7 +340,8 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, updateProfile, signOut,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  fetchSignInMethodsForEmail
 } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -421,7 +422,7 @@ window.switchToRegister = function() {
 };
 
 // =============================================
-// FORGOT PASSWORD - WITHOUT EMAIL CHECK
+// FORGOT PASSWORD - FIXED
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -455,12 +456,12 @@ window.sendResetLink = async function() {
         const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Sending reset link to ' + email + '...', 'info');
+        showLoginStatus('⏳ Sending reset link...', 'info');
         
-        // Directly send reset email without checking if email exists
+        // FIX: Use handleCodeInApp: true and proper action code settings
         await sendPasswordResetEmail(auth, email, {
             url: window.location.href,
-            handleCodeInApp: false
+            handleCodeInApp: true
         });
         
         showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
@@ -468,10 +469,9 @@ window.sendResetLink = async function() {
         btn.disabled = false;
         btn.textContent = originalText;
         
-        // Auto hide after 5 seconds
         setTimeout(() => {
             hideForgotPassword();
-        }, 5000);
+        }, 6000);
         
     } catch (error) {
         console.error('Reset error:', error);
@@ -483,6 +483,8 @@ window.sendResetLink = async function() {
             showLoginStatus('❌ Too many requests. Please try again later.', 'error');
         } else if (error.code === 'auth/user-not-found') {
             showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
+        } else if (error.code === 'auth/unauthorized-continue-uri') {
+            showLoginStatus('❌ Please add this domain to Firebase Console > Authentication > Authorized domains', 'error');
         } else {
             showLoginStatus('❌ ' + error.message, 'error');
         }

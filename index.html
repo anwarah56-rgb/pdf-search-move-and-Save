@@ -11,30 +11,141 @@
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
-:root{--navy:#071b3a;--blue:#1463e6;--green:#16a34a;--purple:#6d42e8;--orange:#f28a17;--ink:#172033;--muted:#667085;--line:#e5e7eb;--bg:#f5f7fb;--card:#fff}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-button,input,select{font:inherit}.header{background:linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8);color:#fff;padding:16px 28px 28px}
+:root{--navy:#071b3a;--blue:#1463e6;--green:#16a34a;--purple:#6d42e8;--orange:#f28a17;--ink:#172033;--muted:#667085;--line:#e5e7eb;--bg:#f5f7fb;--card:#fff;--header-bg:linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8);--header-color:#fff;--admin-badge:#111827;--premium-badge:#7c3aed;--user-badge:#1463e6;--guest-badge:#6b7280}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);transition:background 0.5s ease}
+button,input,select{font:inherit}
+.header{background:var(--header-bg);color:var(--header-color);padding:16px 28px 28px;transition:background 0.5s ease}
 .header-inner,.container{max-width:1450px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.brandbox{display:flex;align-items:center;gap:12px}.logo{font-size:38px}.brand{font-size:27px;font-weight:850}.tag{font-size:13px;opacity:.85}.builder{background:#16a34a;border-radius:22px;padding:8px 15px;font-weight:800;font-size:13px}
-.authbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.authbar button{border:1px solid #ffffff55;background:#ffffff12;color:#fff;padding:9px 13px;border-radius:9px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap}.authbar .light{background:#fff;color:#12325f}
-.user-menu{position:relative;display:none}.user-btn{display:flex;align-items:center;gap:8px;background:#ffffff12;color:#fff;border:1px solid #ffffff44;border-radius:10px;padding:8px 11px;cursor:pointer;font-weight:800}.role{background:#7c3aed;color:#fff;border-radius:20px;padding:3px 7px;font-size:10px}
+.authbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.authbar button{border:1px solid #ffffff55;background:#ffffff12;color:var(--header-color);padding:9px 13px;border-radius:9px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap}.authbar .light{background:#fff;color:#12325f}
+.user-menu{position:relative;display:none}.user-btn{display:flex;align-items:center;gap:8px;background:#ffffff12;color:var(--header-color);border:1px solid #ffffff44;border-radius:10px;padding:8px 11px;cursor:pointer;font-weight:800}.role{background:#7c3aed;color:#fff;border-radius:20px;padding:3px 7px;font-size:10px}
 .dropdown{display:none;position:absolute;right:0;top:46px;width:260px;background:#fff;color:var(--ink);border-radius:14px;box-shadow:0 18px 50px #0003;padding:10px;z-index:30}.dropdown.show{display:block}.drop-head{padding:10px;border-bottom:1px solid var(--line);margin-bottom:6px}.drop-email{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}.drop-item{width:100%;border:0;background:#fff;text-align:left;padding:11px;border-radius:9px;cursor:pointer;font-size:13px}.drop-item:hover{background:#f3f6fb}.drop-item.danger{color:#dc2626}
 .hero{max-width:1450px;margin:22px auto 0}.hero h1{margin:0;font-size:23px}.hero p{margin:5px 0 0;opacity:.84;font-size:13px}
-.container{padding:0 18px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}.stat,.tools-card,.activity-card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 22px #12264d0b}.stat{padding:17px;display:flex;gap:12px}.icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none}.i-blue{background:#e8f0ff}.i-green{background:#e3f8ec}.i-purple{background:#eee8ff}.i-orange{background:#fff0dc}.stat-title{font-size:13px;color:#475467}.stat-value{font-size:21px;font-weight:850;margin:4px 0}.stat-note{font-size:11px;color:#667085}.progress{height:7px;background:#e5eaf2;border-radius:8px;overflow:hidden;margin:7px 0}.progress span{display:block;height:100%;background:#1463e6;border-radius:8px}
-.tools-card{padding:20px;margin-top:15px}.section-title{font-size:20px;font-weight:850;margin:0 0 15px}.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.tool{border:1px solid #e2e6ee;border-radius:15px;padding:16px}.tool h3{margin:8px 0 6px;font-size:16px}.tool p{margin:0;color:#667085;font-size:12px;line-height:1.55;min-height:38px}.tool button{margin-top:13px;width:100%;border:0;border-radius:9px;color:#fff;padding:10px;font-weight:800;cursor:pointer}.bluebtn{background:#1463e6}.greenbtn{background:#16a34a}.purplebtn{background:#6d42e8}.orangebtn{background:#f28a17}
-.workspace{display:none;margin-top:15px}.workspace.active{display:block}.workspace .box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid #dbe1ea;background:#fff;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer;color:#475467}.tab.active{background:#eaf1ff;color:#1463e6;border-color:#bfd3ff}
-label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;outline:none}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{width:100%;border:0;border-radius:9px;padding:11px;color:#fff;font-weight:850;cursor:pointer;margin-top:9px}.status{padding:11px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin-top:11px;font-size:13px}
-table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;border-bottom:1px solid var(--line);font-size:12px;text-align:left}th{background:#f8fafc}.good{color:#16a34a;font-weight:800}.bad{color:#dc2626;font-weight:800}
+.container{padding:0 18px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}.stat,.tools-card,.activity-card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 22px #12264d0b;transition:background 0.5s ease, border-color 0.5s ease}.stat{padding:17px;display:flex;gap:12px}.icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none}.i-blue{background:#e8f0ff}.i-green{background:#e3f8ec}.i-purple{background:#eee8ff}.i-orange{background:#fff0dc}.stat-title{font-size:13px;color:#475467}.stat-value{font-size:21px;font-weight:850;margin:4px 0}.stat-note{font-size:11px;color:#667085}.progress{height:7px;background:#e5eaf2;border-radius:8px;overflow:hidden;margin:7px 0}.progress span{display:block;height:100%;background:#1463e6;border-radius:8px}
+.tools-card{padding:20px;margin-top:15px}.section-title{font-size:20px;font-weight:850;margin:0 0 15px}.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.tool{border:1px solid #e2e6ee;border-radius:15px;padding:16px;transition:border-color 0.5s ease, background 0.5s ease}.tool h3{margin:8px 0 6px;font-size:16px}.tool p{margin:0;color:#667085;font-size:12px;line-height:1.55;min-height:38px}.tool button{margin-top:13px;width:100%;border:0;border-radius:9px;color:#fff;padding:10px;font-weight:800;cursor:pointer}.bluebtn{background:#1463e6}.greenbtn{background:#16a34a}.purplebtn{background:#6d42e8}.orangebtn{background:#f28a17}
+.workspace{display:none;margin-top:15px}.workspace.active{display:block}.workspace .box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;transition:background 0.5s ease, border-color 0.5s ease}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid #dbe1ea;background:#fff;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer;color:#475467;transition:all 0.3s ease}.tab.active{background:#eaf1ff;color:#1463e6;border-color:#bfd3ff}
+label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;outline:none;transition:border-color 0.3s ease}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{width:100%;border:0;border-radius:9px;padding:11px;color:#fff;font-weight:850;cursor:pointer;margin-top:9px}.status{padding:11px;background:#f8fafc;border:1px solid var(--line);border-radius:9px;margin-top:11px;font-size:13px;transition:background 0.5s ease}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;border-bottom:1px solid var(--line);font-size:12px;text-align:left}th{background:#f8fafc;transition:background 0.5s ease}.good{color:#16a34a;font-weight:800}.bad{color:#dc2626;font-weight:800}
 .lower{display:grid;grid-template-columns:1fr;gap:15px;margin-top:15px}.activity-card{padding:20px}.activity-table{width:100%;border-collapse:collapse}.activity-table td,.activity-table th{padding:10px;border-bottom:1px solid var(--line);font-size:12px}.complete{color:#16a34a;font-weight:800}
-.premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.premium-banner h2{margin:0 0 5px;font-size:19px}.premium-banner p{margin:0;color:#667085;font-size:12px}.plan-actions{display:flex;gap:8px;flex-wrap:wrap}.plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
-.footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px}.footer b{color:#69d18a}
+.premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;transition:background 0.5s ease, border-color 0.5s ease}.premium-banner h2{margin:0 0 5px;font-size:19px}.premium-banner p{margin:0;color:#667085;font-size:12px}.plan-actions{display:flex;gap:8px;flex-wrap:wrap}.plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
+.footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px;transition:background 0.5s ease}.footer b{color:#69d18a}
 .modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center;padding:20px;overflow:auto}.modal.show{display:flex}.modal-card{width:min(400px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 25px 80px #0004;position:relative}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:#fff;z-index:3;padding-bottom:8px;border-bottom:1px solid #eef2f6}.modal-head h3{margin:0}.modal-tools{display:flex;gap:6px}.modal-tools button{width:34px;height:34px;flex:none;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}.modal-card h3{margin-top:0}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.modal-actions button{width:100%;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer}
-.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}.payment-minimized .modal-card>*:not(.modal-head){display:none}.payment-minimized .modal-head h3{font-size:13px}.payment-minimized .modal-tools button{width:28px;height:28px}.success{background:#ecfdf3!important;border-color:#bbf7d0!important;color:#166534}.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}.payment-plan strong{font-size:18px}.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0;word-break:break-all}.qr-wrap{display:flex;justify-content:center;margin:12px 0}.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.qr-box small{display:block;color:#667085;margin-top:7px}.admin-badge{display:inline-block;background:#111827;color:#fff;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:850}
+.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}.payment-minimized .modal-card>*:not(.modal-head){display:none}.payment-minimized .modal-head h3{font-size:13px}.payment-minimized .modal-tools button{width:28px;height:28px}.success{background:#ecfdf3!important;border-color:#bbf7d0!important;color:#166534}.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}.payment-plan strong{font-size:18px}.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0;word-break:break-all}.qr-wrap{display:flex;justify-content:center;margin:12px 0}.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}.qr-box small{display:block;color:#667085;margin-top:7px}
 .premium-overlay{position:fixed;inset:0;background:#0b173bcc;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}.premium-overlay.show{display:flex}.premium-overlay .modal-card{max-width:380px;width:100%}
 .user-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;margin-left:8px}
 .user-badge.admin{background:#111827;color:#fff}
 .user-badge.premium{background:#7c3aed;color:#fff}
-.user-badge.user{background:#1463e6;color:#fff}
+.user-badge.registered{background:#1463e6;color:#fff}
 .user-badge.guest{background:#6b7280;color:#fff}
+.role-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800}
+.role-badge.admin{background:#111827;color:#fff}
+.role-badge.premium{background:#7c3aed;color:#fff}
+.role-badge.registered{background:#1463e6;color:#fff}
+.role-badge.guest{background:#6b7280;color:#fff}
+
+/* Admin Theme */
+body.admin-theme{--bg:#0a0e1a;--line:#1a2340;--card:#111827;--ink:#e5e7eb;--muted:#9ca3af}
+body.admin-theme .stat,body.admin-theme .tools-card,body.admin-theme .activity-card,body.admin-theme .workspace .box{background:#111827;border-color:#1a2340}
+body.admin-theme .tool{background:#111827;border-color:#1a2340}
+body.admin-theme .tool p{color:#9ca3af}
+body.admin-theme .stat-title{color:#9ca3af}
+body.admin-theme .stat-note{color:#6b7280}
+body.admin-theme .status{background:#1a2340;border-color:#2a3350;color:#e5e7eb}
+body.admin-theme table th{background:#1a2340;color:#e5e7eb}
+body.admin-theme table td{color:#d1d5db;border-color:#1a2340}
+body.admin-theme .premium-banner{background:linear-gradient(110deg,#1a1a2e,#2d1b3d);border-color:#2a3350}
+body.admin-theme .premium-banner h2{color:#e5e7eb}
+body.admin-theme .premium-banner p{color:#9ca3af}
+body.admin-theme .activity-table td,body.admin-theme .activity-table th{color:#d1d5db;border-color:#1a2340}
+body.admin-theme .tabs .tab{background:#111827;border-color:#2a3350;color:#9ca3af}
+body.admin-theme .tabs .tab.active{background:#1a2340;color:#60a5fa;border-color:#3b82f6}
+body.admin-theme .progress{background:#2a3350}
+body.admin-theme .icon.i-blue{background:#1a2a4a;color:#60a5fa}
+body.admin-theme .icon.i-green{background:#1a2a2a;color:#34d399}
+body.admin-theme .icon.i-purple{background:#2a1a4a;color:#a78bfa}
+body.admin-theme .icon.i-orange{background:#2a1a1a;color:#fbbf24}
+body.admin-theme .authbar button{color:#e5e7eb}
+body.admin-theme .authbar .light{background:#1a2340;color:#e5e7eb}
+body.admin-theme .footer{background:#0a0e1a}
+body.admin-theme .footer b{color:#60a5fa}
+body.admin-theme .modal-card{background:#111827;color:#e5e7eb}
+body.admin-theme .modal-head{background:#111827;border-color:#1a2340}
+body.admin-theme .modal-head h3{color:#e5e7eb}
+body.admin-theme .modal-actions button{color:#fff}
+body.admin-theme .modal-actions button[style*="background:#e5e7eb"]{background:#2a3350!important;color:#e5e7eb!important}
+body.admin-theme .modal-tools button{background:#2a3350;color:#e5e7eb}
+body.admin-theme .modal-tools .close-pay{background:#4a1a1a;color:#ef4444}
+body.admin-theme .modal-card label{color:#e5e7eb}
+body.admin-theme .modal-card input,body.admin-theme .modal-card select{background:#1a2340;border-color:#2a3350;color:#e5e7eb}
+body.admin-theme .modal-card input::placeholder{color:#6b7280}
+body.admin-theme .modal-card .status{background:#1a2340;border-color:#2a3350;color:#e5e7eb}
+body.admin-theme .modal-card .upi{background:#1a2340;border-color:#2a3350;color:#e5e7eb}
+body.admin-theme .payment-plan{background:#1a2340;border-color:#2a3350;color:#e5e7eb}
+body.admin-theme .qr-box{background:#1a2340;border-color:#2a3350}
+body.admin-theme .qr-box small{color:#9ca3af}
+body.admin-theme .drop-item{background:#111827;color:#e5e7eb}
+body.admin-theme .drop-item:hover{background:#1a2340}
+body.admin-theme .drop-item.danger{color:#ef4444}
+body.admin-theme .dropdown{background:#111827;border-color:#1a2340}
+body.admin-theme .drop-head{background:#111827;border-color:#1a2340}
+body.admin-theme .drop-head b{color:#e5e7eb}
+body.admin-theme .drop-email{color:#9ca3af}
+body.admin-theme .premium-overlay .modal-card{background:#111827}
+body.admin-theme .premium-overlay .modal-card p{color:#e5e7eb}
+body.admin-theme .premium-overlay .modal-card div[style*="background:#f8fafc"]{background:#1a2340!important;color:#e5e7eb}
+body.admin-theme .premium-overlay .modal-card div[style*="background:#f8fafc"] span{color:#e5e7eb}
+body.admin-theme .plan-btn{color:#fff}
+
+/* Premium Theme */
+body.premium-theme{--bg:#0f0a1a;--line:#1a1a3d;--card:#1a1130;--ink:#e5e7eb;--muted:#9ca3af}
+body.premium-theme .stat,body.premium-theme .tools-card,body.premium-theme .activity-card,body.premium-theme .workspace .box{background:#1a1130;border-color:#2a1a4a}
+body.premium-theme .tool{background:#1a1130;border-color:#2a1a4a}
+body.premium-theme .tool p{color:#9ca3af}
+body.premium-theme .stat-title{color:#9ca3af}
+body.premium-theme .stat-note{color:#6b7280}
+body.premium-theme .status{background:#2a1a4a;border-color:#3a2a5a;color:#e5e7eb}
+body.premium-theme table th{background:#2a1a4a;color:#e5e7eb}
+body.premium-theme table td{color:#d1d5db;border-color:#2a1a4a}
+body.premium-theme .premium-banner{background:linear-gradient(110deg,#1a0a2e,#2d1b3d);border-color:#3a2a5a}
+body.premium-theme .premium-banner h2{color:#e5e7eb}
+body.premium-theme .premium-banner p{color:#9ca3af}
+body.premium-theme .activity-table td,body.premium-theme .activity-table th{color:#d1d5db;border-color:#2a1a4a}
+body.premium-theme .tabs .tab{background:#1a1130;border-color:#3a2a5a;color:#9ca3af}
+body.premium-theme .tabs .tab.active{background:#2a1a4a;color:#a78bfa;border-color:#7c3aed}
+body.premium-theme .progress{background:#3a2a5a}
+body.premium-theme .icon.i-blue{background:#1a1a3d;color:#818cf8}
+body.premium-theme .icon.i-green{background:#1a2a2a;color:#34d399}
+body.premium-theme .icon.i-purple{background:#2a1a4a;color:#a78bfa}
+body.premium-theme .icon.i-orange{background:#2a1a1a;color:#fbbf24}
+body.premium-theme .authbar button{color:#e5e7eb}
+body.premium-theme .authbar .light{background:#2a1a4a;color:#e5e7eb}
+body.premium-theme .footer{background:#0a0a1a}
+body.premium-theme .footer b{color:#a78bfa}
+body.premium-theme .modal-card{background:#1a1130;color:#e5e7eb}
+body.premium-theme .modal-head{background:#1a1130;border-color:#2a1a4a}
+body.premium-theme .modal-head h3{color:#e5e7eb}
+body.premium-theme .modal-actions button{color:#fff}
+body.premium-theme .modal-actions button[style*="background:#e5e7eb"]{background:#2a1a4a!important;color:#e5e7eb!important}
+body.premium-theme .modal-tools button{background:#2a1a4a;color:#e5e7eb}
+body.premium-theme .modal-tools .close-pay{background:#4a1a1a;color:#ef4444}
+body.premium-theme .modal-card label{color:#e5e7eb}
+body.premium-theme .modal-card input,body.premium-theme .modal-card select{background:#2a1a4a;border-color:#3a2a5a;color:#e5e7eb}
+body.premium-theme .modal-card input::placeholder{color:#6b7280}
+body.premium-theme .modal-card .status{background:#2a1a4a;border-color:#3a2a5a;color:#e5e7eb}
+body.premium-theme .modal-card .upi{background:#2a1a4a;border-color:#3a2a5a;color:#e5e7eb}
+body.premium-theme .payment-plan{background:#2a1a4a;border-color:#3a2a5a;color:#e5e7eb}
+body.premium-theme .qr-box{background:#2a1a4a;border-color:#3a2a5a}
+body.premium-theme .qr-box small{color:#9ca3af}
+body.premium-theme .drop-item{background:#1a1130;color:#e5e7eb}
+body.premium-theme .drop-item:hover{background:#2a1a4a}
+body.premium-theme .drop-item.danger{color:#ef4444}
+body.premium-theme .dropdown{background:#1a1130;border-color:#2a1a4a}
+body.premium-theme .drop-head{background:#1a1130;border-color:#2a1a4a}
+body.premium-theme .drop-head b{color:#e5e7eb}
+body.premium-theme .drop-email{color:#9ca3af}
+body.premium-theme .premium-overlay .modal-card{background:#1a1130}
+body.premium-theme .premium-overlay .modal-card p{color:#e5e7eb}
+body.premium-theme .premium-overlay .modal-card div[style*="background:#f8fafc"]{background:#2a1a4a!important;color:#e5e7eb}
+body.premium-theme .premium-overlay .modal-card div[style*="background:#f8fafc"] span{color:#e5e7eb}
 @media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.modal{padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:13px}.modal-head h3{font-size:16px}.modal-tools button{width:32px;height:32px}.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -131,9 +242,10 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:8px;bord
 <div class="modal-head"><h3>⭐ Premium Required</h3><div class="modal-tools"><button id="closePremiumPopup" class="close-pay">✕</button></div></div>
 <p style="font-size:14px;color:#475467;margin:12px 0">You have reached your page limit.</p>
 <div style="background:#f8fafc;border-radius:12px;padding:16px;margin:12px 0">
-<div style="display:flex;justify-content:space-between;padding:6px 0"><span>Guest</span><span>20 pages</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0"><span>Registered</span><span>50 pages</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>Premium/Admin</span><span>♾️ Unlimited</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0"><span>👤 Guest</span><span>20 pages</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0"><span>📝 Registered</span><span>50 pages</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>⭐ Premium</span><span>♾️ Unlimited</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;color:#111827;font-weight:800"><span>👑 Admin</span><span>♾️ Unlimited</span></div>
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0">
 <button id="popupPremium6" class="action purplebtn">₹400 / 6 Months</button>
@@ -189,7 +301,6 @@ let recaptchaVerifier = null;
 let pendingRegistration = null;
 let compressedResults = [];
 let isPremiumPopupShown = false;
-let currentUserEmail = "";
 
 const UPI_ID = "md.anwar18@ybl";
 
@@ -208,19 +319,56 @@ const size = n => n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toF
 
 const pageLimit = () => {
   if (currentRole === "admin" || currentRole === "premium") return Infinity;
-  if (currentUser) return 50;
+  if (currentUser && currentRole === "registered") return 50;
   return 20;
 };
 
 const pageKey = () => currentUser ? "pdfhub_pages_" + currentUser.uid : "pdfhub_guest_pages";
 const savePageUsage = () => localStorage.setItem(pageKey(), pageUsage);
 
+const getRoleDisplay = (role) => {
+  const map = {
+    'admin': { label: '👑 ADMIN', class: 'admin', note: 'Unlimited Access' },
+    'premium': { label: '⭐ PREMIUM', class: 'premium', note: 'Unlimited Access' },
+    'registered': { label: '📝 REGISTERED', class: 'registered', note: '50 pages limit' },
+    'guest': { label: '👤 GUEST', class: 'guest', note: '20 pages limit' }
+  };
+  return map[role] || map['guest'];
+};
+
+// Apply theme based on role
+function applyTheme(role) {
+  const body = document.body;
+  const header = document.querySelector('.header');
+  
+  // Remove all theme classes
+  body.classList.remove('admin-theme', 'premium-theme');
+  
+  // Reset header
+  header.style.background = '';
+  
+  if (role === 'admin') {
+    body.classList.add('admin-theme');
+    header.style.background = 'linear-gradient(135deg, #0a0e1a, #1a1a3d 62%, #2a1a4a)';
+    // Update meta theme color
+    document.querySelector('meta[name="theme-color"]').content = '#1a1a3d';
+  } else if (role === 'premium') {
+    body.classList.add('premium-theme');
+    header.style.background = 'linear-gradient(135deg, #0f0a1a, #2a1a4a 62%, #3a2a5a)';
+    document.querySelector('meta[name="theme-color"]').content = '#2a1a4a';
+  } else {
+    header.style.background = 'linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8)';
+    document.querySelector('meta[name="theme-color"]').content = '#0b57d0';
+  }
+}
+
 const updatePageUsage = () => {
   const lim = pageLimit();
   const used = pageUsage;
-  $("opsValue").innerHTML = lim === Infinity ? `${used} <small>/ ∞</small>` : `${used} <small>/ ${lim}</small>`;
-  $("opsBar").style.width = lim === Infinity ? "100%" : Math.min(100, (used / lim) * 100) + "%";
-  $("opsNote").textContent = lim === Infinity ? "Unlimited pages" : `${Math.max(0, lim - used)} pages remaining`;
+  const isUnlimited = lim === Infinity;
+  $("opsValue").innerHTML = isUnlimited ? `${used} <small>/ ♾️</small>` : `${used} <small>/ ${lim}</small>`;
+  $("opsBar").style.width = isUnlimited ? "100%" : Math.min(100, (used / lim) * 100) + "%";
+  $("opsNote").textContent = isUnlimited ? "♾️ Unlimited pages" : `${Math.max(0, lim - used)} pages remaining`;
 };
 
 async function checkPageLimit(files) {
@@ -233,7 +381,7 @@ async function checkPageLimit(files) {
       const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
       const pages = pdf.numPages;
       if (pages > lim) {
-        showPremiumPopup(`"${file.name}" has ${pages} pages. Your ${currentUser ? "registered" : "guest"} account allows maximum ${lim} pages per PDF.`);
+        showPremiumPopup(`"${file.name}" has ${pages} pages. Your ${currentRole} account allows maximum ${lim} pages per PDF.`);
         return false;
       }
       total += pages;
@@ -243,7 +391,7 @@ async function checkPageLimit(files) {
     return false;
   }
   if (pageUsage + total > lim) {
-    showPremiumPopup(`You have reached your page limit. ${currentUser ? "Registered" : "Guest"} account: ${lim} pages total.`);
+    showPremiumPopup(`You have reached your page limit. ${currentRole.toUpperCase()} account: ${lim} pages total.`);
     return false;
   }
   pageUsage += total;
@@ -255,7 +403,6 @@ async function checkPageLimit(files) {
 function showPremiumPopup(message) {
   if (isPremiumPopupShown) return;
   if (currentRole === "admin" || currentRole === "premium") {
-    // Admin or premium users should never see this
     return;
   }
   isPremiumPopupShown = true;
@@ -271,31 +418,52 @@ function hidePremiumPopup() {
   isPremiumPopupShown = false;
 }
 
-function getUserBadge(role) {
-  if (role === "admin") return '<span class="user-badge admin">👑 ADMIN</span>';
-  if (role === "premium") return '<span class="user-badge premium">⭐ PREMIUM</span>';
-  if (role === "user") return '<span class="user-badge user">👤 USER</span>';
-  return '<span class="user-badge guest">👤 GUEST</span>';
-}
-
 function updateUI() {
-  const roleDisplay = currentRole === "admin" ? "ADMIN" : currentRole === "premium" ? "PREMIUM" : currentUser ? "REGISTERED" : "GUEST";
-  const roleClass = currentRole === "admin" ? "admin" : currentRole === "premium" ? "premium" : currentUser ? "user" : "guest";
+  const roleInfo = getRoleDisplay(currentRole);
   
-  $("accountType").innerHTML = roleDisplay + ` <span class="user-badge ${roleClass}">${roleDisplay}</span>`;
-  $("accountNote").textContent = currentRole === "admin" ? "👑 Admin — Unlimited Access" : currentRole === "premium" ? "⭐ Premium — Unlimited Access" : currentUser ? "📝 Registered: 50 pages" : "👤 Guest: 20 pages";
-  $("planValue").textContent = currentRole === "admin" || currentRole === "premium" ? "♾️ Unlimited" : "Free";
-  $("planNote").textContent = currentRole === "admin" || currentRole === "premium" ? "Unlimited Access" : "₹400 / 6 Months";
-  $("role").textContent = currentRole === "admin" ? "ADMIN" : currentRole === "premium" ? "PREMIUM" : currentUser ? "USER" : "GUEST";
-  $("role").style.background = currentRole === "admin" ? "#111827" : currentRole === "premium" ? "#7c3aed" : currentUser ? "#1463e6" : "#475569";
-  $("dropPlan").textContent = currentRole === "admin" ? "👑 ADMIN — UNLIMITED" : currentRole === "premium" ? "⭐ PREMIUM — UNLIMITED" : currentUser ? "📝 REGISTERED — 50 PAGES" : "👤 GUEST — 20 PAGES";
-  $("premiumMenuBtn").style.display = currentRole === "premium" || currentRole === "admin" ? "none" : "block";
+  // Apply theme
+  applyTheme(currentRole);
+  
+  // Account Type with badge
+  $("accountType").innerHTML = roleInfo.label;
+  $("accountType").className = "stat-value";
+  
+  // Account note
+  $("accountNote").textContent = roleInfo.note;
+  
+  // Plan
+  const isUnlimited = currentRole === "admin" || currentRole === "premium";
+  $("planValue").textContent = isUnlimited ? "♾️ Unlimited" : "Free";
+  $("planValue").style.color = isUnlimited ? "#34d399" : "#172033";
+  $("planNote").textContent = isUnlimited ? "♾️ Unlimited Access" : "₹400 / 6 Months";
+  
+  // Role badge in header
+  const roleDisplay = currentRole === "admin" ? "ADMIN" : 
+                     currentRole === "premium" ? "PREMIUM" : 
+                     currentRole === "registered" ? "USER" : "GUEST";
+  $("role").textContent = roleDisplay;
+  $("role").style.background = currentRole === "admin" ? "#111827" : 
+                               currentRole === "premium" ? "#7c3aed" : 
+                               currentRole === "registered" ? "#1463e6" : "#6b7280";
+  
+  // Dropdown plan
+  const planText = currentRole === "admin" ? "👑 ADMIN — UNLIMITED" : 
+                  currentRole === "premium" ? "⭐ PREMIUM — UNLIMITED" : 
+                  currentRole === "registered" ? "📝 REGISTERED — 50 PAGES" : "👤 GUEST — 20 PAGES";
+  $("dropPlan").textContent = planText;
+  
+  // Show/hide premium menu
+  $("premiumMenuBtn").style.display = (currentRole === "premium" || currentRole === "admin") ? "none" : "block";
   $("adminBtn").style.display = currentRole === "admin" ? "block" : "none";
   $("adminLoginBtn").style.display = currentRole === "admin" ? "none" : "inline-block";
   
-  // Show user info in dropdown
-  const userName = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Account";
-  $("dropName").innerHTML = userName + getUserBadge(currentRole);
+  // Update dropdown name with badge
+  const displayName = currentUser?.displayName || currentUser?.email?.split("@")[0] || "Account";
+  const badge = currentRole === "admin" ? ' <span class="user-badge admin">👑 ADMIN</span>' :
+                currentRole === "premium" ? ' <span class="user-badge premium">⭐ PREMIUM</span>' :
+                currentRole === "registered" ? ' <span class="user-badge registered">📝 USER</span>' :
+                ' <span class="user-badge guest">👤 GUEST</span>';
+  $("dropName").innerHTML = displayName + badge;
   
   updatePageUsage();
 }
@@ -315,11 +483,6 @@ function refreshSearch() {
 }
 
 function openTool(t) {
-  // Check if user is admin or premium for unlimited access
-  if (currentRole !== "admin" && currentRole !== "premium") {
-    // Check page limit before opening tool
-    // This will be checked when they actually use the tool
-  }
   $("workspace").classList.add("active");
   document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x.dataset.tool === t));
   ["search", "compress", "merge", "zip"].forEach(x => $("tool-" + x).style.display = x === t ? "block" : "none");
@@ -457,31 +620,29 @@ async function compressOne(file, quality) {
 // Auth state
 onAuthStateChanged(auth, async u => {
   currentUser = u;
-  currentRole = "guest";
-  currentUserEmail = u?.email || "";
   pageUsage = Number(localStorage.getItem(u ? "pdfhub_pages_" + u.uid : "pdfhub_guest_pages") || 0);
   
   if (u) {
+    currentRole = "registered";
+    
     try {
-      // Check if user is admin
       const a = await getDoc(doc(db, "admins", u.uid));
       if (a.exists() && a.data().active !== false) {
         currentRole = "admin";
-        console.log("👑 Admin user logged in:", u.email);
+        console.log("👑 Admin logged in:", u.email);
       } else {
-        // Check if user is premium
         const p = await getDoc(doc(db, "premiumUsers", u.uid));
         if (p.exists() && p.data().active !== false && p.data().validTill?.toDate?.() > new Date()) {
           currentRole = "premium";
           console.log("⭐ Premium user logged in:", u.email);
         } else {
-          currentRole = "user";
-          console.log("👤 Registered user logged in:", u.email);
+          currentRole = "registered";
+          console.log("📝 Registered user logged in:", u.email);
         }
       }
     } catch (e) { 
       console.warn("Error checking user role:", e);
-      currentRole = "user";
+      currentRole = "registered";
     }
   } else {
     currentRole = "guest";
@@ -496,27 +657,23 @@ onAuthStateChanged(auth, async u => {
   $("userMenu").style.display = u ? "block" : "none";
   $("userEmail").textContent = u?.email || "";
   
-  // Show user name in dropdown
   const displayName = u?.displayName || u?.email?.split("@")[0] || "Account";
-  $("dropName").innerHTML = displayName + getUserBadge(currentRole);
   $("userShort").textContent = displayName;
   
-  // Welcome message with name
-  if (u && u.displayName) {
-    $("welcomeTitle").textContent = "👋 Welcome, " + u.displayName + "!";
-    $("welcomeText").textContent = "You are logged in as " + u.email + " | " + currentRole.toUpperCase();
-  } else if (u) {
-    $("welcomeTitle").textContent = "👋 Welcome!";
-    $("welcomeText").textContent = "You are logged in as " + u.email + " | " + currentRole.toUpperCase();
+  if (u) {
+    const roleEmoji = currentRole === "admin" ? "👑" : currentRole === "premium" ? "⭐" : "👤";
+    const roleName = currentRole.toUpperCase();
+    $("welcomeTitle").textContent = `${roleEmoji} Welcome, ${displayName}!`;
+    $("welcomeText").textContent = `Logged in as ${u.email} | ${roleName} | ${currentRole === "admin" || currentRole === "premium" ? "♾️ Unlimited" : currentRole === "registered" ? "📝 50 pages" : "👤 20 pages"}`;
+    
+    if (!window._loginLogged) {
+      window._loginLogged = true;
+      addActivity("Login", `${u.email} (${currentRole.toUpperCase()})`);
+    }
   } else {
-    $("welcomeTitle").textContent = "Welcome to PDF Utility Hub";
+    $("welcomeTitle").textContent = "👋 Welcome to PDF Utility Hub";
     $("welcomeText").textContent = "Search, compress, merge and ZIP your PDF files directly in your browser.";
-  }
-  
-  // Add login activity
-  if (u && !window._loginLogged) {
-    window._loginLogged = true;
-    addActivity("Login", u.email + " (" + currentRole.toUpperCase() + ")");
+    window._loginLogged = false;
   }
   
   updateUI();
@@ -532,9 +689,12 @@ $("authCancel").onclick = () => $("authModal").classList.remove("show");
 // Logout
 $("logoutBtn").onclick = () => {
   window._loginLogged = false;
+  const email = currentUser?.email || "User";
   signOut(auth);
   $("dropdown").classList.remove("show");
-  addActivity("Logout", "User logged out");
+  addActivity("Logout", `${email} logged out`);
+  // Reset theme
+  applyTheme('guest');
 };
 
 // Auth submit
@@ -684,11 +844,6 @@ $("searchStop").onclick = () => {
 };
 
 $("searchBtn").onclick = async () => {
-  // Check if admin or premium
-  if (currentRole === "admin" || currentRole === "premium") {
-    console.log("🟢 Admin/Premium user - Unlimited access");
-  }
-  
   found = [];
   stopSearch = false;
   $("searchRows").innerHTML = "";
@@ -759,11 +914,6 @@ $("searchMerge").onclick = async () => {
 
 // Compress tool
 $("compressBtn").onclick = async () => {
-  // Check if admin or premium
-  if (currentRole === "admin" || currentRole === "premium") {
-    console.log("🟢 Admin/Premium user - Unlimited access");
-  }
-  
   const fs = [...$("compressFiles").files];
   if (!fs.length) {
     alert("Select PDFs.");
@@ -818,11 +968,6 @@ $("compressMerge").onclick = async () => {
 
 // Merge tool
 $("mergeBtn").onclick = async () => {
-  // Check if admin or premium
-  if (currentRole === "admin" || currentRole === "premium") {
-    console.log("🟢 Admin/Premium user - Unlimited access");
-  }
-  
   const fs = [...$("mergeFiles").files];
   if (fs.length < 2) {
     alert("Select at least 2 PDFs.");
@@ -847,11 +992,6 @@ $("mergeBtn").onclick = async () => {
 
 // ZIP tool
 $("zipBtn").onclick = async () => {
-  // Check if admin or premium
-  if (currentRole === "admin" || currentRole === "premium") {
-    console.log("🟢 Admin/Premium user - Unlimited access");
-  }
-  
   const fs = [...$("zipFiles").files];
   if (!fs.length) {
     alert("Select PDFs.");
@@ -868,8 +1008,7 @@ $("zipBtn").onclick = async () => {
 };
 
 console.log("📄 PDF Utility Hub loaded successfully!");
-console.log("👤 Current user:", currentUser?.email || "Guest");
-console.log("🔑 Role:", currentRole);
+console.log("👤 Current Role:", currentRole);
 </script>
 </body>
 </html>

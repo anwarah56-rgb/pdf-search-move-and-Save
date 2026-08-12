@@ -314,6 +314,16 @@ let isPremiumPopupShown = false;
 
 const UPI_ID = "md.anwar18@ybl";
 
+// =============================================
+// 👑 ADMIN UID - YOUR UID IS ADDED HERE
+// =============================================
+const ADMIN_UIDS = [
+  "O2TjdGUFfdaET03CLusJehrgsNu2"  // Your UID
+];
+// =============================================
+
+console.log("👑 Admin UIDs configured:", ADMIN_UIDS);
+
 const download = (blob, name) => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -595,28 +605,35 @@ onAuthStateChanged(auth, async u => {
     // Default to registered user
     currentRole = "registered";
     
-    try {
-      // First check if user is admin
-      console.log("🔍 Checking admin status for:", u.uid);
-      const a = await getDoc(doc(db, "admins", u.uid));
-      if (a.exists() && a.data().active !== false) {
-        currentRole = "admin";
-        console.log("👑 ADMIN user confirmed! Email:", u.email);
-      } else {
-        // If not admin, check premium
-        console.log("🔍 Checking premium status for:", u.uid);
-        const p = await getDoc(doc(db, "premiumUsers", u.uid));
-        if (p.exists() && p.data().active !== false && p.data().validTill?.toDate?.() > new Date()) {
-          currentRole = "premium";
-          console.log("⭐ PREMIUM user confirmed! Email:", u.email);
+    // FIRST CHECK: Is user in admin UID list?
+    if (ADMIN_UIDS.includes(u.uid)) {
+      currentRole = "admin";
+      console.log("👑✅ ADMIN found in UID list! Email:", u.email);
+      console.log("👑 UID matched:", u.uid);
+    } else {
+      // SECOND CHECK: Check Firestore
+      try {
+        console.log("🔍 Checking admin status in Firestore for:", u.uid);
+        const a = await getDoc(doc(db, "admins", u.uid));
+        if (a.exists() && a.data().active !== false) {
+          currentRole = "admin";
+          console.log("👑✅ ADMIN found in Firestore! Email:", u.email);
         } else {
-          currentRole = "registered";
-          console.log("📝 REGISTERED user. Email:", u.email);
+          // THIRD CHECK: Check premium
+          console.log("🔍 Checking premium status for:", u.uid);
+          const p = await getDoc(doc(db, "premiumUsers", u.uid));
+          if (p.exists() && p.data().active !== false && p.data().validTill?.toDate?.() > new Date()) {
+            currentRole = "premium";
+            console.log("⭐ PREMIUM user confirmed! Email:", u.email);
+          } else {
+            currentRole = "registered";
+            console.log("📝 REGISTERED user. Email:", u.email);
+          }
         }
+      } catch (e) { 
+        console.warn("⚠️ Error checking user role:", e);
+        currentRole = "registered";
       }
-    } catch (e) { 
-      console.warn("⚠️ Error checking user role:", e);
-      currentRole = "registered";
     }
   } else {
     currentRole = "guest";
@@ -883,6 +900,8 @@ $("zipBtn").onclick = async () => {
 };
 
 console.log("📄 PDF Utility Hub loaded successfully!");
+console.log("👑 Admin UIDs configured:", ADMIN_UIDS);
+console.log("👑 Your UID in list:", ADMIN_UIDS.includes("O2TjdGUFfdaET03CLusJehrgsNu2") ? "✅ YES" : "❌ NO");
 </script>
 </body>
 </html>

@@ -295,12 +295,10 @@ body.premium-theme .premium-banner p{color:#475467}
   <div class="form-group"><label>Email Address</label><input id="loginEmail" type="email" placeholder="Enter your email address"></div>
   <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter your password"></div>
   
-  <!-- Forgot Password Link -->
   <div style="text-align:right;margin-bottom:12px">
     <a onclick="showForgotPassword()" style="color:#1463e6;cursor:pointer;font-size:12px;text-decoration:none">🔑 Forgot Password?</a>
   </div>
   
-  <!-- Forgot Password Box -->
   <div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border-radius:9px;border:1px solid #e5e7eb">
     <div class="form-group" style="margin-bottom:8px">
       <label style="font-size:13px;font-weight:600;color:#475467">📧 Email for reset</label>
@@ -422,7 +420,7 @@ window.switchToRegister = function() {
 };
 
 // =============================================
-// FORGOT PASSWORD - FIXED WITH ACTION CODE SETTINGS
+// FORGOT PASSWORD
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -456,9 +454,9 @@ window.sendResetLink = async function() {
         const originalText = btn.textContent;
         btn.disabled = true;
         btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Sending reset link...', 'info');
+        showLoginStatus('⏳ Checking email and sending reset link...', 'info');
         
-        // FIRST CHECK: Check if email exists
+        // Check if email exists
         const methods = await fetchSignInMethodsForEmail(auth, email);
         
         if (methods.length === 0) {
@@ -468,15 +466,8 @@ window.sendResetLink = async function() {
             return;
         }
         
-        // Use actionCodeSettings with multiple fallback URLs
-        const actionCodeSettings = {
-            url: 'https://pdf-utility-hu.firebaseapp.com/__/auth/action?mode=resetPassword',
-            handleCodeInApp: false,
-            iOS: { bundleId: 'com.pdfutilityhub.app' },
-            android: { packageName: 'com.pdfutilityhub.app', installApp: false }
-        };
-        
-        await sendPasswordResetEmail(auth, email, actionCodeSettings);
+        // Send reset email
+        await sendPasswordResetEmail(auth, email);
         
         showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
         document.getElementById('resetEmail').value = '';
@@ -497,8 +488,6 @@ window.sendResetLink = async function() {
             showLoginStatus('❌ Too many requests. Please try again later.', 'error');
         } else if (error.code === 'auth/user-not-found') {
             showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
-        } else if (error.code === 'auth/unauthorized-continue-uri') {
-            showLoginStatus('❌ Please add localhost to Firebase Console > Authentication > Authorized domains', 'error');
         } else {
             showLoginStatus('❌ ' + error.message, 'error');
         }
@@ -851,7 +840,7 @@ window.hidePremiumPopup = function() {
 };
 
 // =============================================
-// TOOL FUNCTIONS (Search, Compress, Merge, ZIP)
+// TOOL FUNCTIONS
 // =============================================
 window.openTool = function(t) {
     document.getElementById('workspace').classList.add('active');
@@ -864,7 +853,6 @@ window.openTool = function(t) {
     document.getElementById('workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-// Search Tool
 window.startSearch = async function() {
     found = [];
     stopSearch = false;
@@ -960,7 +948,6 @@ window.mergeSearchResults = async function() {
     addActivity('PDF Search', a.length + ' PDFs merged');
 };
 
-// Compress Tool
 function size(n) {
     return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
 }
@@ -1047,7 +1034,6 @@ window.mergeCompressed = async function() {
     setTimeout(() => URL.revokeObjectURL(url), 3000);
 };
 
-// Merge Tool
 window.mergePDFs = async function() {
     const fs = [...document.getElementById('mergeFiles').files];
     if (fs.length < 2) {
@@ -1078,7 +1064,6 @@ window.mergePDFs = async function() {
     }
 };
 
-// ZIP Tool
 window.createZip = async function() {
     const fs = [...document.getElementById('zipFiles').files];
     if (!fs.length) {
@@ -1105,11 +1090,6 @@ window.createZip = async function() {
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);
 console.log('📧 Forgot Password: Enter email to receive reset link');
-
-// Check if running on localhost
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('⚠️ Running on localhost - Make sure localhost is added to Firebase Authorized Domains');
-}
 </script>
 </body>
 </html>

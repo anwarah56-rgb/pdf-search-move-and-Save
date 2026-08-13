@@ -322,7 +322,7 @@ function updateUI(){
  document.getElementById('userShort').textContent=name;
  document.getElementById('userEmail').textContent=currentUser?.email||'';
  document.getElementById('accountType').textContent=isLoggedIn?(role==='premium'?'⭐ PREMIUM':role==='admin'?'👑 ADMIN':'📝 REGISTERED'):'👤 GUEST';
- document.getElementById('accountNote').textContent=isUnlimited?'♾️ Unlimited':(role==='registered'?'50 pages limit':'20 pages limit');
+ document.getElementById('accountNote').textContent=isUnlimited?'♾️ Unlimited':(role==='registered'?'100 pages limit':'60 pages limit');
  document.getElementById('planValue').textContent=isUnlimited?'♾️ Unlimited':'Free';
  document.getElementById('opsValue').innerHTML=isUnlimited?pageUsage+' / ♾️':pageUsage+' / '+limit;
  document.getElementById('opsBar').style.width=isUnlimited?'100%':Math.min(100,(pageUsage/limit)*100)+'%';

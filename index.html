@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b57d0">
-<title>PDF Utility Hub by Anwar</title>
+<title>PDF Utility Hub - Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <style>
+/* --- User & Common CSS --- */
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b}
 .container{max-width:1320px;margin:auto;padding:0 20px}
@@ -112,12 +113,14 @@ th{background:#f8fafc;font-weight:600}
 .limit-card button{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font-weight:700;cursor:pointer;transition:.2s}
 .limit-card .buy{background:#7c3aed;color:#fff}
 .limit-card .close{background:#e2e8f0;color:#0f172a}
-@media(max-width:768px){.tools,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.header{padding:12px 0}.brand{font-size:18px}.authbar{width:100%;justify-content:flex-end}}
-</style>
 
-<!-- Admin Dashboard Styles (Screen) -->
-<style>
-#adminDashboard{margin-top:20px;display:none}
+/* --- Admin Dashboard CSS (Appears below Tools) --- */
+#adminDashboard{margin-top:30px;display:none;padding-top:20px;border-top:3px dashed #2563eb}
+.admin-dashboard{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+.admin-stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:18px;text-align:center}
+.admin-stat .val{font-size:28px;font-weight:800;color:#0f172a}
+.admin-stat .lbl{font-size:14px;color:#64748b}
 .admin-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:16px}
 .admin-tab{border:0;background:transparent;padding:10px 18px;border-radius:30px;font-weight:600;cursor:pointer;color:#64748b;transition:.2s}
 .admin-tab.active{background:#dbeafe;color:#1e3a8a}
@@ -125,7 +128,9 @@ th{background:#f8fafc;font-weight:600}
 .admin-section{display:none}
 .admin-section.active{display:block}
 .admin-card-table{overflow-x:auto;background:#fafcff;border-radius:12px;border:1px solid #e2e8f0;padding:4px}
-.admin-refresh{background:#e2e8f0;border:0;border-radius:30px;padding:8px 16px;cursor:pointer;font-weight:600;margin-left:auto}
+.admin-actions{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+.admin-actions button{background:#e2e8f0;border:0;border-radius:30px;padding:8px 16px;cursor:pointer;font-weight:600}
+@media(max-width:768px){.tools,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.header{padding:12px 0}.brand{font-size:18px}.authbar{width:100%;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -141,13 +146,18 @@ th{background:#f8fafc;font-weight:600}
 <button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade</button>
 <button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
 </div></div>
-<button id="loginBtn" class="light" onclick="showLogin()">🔐 Login</button>
+<button id="loginBtn" class="light" onclick="showLogin()">🔐 User Login</button>
 <button id="registerBtn" class="light" onclick="showRegister()">✨ Register</button>
+<!-- ✅ Always visible Admin Login button -->
+<button id="adminLoginBtn" class="light" style="background:#facc15;color:#0f172a;font-weight:800" onclick="showAdminLogin()">🛡️ Admin Login</button>
 </div></div>
 <div class="hero"><h1 id="welcomeTitle">👋 Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, Compress, Merge & ZIP PDFs in your browser.</p></div>
 </div></header>
 
 <main class="container">
+
+<!-- ✅ USER PORTAL (Normal Users & Admin both see this) -->
+<div id="userPortal">
 <section class="stats">
 <div class="stat"><div>📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 / 60</div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">Guest: 60 pages</div></div></div>
 <div class="stat"><div>👤</div><div><div class="stat-title">Account</div><div class="stat-value" id="accountType">GUEST</div><div class="stat-note" id="accountNote">60 pages limit</div></div></div>
@@ -168,6 +178,7 @@ th{background:#f8fafc;font-weight:600}
 
 <section class="workspace" id="workspace"><div class="box">
 <div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
+
 <!-- Search -->
 <div id="tool-search"><h3>🔎 Search PDFs from Excel</h3>
 <label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf" multiple>
@@ -178,6 +189,7 @@ th{background:#f8fafc;font-weight:600}
 <div id="searchProgress" class="processing-progress"><div class="bar"><div id="searchProgressFill" class="fill"></div></div><div class="line"><span id="searchProgressLine">Processing...</span><span id="searchProgressPct">0%</span></div></div>
 <table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
 </div>
+
 <!-- Compress -->
 <div id="tool-compress" style="display:none"><h3>🗜️ Compress PDFs (up to 80% smaller)</h3>
 <label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf" multiple>
@@ -189,6 +201,7 @@ th{background:#f8fafc;font-weight:600}
 <div id="compressProgress" class="processing-progress"><div class="bar"><div id="compressProgressFill" class="fill"></div></div><div class="line"><span id="compressProgressLine">Processing...</span><span id="compressProgressPct">0%</span></div></div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Compressed</th><th>Reduction</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 </div>
+
 <!-- Merge -->
 <div id="tool-merge" style="display:none"><h3>🔗 Merge PDFs</h3>
 <label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf" multiple>
@@ -197,6 +210,7 @@ th{background:#f8fafc;font-weight:600}
 <div id="mergeStatus" class="status">Ready — select at least 2 PDFs.</div>
 <div id="mergeProgress" class="processing-progress"><div class="bar"><div id="mergeProgressFill" class="fill"></div></div><div class="line"><span id="mergeProgressLine">Processing...</span><span id="mergeProgressPct">0%</span></div></div>
 </div>
+
 <!-- ZIP -->
 <div id="tool-zip" style="display:none"><h3>📦 Create ZIP</h3>
 <label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf" multiple>
@@ -207,19 +221,29 @@ th{background:#f8fafc;font-weight:600}
 </div>
 </div></section>
 
-<!-- 🟢 NEW: ADMIN DASHBOARD ON SCREEN -->
+<!-- ✅ ADMIN DASHBOARD (Appears only for Admin, right below PDF Tools) -->
 <div id="adminDashboard">
-<div class="tools-card">
-<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
-<h2 class="section-title" style="margin:0;">🛡️ Admin Dashboard</h2>
+<div class="admin-dashboard">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+<h2 class="section-title" style="margin:0;">🛡️ Admin Control Panel</h2>
+<div class="admin-actions">
+<button class="admin-tab" onclick="loadAdminData()">↻ Refresh Data</button>
 </div>
+</div>
+
+<!-- Admin Stats -->
+<div class="admin-stats">
+<div class="admin-stat"><div class="val" id="adminTotalUsers">0</div><div class="lbl">👥 Total Users</div></div>
+<div class="admin-stat"><div class="val" id="adminPremiumUsers">0</div><div class="lbl">⭐ Premium Users</div></div>
+<div class="admin-stat"><div class="val" id="adminTotalRevenue">₹0</div><div class="lbl">💰 Total Revenue</div></div>
+</div>
+
 <div class="admin-tabs">
 <button class="admin-tab active" onclick="switchAdminTab('users')">👥 All Users</button>
 <button class="admin-tab" onclick="switchAdminTab('premium')">⭐ Premium Users</button>
 <button class="admin-tab" onclick="switchAdminTab('payments')">💳 Payment History</button>
-<button class="admin-refresh" onclick="loadAdminData()">↻ Refresh</button>
 </div>
-<div class="status" id="adminStatus">Click "Refresh" to load data. (Make sure Firebase Rules allow reading).</div>
+<div class="status" id="adminStatus">🔄 Loading data... (Make sure Firestore Rules allow reading)</div>
 
 <div id="admin-section-users" class="admin-section active">
 <div class="admin-card-table"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Joined On</th></tr></thead><tbody id="adminUsersRows"></tbody></table></div>
@@ -233,42 +257,29 @@ th{background:#f8fafc;font-weight:600}
 </div>
 </div>
 
+</div> <!-- End User Portal -->
 </main>
 <footer class="footer">© 2026 PDF Utility Hub · <b>Build by Anwar</b> · Professional PDF Tools</footer>
 
-<!-- Modals -->
+<!-- Modals: Login, Register, Admin Login, Payment -->
 <div class="modal" id="authModal"><div class="modal-card"><div class="modal-head"><h3>📝 Create Account</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
-<div class="register-container"><div class="form-group"><label>Full Name</label><input id="regName" placeholder="Name"></div>
-<div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="Email"></div>
-<div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Min 6 chars"></div>
-<div id="regStatus" class="status-msg" style="display:none"></div>
-<button class="register-btn" onclick="handleRegister()">Sign up</button>
-<div class="login-link">Already a member? <a onclick="switchToLogin()">Login</a></div>
-</div></div></div>
+<div class="register-container"><div class="form-group"><label>Full Name</label><input id="regName" placeholder="Name"></div><div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="Email"></div><div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Min 6 chars"></div><div id="regStatus" class="status-msg" style="display:none"></div><button class="register-btn" onclick="handleRegister()">Sign up</button><div class="login-link">Already a member? <a onclick="switchToLogin()">Login</a></div></div></div></div>
 
-<div class="modal" id="loginModal"><div class="modal-card"><div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
-<div class="register-container">
-<div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div>
-<div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div>
-<div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none;font-weight:600">🔑 Forgot Password?</a></div>
-<div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0">
-<div class="form-group" style="margin-bottom:8px"><label style="font-size:13px;font-weight:600;color:#475569">📧 Enter registered email</label><input id="resetEmail" type="email" placeholder="Enter your registered email" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none"></div>
-<button class="register-btn" style="background:#ea580c;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button>
-<button class="register-btn" style="background:#e2e8f0;color:#0f172a;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button>
-</div>
-<div id="loginStatus" class="status-msg" style="display:none"></div>
-<button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button>
-<div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div>
+<div class="modal" id="loginModal"><div class="modal-card"><div class="modal-head"><h3>🔐 User Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div><div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div><div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none;font-weight:600">🔑 Forgot Password?</a></div><div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0"><div class="form-group" style="margin-bottom:8px"><label style="font-size:13px;font-weight:600;color:#475569">📧 Enter registered email</label><input id="resetEmail" type="email" placeholder="Enter your registered email" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none"></div><button class="register-btn" style="background:#ea580c;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button><button class="register-btn" style="background:#e2e8f0;color:#0f172a;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button></div><div id="loginStatus" class="status-msg" style="display:none"></div><button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button><div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div></div></div></div>
+
+<!-- ✅ SEPARATE ADMIN LOGIN MODAL -->
+<div class="modal" id="adminLoginModal"><div class="modal-card"><div class="modal-head"><h3>🛡️ Admin Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div style="background:#fef9c3;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px;border:1px solid #fde047">🔑 Only authorized admins can login here.</div>
+<div class="form-group"><label>Admin Email</label><input id="adminLoginEmail" type="email" placeholder="Enter admin email"></div>
+<div class="form-group"><label>Admin Password</label><input id="adminLoginPassword" type="password" placeholder="Enter admin password"></div>
+<div id="adminLoginStatus" class="status-msg" style="display:none"></div>
+<button class="register-btn" id="adminLoginSubmitBtn" onclick="handleAdminLogin()">🛡️ Login as Admin</button>
 </div></div></div>
 
 <div class="modal" id="paymentModal"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
-<div id="paymentDetails"></div>
-<label>UPI ID</label><div class="upi" style="background:#f1f5f9;padding:12px;border-radius:12px;font-family:monospace;font-size:16px;text-align:center;margin:8px 0">md.anwar18@ybl</div>
-<div class="qr-wrap" style="text-align:center;margin:12px 0"><div id="upiQr"></div></div>
-<label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR">
-<button class="action bluebtn" onclick="submitPayment()">SUBMIT & ACTIVATE PREMIUM</button>
-<div id="paymentMsg" class="status">Premium will be activated instantly upon submission.</div>
-</div></div>
+<div id="paymentDetails"></div><label>UPI ID</label><div class="upi" style="background:#f1f5f9;padding:12px;border-radius:12px;font-family:monospace;font-size:16px;text-align:center;margin:8px 0">md.anwar18@ybl</div>
+<div class="qr-wrap" style="text-align:center;margin:12px 0"><div id="upiQr"></div></div><label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR"><button class="action bluebtn" onclick="submitPayment()">SUBMIT & ACTIVATE PREMIUM</button><div id="paymentMsg" class="status">Premium will be activated instantly.</div></div></div>
 
 <div class="limit-popup" id="limitReachedPopup"><div class="limit-card"><div style="font-size:48px">🚫</div><h2>Limit Reached</h2><p id="limitReachedText">You have used all your pages.</p><button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM</button><button class="close" onclick="closeLimitReached()">Close</button></div></div>
 
@@ -306,6 +317,8 @@ let currentUser = null, currentRole = 'guest', pageUsage = 0;
 let resetRequestCount = 0, lastResetTime = 0, selectedPlan = '6';
 
 const PAGE_LIMITS = { guest:60, registered:100, premium:Infinity, admin:Infinity };
+
+// ✅ अपना UID इस ऐरे में डालें! (Firebase Authentication से कॉपी करें)
 const ADMIN_UIDS = ["O2TjdGUFfdaET03CLusJehrgsNu2"];
 
 function loadPageUsage(){ const raw = localStorage.getItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages'); pageUsage = Math.max(0, parseInt(raw||'0',10)||0); }
@@ -324,6 +337,7 @@ async function checkPageLimit(files, statusId){
 
 function consumePages(pages){ if(pages && currentRole!=='premium'&&currentRole!=='admin'){ pageUsage+=pages; savePageUsage(); updateUI(); } }
 
+// UI Updates (Tools always visible, Admin Dashboard toggles)
 function updateUI(){
  const isLoggedIn=!!currentUser, role=currentRole, limit=PAGE_LIMITS[role]??20, isUnlimited=limit===Infinity;
  document.getElementById('loginBtn').style.display=isLoggedIn?'none':'inline-block';
@@ -332,6 +346,8 @@ function updateUI(){
  const name=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Account';
  document.getElementById('userShort').textContent=name;
  document.getElementById('userEmail').textContent=currentUser?.email||'';
+ 
+ // Update User Stats (always visible)
  document.getElementById('accountType').textContent=isLoggedIn?(role==='premium'?'⭐ PREMIUM':role==='admin'?'👑 ADMIN':'📝 REGISTERED'):'👤 GUEST';
  document.getElementById('accountNote').textContent=isUnlimited?'♾️ Unlimited':(role==='registered'?'100 pages limit':'60 pages limit');
  document.getElementById('planValue').textContent=isUnlimited?'♾️ Unlimited':'Free';
@@ -340,22 +356,79 @@ function updateUI(){
  document.getElementById('opsNote').textContent=isUnlimited?'♾️ Unlimited':Math.max(0,limit-pageUsage)+' pages remaining';
  document.getElementById('welcomeTitle').textContent=isLoggedIn?`👋 Welcome, ${name}!`:'👋 Welcome to PDF Utility Hub';
  document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()} | ${isUnlimited?'♾️ Unlimited':(role==='registered'?'📝 100 pages':'👤 60 pages')}`:'Search, Compress, Merge & ZIP PDFs.';
- document.getElementById('adminBtn').style.display=role==='admin'?'block':'none';
- document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
  const planText = role==='admin'?'👑 ADMIN — UNLIMITED':role==='premium'?'⭐ PREMIUM — UNLIMITED':role==='registered'?'📝 REGISTERED — 100 PAGES':'👤 GUEST — 60 PAGES';
  document.getElementById('dropPlan').textContent = planText;
+ document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
 
- // 🟢 Show/Hide Admin Dashboard on Screen
- const adminDash = document.getElementById('adminDashboard');
+ // ✅ TOGGLE ADMIN DASHBOARD (Shown below the tools)
+ const adminDashboard = document.getElementById('adminDashboard');
  if(role === 'admin') {
-   adminDash.style.display = 'block';
-   loadAdminData(); // Auto-load data when admin logs in
+   adminDashboard.style.display = 'block';
+   loadAdminData(); // Auto-load when admin logs in
  } else {
-   adminDash.style.display = 'none';
+   adminDashboard.style.display = 'none';
  }
 }
 
-// Auth
+// ✅ Admin Login Handler
+window.showAdminLogin = function() {
+  document.getElementById('adminLoginModal').classList.add('show');
+};
+
+window.handleAdminLogin = async function() {
+  const email = document.getElementById('adminLoginEmail').value.trim();
+  const password = document.getElementById('adminLoginPassword').value;
+  const statusEl = document.getElementById('adminLoginStatus');
+
+  if(!email || !password){ statusEl.textContent = '❌ Enter email and password.'; statusEl.className = 'status-msg error'; statusEl.style.display='block'; return; }
+
+  try {
+    const btn = document.getElementById('adminLoginSubmitBtn');
+    btn.disabled = true; btn.textContent = '⏳ Verifying...';
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
+    console.log('✅ Admin Login Attempt - User UID:', user.uid);
+
+    // Check if this user is an Admin
+    const isHardcodedAdmin = ADMIN_UIDS.includes(user.uid);
+    console.log('✅ Is Hardcoded Admin?', isHardcodedAdmin);
+    
+    let isFirestoreAdmin = false;
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (adminDoc.exists() && adminDoc.data().active !== false) isFirestoreAdmin = true;
+    } catch(e) { /* ignore */ }
+
+    if (!isHardcodedAdmin && !isFirestoreAdmin) {
+      await signOut(auth); // Logout immediately if not admin
+      statusEl.textContent = '❌ Not an Admin. Access Denied.';
+      statusEl.className = 'status-msg error';
+      statusEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '🛡️ Login as Admin';
+      return;
+    }
+
+    // ✅ Admin verified! Set role and update UI
+    currentRole = 'admin';
+    updateUI();
+    
+    statusEl.textContent = '✅ Admin Verified! Dashboard Loading...';
+    statusEl.className = 'status-msg success';
+    statusEl.style.display = 'block';
+    btn.textContent = '✅ Done';
+    
+    setTimeout(() => { hideAllModals(); btn.disabled=false; btn.textContent='🛡️ Login as Admin'; }, 1500);
+  } catch(e) {
+    console.error('Admin Login Error:', e);
+    const btn = document.getElementById('adminLoginSubmitBtn');
+    btn.disabled = false; btn.textContent = '🛡️ Login as Admin';
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.className = 'status-msg error';
+    statusEl.style.display = 'block';
+  }
+};
+
+// User Login & Register
 window.handleRegister=async function(){
  const name=document.getElementById('regName').value.trim(), email=document.getElementById('regEmail').value.trim(), password=document.getElementById('regPassword').value;
  if(!name||!email||password.length<6){ showRegStatus('Fill all fields. Password min 6 chars.','error'); return; }
@@ -370,25 +443,38 @@ window.handleLogin=async function(){
 
 window.logoutUser=async function(){ try{ await signOut(auth); document.getElementById('dropdown').classList.remove('show'); }catch(e){ console.error(e); } };
 
+// Auth State Listener
 onAuthStateChanged(auth, async (user)=>{
  if(user){
-  currentUser=user; currentRole='registered'; loadPageUsage();
-  if(ADMIN_UIDS.includes(user.uid)){ currentRole='admin'; }
-  else {
+  currentUser=user; 
+  currentRole='registered'; // default
+  loadPageUsage();
+  
+  // Check Admin
+  if(ADMIN_UIDS.includes(user.uid)){ 
+    currentRole='admin'; 
+    console.log('✅ Admin found via UID array!');
+  } else {
    try {
     const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-    if (adminDoc.exists() && adminDoc.data().active !== false) currentRole='admin';
-    else {
+    if (adminDoc.exists() && adminDoc.data().active !== false) {
+      currentRole='admin';
+      console.log('✅ Admin found via Firestore!');
+    } else {
      const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
      if (premiumDoc.exists() && premiumDoc.data().active !== false && premiumDoc.data().validTill?.toDate?.() > new Date()) currentRole='premium';
     }
    } catch(e){ console.warn('Error checking role:', e); }
   }
- } else { currentUser=null; currentRole='guest'; loadPageUsage(); }
+ } else { 
+   currentUser=null; 
+   currentRole='guest'; 
+   loadPageUsage(); 
+ }
  updateUI();
 });
 
-// Modals
+// Modals Helpers
 window.showRegister=()=>document.getElementById('authModal').classList.add('show');
 window.showLogin=()=>{ document.getElementById('loginModal').classList.add('show'); document.getElementById('forgotBox').style.display='none'; document.getElementById('loginSubmitBtn').style.display='block'; };
 window.hideAllModals=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'));
@@ -439,7 +525,7 @@ window.toggleDropdown=function(){ document.getElementById('dropdown').classList.
 document.addEventListener('click', e=>{ const d=document.getElementById('dropdown'); if(d&&!document.getElementById('userMenu').contains(e.target)) d.classList.remove('show'); });
 
 // =============================================
-// ADMIN DASHBOARD (SCREEN VERSION)
+// ADMIN DASHBOARD (DATA LOADER)
 // =============================================
 window.switchAdminTab = function(tab) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -460,19 +546,20 @@ window.loadAdminData = async function() {
       getDocs(collection(db, 'paymentRequests'))
     ]);
 
-    // 1. All Users
+    let totalUsers = 0, totalPremium = 0, totalRevenue = 0;
     let userHtml = '';
     usersSnap.forEach(doc => {
       const d = doc.data();
+      totalUsers++;
       const dateStr = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleDateString() : 'N/A';
       userHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.name||'N/A'}</td><td>${d.role||'registered'}</td><td>${dateStr}</td></tr>`;
     });
     document.getElementById('adminUsersRows').innerHTML = userHtml || '<tr><td colspan="4">No registered users found.</td></tr>';
 
-    // 2. Premium Users
     let premiumHtml = '';
     premiumSnap.forEach(doc => {
       const d = doc.data();
+      totalPremium++;
       const validTill = d.validTill?.toDate?.() || null;
       const upgradedAt = d.upgradedAt?.toDate?.() ? d.upgradedAt.toDate().toLocaleDateString() : 'N/A';
       let daysLeft = 'N/A';
@@ -484,20 +571,24 @@ window.loadAdminData = async function() {
     });
     document.getElementById('adminPremiumRows').innerHTML = premiumHtml || '<tr><td colspan="4">No premium users found.</td></tr>';
 
-    // 3. Payment History
     let payHtml = '';
     paymentSnap.forEach(doc => {
       const d = doc.data();
       const createdAt = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleString() : 'N/A';
+      totalRevenue += d.amount || 0;
       payHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td><td>${createdAt}</td></tr>`;
     });
     document.getElementById('adminPaymentRows').innerHTML = payHtml || '<tr><td colspan="6">No payment history found.</td></tr>';
+
+    document.getElementById('adminTotalUsers').textContent = totalUsers;
+    document.getElementById('adminPremiumUsers').textContent = totalPremium;
+    document.getElementById('adminTotalRevenue').textContent = '₹' + totalRevenue;
 
     statusEl.textContent = '✅ Data loaded successfully.';
     statusEl.style.color = '#166534';
   } catch(e) {
     console.error('Admin Load Error:', e);
-    statusEl.textContent = '❌ Error loading data: ' + e.message + ' (Please check Firebase Console -> Firestore -> Rules to allow read access for authenticated users).';
+    statusEl.textContent = '❌ Error: ' + e.message + ' (Check Firestore Rules)';
     statusEl.style.color = '#991b1b';
   }
 };
@@ -519,7 +610,7 @@ window.openPremium=function(){ document.getElementById('dropdown').classList.rem
 
 window.submitPayment=async function(){
  const utr=document.getElementById('utr').value.trim();
- if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first. You must have a registered account to buy Premium.'; return; }
+ if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first.'; return; }
  if(!utr){ document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; return; }
  const months = selectedPlan === '6' ? 6 : 12;
  const amount = selectedPlan === '6' ? 199 : 299;
@@ -534,7 +625,7 @@ window.submitPayment=async function(){
          uid: currentUser.uid, email: currentUser.email, active: true, validTill: validTill, upgradedAt: new Date()
      }, { merge: true });
      currentRole = 'premium'; updateUI();
-     document.getElementById('paymentMsg').textContent='✅ Payment recorded! You are now a PREMIUM user. Enjoy Unlimited pages!'; 
+     document.getElementById('paymentMsg').textContent='✅ Payment recorded! You are now PREMIUM.'; 
      document.getElementById('utr').value=''; 
      setTimeout(() => hideAllModals(), 3000);
  }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
@@ -671,7 +762,7 @@ window.createZip=async function(){
 };
 
 loadPageUsage(); updateUI();
-console.log('✅ PDF Utility Hub ready (Admin Dashboard on Screen)');
+console.log('✅ PDF Utility Hub ready (Admin Dashboard + Tools together)');
 </script>
 </body>
 </html>

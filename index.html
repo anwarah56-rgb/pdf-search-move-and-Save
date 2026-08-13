@@ -8,7 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
@@ -406,6 +405,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const jspdf = window.jspdf;
+const PDFLib = window.PDFLib;
 
 // =============================================
 // 👑 ADMIN UID
@@ -1015,12 +1016,27 @@ window.hidePremiumPopup = function() {
 };
 
 
+
+// =============================================
+// GLOBAL FILE SIZE FORMATTER
+// =============================================
+window.size = function(bytes) {
+    bytes = Number(bytes) || 0;
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+};
+function size(bytes) {
+    return window.size(bytes);
+}
+
 // =============================================
 // ROBUST GLOBAL HELPERS
 // =============================================
-let stopSearch = false;
-let stopCompression = false;
-let compressedResults = [];
+
+
+
 
 function setProgress(tool, percent, text) {
     const wrap = document.getElementById(tool + 'Progress');
@@ -1071,12 +1087,7 @@ async function checkLimit(files) {
     }
     return true;
 }
-function consumePages(pages) {
-    if (currentRole === 'admin' || currentRole === 'premium') return;
-    pageUsage += pages;
-    localStorage.setItem('pdfhub_page_usage_' + (currentUser?.uid || 'guest'), String(pageUsage));
-    updateUI();
-}
+
 window.closeLimitReached = function() {
     document.getElementById('limitReachedPopup').classList.remove('show');
 };
@@ -1410,7 +1421,7 @@ async function getPdfJs() {
     if (!pdfjsReadyPromise) {
         pdfjsReadyPromise = new Promise((resolve, reject) => {
             const s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js';
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
             s.onload = () => {
                 if (window.pdfjsLib) resolve(window.pdfjsLib);
                 else reject(new Error('PDF.js failed to load.'));

@@ -211,6 +211,23 @@ body.premium-theme .premium-banner p{color:#475467}
 .action:disabled{opacity:.55;cursor:not-allowed}
 button{touch-action:manipulation}
 </style>
+
+<style>
+.limit-popup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.65);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px}
+.limit-popup-overlay.show{display:flex}
+.limit-popup{width:min(440px,100%);background:#fff;border-radius:22px;padding:28px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.28)}
+.limit-popup .limit-icon{font-size:52px;margin-bottom:8px}
+.limit-popup h2{margin:8px 0;color:#172033}
+.limit-popup p{color:#667085;line-height:1.55}
+.limit-popup .premium-buy{display:block;width:100%;margin-top:18px;padding:13px;border:0;border-radius:12px;background:#7c3aed;color:#fff;font-weight:800;cursor:pointer}
+.limit-popup .close-limit{display:block;width:100%;margin-top:9px;padding:11px;border:1px solid #d0d5dd;border-radius:12px;background:#fff;cursor:pointer}
+.progress-wrap{display:none;margin:14px 0 4px}
+.progress-wrap.show{display:block}
+.progress-bar-bg{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.progress-bar-fill{height:100%;width:0%;transition:width .15s ease;background:linear-gradient(90deg,#2563eb,#7c3aed)}
+.progress-info{display:flex;justify-content:space-between;margin-top:6px;font-size:13px;color:#667085}
+.processing-line{font-weight:700}
+</style>
 </head>
 <body>
 <header class="header"><div class="header-inner">
@@ -259,10 +276,14 @@ button{touch-action:manipulation}
 
 <section class="workspace" id="workspace"><div class="box">
 <div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
-<div id="tool-search"><h2>Search PDFs from Excel</h2><label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls"><div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">DOWNLOAD SELECTED ZIP</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">MERGE SELECTED</button></div><div id="searchStatus" class="status">Ready</div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></div>
-<div id="tool-compress" style="display:none"><h2>Compress Multiple PDFs</h2><label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple><div class="grid2"><div><label>Target Maximum Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div><div><label>Quality</label><select id="quality"><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div></div><div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">DOWNLOAD COMPRESSED ZIP</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">MERGE COMPRESSED</button></div><div id="compressStatus" class="status">Ready — Select PDF files.</div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></div>
-<div id="tool-merge" style="display:none"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple><label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf"><button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div></div>
-<div id="tool-zip" style="display:none"><h2>Create ZIP from PDFs</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple><label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip"><button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready — Select PDF files.</div></div>
+<div id="tool-search"><h2>Search PDFs from Excel</h2><label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls"><div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">DOWNLOAD SELECTED ZIP</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">MERGE SELECTED</button></div><div id="searchStatus" class="status">Ready</div>
+<div id="searchProgress" class="progress-wrap"><div class="progress-bar-bg"><div id="searchProgressFill" class="progress-bar-fill"></div></div><div class="progress-info"><span id="searchProgressText" class="processing-line">Processing...</span><span id="searchProgressPct">0%</span></div></div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></div>
+<div id="tool-compress" style="display:none"><h2>Compress Multiple PDFs</h2><label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple><div class="grid2"><div><label>Target Maximum Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div><div><label>Quality</label><select id="quality"><option value="strong" selected>Text Priority</option><option value="medium">Balanced</option><option value="light">High Quality</option></select></div></div><div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">DOWNLOAD COMPRESSED ZIP</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">MERGE COMPRESSED</button></div><div id="compressStatus" class="status">Ready — Select PDF files.</div>
+<div id="compressProgress" class="progress-wrap"><div class="progress-bar-bg"><div id="compressProgressFill" class="progress-bar-fill"></div></div><div class="progress-info"><span id="compressProgressText" class="processing-line">Processing...</span><span id="compressProgressPct">0%</span></div></div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></div>
+<div id="tool-merge" style="display:none"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple><label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf"><button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div>
+<div id="mergeProgress" class="progress-wrap"><div class="progress-bar-bg"><div id="mergeProgressFill" class="progress-bar-fill"></div></div><div class="progress-info"><span id="mergeProgressText" class="processing-line">Processing...</span><span id="mergeProgressPct">0%</span></div></div></div>
+<div id="tool-zip" style="display:none"><h2>Create ZIP from PDFs</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple><label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip"><button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready — Select PDF files.</div>
+<div id="zipProgress" class="progress-wrap"><div class="progress-bar-bg"><div id="zipProgressFill" class="progress-bar-fill"></div></div><div class="progress-info"><span id="zipProgressText" class="processing-line">Processing...</span><span id="zipProgressPct">0%</span></div></div></div>
 </div></section>
 
 <section class="lower"><div class="activity-card"><h2 class="section-title">Recent Activity</h2><table class="activity-table"><thead><tr><th>Tool</th><th>Details</th><th>Status</th><th>Time</th></tr></thead><tbody id="activityBody"><tr><td>—</td><td>No activity yet</td><td>—</td><td>—</td></tr></tbody></table></div></section>
@@ -385,6 +406,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const PDFDocument = PDFLib.PDFDocument;
 
 // =============================================
 // 👑 ADMIN UID
@@ -1013,6 +1035,11 @@ window.startSearch = async function() {
     document.getElementById('searchRows').innerHTML = '';
     const fs = [...document.getElementById('searchPdfs').files];
     const ef = document.getElementById('searchExcel').files[0];
+
+    if (fs.length) {
+        const limitCheck = await checkPageLimit(fs, 'search');
+        if (!limitCheck.allowed) return;
+    }
     if (!fs.length || !ef) {
         alert('Select PDF files and Excel file.');
         return;
@@ -1129,57 +1156,44 @@ window.compressFiles = async function() {
     const rows = document.getElementById('compressRows');
     const status = document.getElementById('compressStatus');
 
-    if (!fs.length) {
-        alert('Select PDF files.');
-        return;
-    }
+    if (!fs.length) { alert('Select PDF files.'); return; }
 
-    const compressCheck = await checkPageLimit(fs, 'compressStatus');
-    if (!compressCheck) return;
+    const check = await checkPageLimit(fs, 'compress');
+    if (!check.allowed) return;
 
-    consumePages(compressCheck.pages);
     stopCompression = false;
     rows.innerHTML = '';
     compressedResults = [];
     document.getElementById('compressZip').disabled = true;
     document.getElementById('compressMerge').disabled = true;
+    setProgress('compress', 0, 'Starting compression...');
 
-    let done = 0;
-
-    for (const file of fs) {
+    for (let i = 0; i < fs.length; i++) {
+        setProgress('search', (i / Math.max(1, fs.length)) * 100, 'Searching ' + (i+1) + ' of ' + fs.length + '...');
         if (stopCompression) break;
 
+        const file = fs[i];
         const tr = document.createElement('tr');
         tr.innerHTML = '<td>' + file.name + '</td><td>' + size(file.size) +
             '</td><td>⏳ Processing...</td><td>...</td><td></td>';
         rows.appendChild(tr);
 
         try {
+            setProgress('compress', (i / fs.length) * 100, 'Compressing ' + (i+1) + ' of ' + fs.length + '...');
             const input = await file.arrayBuffer();
             const pdfDoc = await PDFLib.PDFDocument.load(input, { ignoreEncryption: true });
-            const targetMB = parseFloat(document.getElementById('target').value || '5');
-            const quality = document.getElementById('quality').value;
+            const rebuilt = await pdfDoc.save({useObjectStreams:true, addDefaultPage:false});
+            const rebuiltBlob = new Blob([rebuilt], {type:'application/pdf'});
 
-            // pdf-lib can rebuild/optimize PDF structure, but it cannot
-            // recompress embedded images like a desktop PDF compressor.
-            const saveOptions = {
-                useObjectStreams: quality !== 'light',
-                addDefaultPage: false
-            };
-            const rebuilt = await pdfDoc.save(saveOptions);
-            const rebuiltBlob = new Blob([rebuilt], { type: 'application/pdf' });
-
-            // Never make the file larger.
+            // Browser-side PDF rebuild is lossless-ish; never make output larger.
+            // For scanned/image-heavy PDFs, image downsampling is required for true 80% reduction.
             const finalBlob = rebuiltBlob.size < file.size ? rebuiltBlob : file;
-            const reduced = finalBlob.size < file.size;
-
             const name = file.name.replace(/\.pdf$/i, '') + '_compressed.pdf';
-            compressedResults.push({ name, blob: finalBlob });
+            compressedResults.push({name, blob:finalBlob});
 
             tr.cells[2].textContent = size(finalBlob.size);
-            tr.cells[3].textContent = reduced
-                ? '✅ Reduced'
-                : ('↔ Kept original (' + targetMB + ' MB target)');
+            const reduction = file.size ? Math.max(0, Math.round((1 - finalBlob.size/file.size)*100)) : 0;
+            tr.cells[3].textContent = reduction > 0 ? '✅ ' + reduction + '% smaller' : '↔ Original kept';
 
             const btn = document.createElement('button');
             btn.textContent = '⬇️ Download';
@@ -1187,13 +1201,12 @@ window.compressFiles = async function() {
             btn.onclick = () => downloadBlob(finalBlob, name);
             tr.cells[4].appendChild(btn);
 
-            done++;
-            status.textContent = 'Processed ' + done + ' / ' + fs.length + ' PDF(s)';
         } catch (e) {
             tr.cells[2].textContent = 'Failed';
             tr.cells[3].textContent = '❌ ' + (e.message || e);
         }
 
+        setProgress('compress', ((i+1)/fs.length)*100, 'Completed ' + (i+1) + ' of ' + fs.length);
         await new Promise(r => setTimeout(r, 0));
     }
 
@@ -1242,62 +1255,94 @@ window.mergeCompressed = async function() {
 
 window.mergePDFs = async function() {
     const fs = [...document.getElementById('mergeFiles').files];
-    if (fs.length < 2) {
-        alert('Select at least 2 PDFs.');
-        return;
-    }
-    const mergeCheck = await checkPageLimit(fs, 'mergeStatus');
-    if (!mergeCheck) return;
-    consumePages(mergeCheck.pages);
+    if (fs.length < 2) { alert('Select at least 2 PDFs.'); return; }
+
+    const check = await checkPageLimit(fs, 'merge');
+    if (!check.allowed) return;
+
+    const status = document.getElementById('mergeStatus');
+    const out = await PDFLib.PDFDocument.create();
+    setProgress('merge', 0, 'Starting merge...');
+
     try {
-        const out = await PDFLib.PDFDocument.create();
-        for (const f of fs) {
-            const s = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption: true });
-            (await out.copyPages(s, s.getPageIndices())).forEach(p => out.addPage(p));
+        for (let i=0;i<fs.length;i++) {
+            status.textContent = 'Processing ' + (i+1) + ' of ' + fs.length + ': ' + fs[i].name;
+            const src = await PDFLib.PDFDocument.load(await fs[i].arrayBuffer(), {ignoreEncryption:true});
+            const pages = await out.copyPages(src, src.getPageIndices());
+            pages.forEach(p => out.addPage(p));
+            setProgress('merge', ((i+1)/fs.length)*100, 'Merging ' + (i+1) + ' of ' + fs.length);
+            await new Promise(r=>setTimeout(r,0));
         }
-        let name = document.getElementById('mergeName').value || 'Merged_PDF.pdf';
-        if (!/\.pdf$/i.test(name)) name += '.pdf';
-        const blob = new Blob([await out.save()], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const aTag = document.createElement('a');
-        aTag.href = url;
-        aTag.download = name;
-        document.body.appendChild(aTag);
-        aTag.click();
-        aTag.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 3000);
-        document.getElementById('mergeStatus').textContent = '✅ Merge complete.';
-        addActivity('Merge PDF', fs.length + ' files merged');
-    } catch (e) {
-        document.getElementById('mergeStatus').textContent = 'Error: ' + e.message;
+
+        const bytes = await out.save({useObjectStreams:true});
+        downloadBlob(new Blob([bytes], {type:'application/pdf'}), document.getElementById('mergeName').value || 'Merged_PDF.pdf');
+        status.textContent = '✅ Merge complete.';
+        addActivity('Merge PDF', fs.length + ' PDF(s) merged');
+    } catch(e) {
+        status.textContent = '❌ Merge failed: ' + (e.message || e);
     }
 };
-
 window.createZip = async function() {
     const fs = [...document.getElementById('zipFiles').files];
-    if (!fs.length) {
-        alert('Select PDFs.');
-        return;
+    if (!fs.length) { alert('Select PDF files.'); return; }
+
+    const check = await checkPageLimit(fs, 'zip');
+    if (!check.allowed) return;
+
+    const status = document.getElementById('zipStatus');
+    setProgress('zip', 0, 'Creating ZIP...');
+
+    try {
+        const zip = new JSZip();
+        for (let i=0;i<fs.length;i++) {
+            status.textContent = 'Adding ' + (i+1) + ' of ' + fs.length + ': ' + fs[i].name;
+            zip.file(fs[i].name, await fs[i].arrayBuffer());
+            setProgress('zip', ((i+1)/fs.length)*100, 'Adding ' + (i+1) + ' of ' + fs.length);
+            await new Promise(r=>setTimeout(r,0));
+        }
+        const blob = await zip.generateAsync({type:'blob'}, meta => {
+            setProgress('zip', meta.percent, 'Building ZIP...');
+        });
+        downloadBlob(blob, document.getElementById('zipName').value || 'PDF_Files.zip');
+        status.textContent = '✅ ZIP created successfully.';
+        addActivity('Create ZIP', fs.length + ' PDF(s) zipped');
+    } catch(e) {
+        status.textContent = '❌ ZIP failed: ' + (e.message || e);
     }
-    const zipCheck = await checkPageLimit(fs, 'zipStatus');
-    if (!zipCheck) return;
-    consumePages(zipCheck.pages);
-    const z = new JSZip();
-    fs.forEach(f => z.file(f.name, f));
-    let name = document.getElementById('zipName').value || 'PDF_Files.zip';
-    if (!/\.zip$/i.test(name)) name += '.zip';
-    const blob = await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
-    const url = URL.createObjectURL(blob);
-    const aTag = document.createElement('a');
-    aTag.href = url;
-    aTag.download = name;
-    document.body.appendChild(aTag);
-    aTag.click();
-    aTag.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 3000);
-    document.getElementById('zipStatus').textContent = '✅ ' + fs.length + ' PDF(s) saved in ZIP.';
-    addActivity('Create ZIP', fs.length + ' PDF(s) zipped');
 };
+window.showLimitPopup = function(message) {
+    document.getElementById('limitPopupText').textContent = message;
+    document.getElementById('limitPopup').classList.add('show');
+};
+
+window.closeLimitPopup = function() {
+    document.getElementById('limitPopup').classList.remove('show');
+};
+
+window.buyPremiumFromLimit = function() {
+    closeLimitPopup();
+    if (typeof showPremium === 'function') showPremium();
+    else if (typeof openPremium === 'function') openPremium();
+};
+
+function setProgress(tool, percent, text) {
+    const wrap = document.getElementById(tool + 'Progress');
+    const fill = document.getElementById(tool + 'ProgressFill');
+    const pct = document.getElementById(tool + 'ProgressPct');
+    const label = document.getElementById(tool + 'ProgressText');
+    if (!wrap || !fill) return;
+
+    wrap.classList.add('show');
+    percent = Math.max(0, Math.min(100, Math.round(percent)));
+    fill.style.width = percent + '%';
+    if (pct) pct.textContent = percent + '%';
+    if (label) label.textContent = text || 'Processing...';
+}
+
+function hideProgress(tool) {
+    const wrap = document.getElementById(tool + 'Progress');
+    if (wrap) wrap.classList.remove('show');
+}
 
 // =============================================
 // SAFE DOWNLOAD HELPER
@@ -1445,5 +1490,15 @@ console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);
 console.log('📧 Forgot Password: Rate limiting enabled - 30 seconds cooldown');
 </script>
+
+<div class="limit-popup-overlay" id="limitPopup">
+  <div class="limit-popup">
+    <div class="limit-icon">🚫</div>
+    <h2>Limit Reached</h2>
+    <p id="limitPopupText">Your free PDF page limit has been reached.</p>
+    <button class="premium-buy" onclick="buyPremiumFromLimit()">⭐ Buy Premium Plan</button>
+    <button class="close-limit" onclick="closeLimitPopup()">Close</button>
+  </div>
+</div>
 </body>
 </html>

@@ -7,371 +7,235 @@
 <title>PDF Utility Hub by Anwar</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:#f5f7fb;color:#172033}
-button,input,select{font:inherit}
-.header{background:linear-gradient(135deg,#061735,#0b57d0 62%,#3157d8);color:#fff;padding:16px 28px 28px}
-.header-inner,.container{max-width:1450px;margin:auto}
-.top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.brandbox{display:flex;align-items:center;gap:12px}
-.logo{font-size:38px}
-.brand{font-size:27px;font-weight:850}
-.tag{font-size:13px;opacity:.85}
-.builder{background:#16a34a;border-radius:22px;padding:8px 15px;font-weight:800;font-size:13px}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b}
+.container{max-width:1320px;margin:auto;padding:0 20px}
+.header{background:linear-gradient(135deg,#0f172a,#1e3a8a 70%,#2563eb);color:#fff;padding:16px 0 24px}
+.header-inner{max-width:1320px;margin:auto;padding:0 20px}
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:700}
+.brand span{background:#facc15;color:#0f172a;padding:4px 12px;border-radius:20px;font-size:14px}
 .authbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.authbar button{border:1px solid #ffffff55;background:#ffffff12;color:#fff;padding:9px 13px;border-radius:9px;font-weight:800;cursor:pointer;font-size:12px;white-space:nowrap}
-.authbar .light{background:#fff;color:#12325f}
+.authbar button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 14px;border-radius:30px;font-weight:600;cursor:pointer;transition:.2s}
+.authbar button:hover{background:#fff;color:#1e3a8a}
+.authbar .light{background:#fff;color:#1e3a8a}
 .user-menu{position:relative;display:none}
-.user-btn{display:flex;align-items:center;gap:8px;background:#ffffff12;color:#fff;border:1px solid #ffffff44;border-radius:10px;padding:8px 11px;cursor:pointer;font-weight:800}
-.role{background:#7c3aed;color:#fff;border-radius:20px;padding:3px 7px;font-size:10px}
-.dropdown{display:none;position:absolute;right:0;top:46px;width:260px;background:#fff;color:#172033;border-radius:14px;box-shadow:0 18px 50px #0003;padding:10px;z-index:30}
+.user-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600}
+.dropdown{display:none;position:absolute;right:0;top:46px;width:250px;background:#fff;color:#1e293b;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);padding:10px;z-index:30}
 .dropdown.show{display:block}
-.drop-head{padding:10px;border-bottom:1px solid #e5e7eb;margin-bottom:6px}
-.drop-email{font-size:12px;color:#667085}
-.drop-item{width:100%;border:0;background:#fff;text-align:left;padding:11px;border-radius:9px;cursor:pointer;font-size:13px}
-.drop-item:hover{background:#f3f6fb}
+.drop-item{width:100%;border:0;background:#fff;text-align:left;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s}
+.drop-item:hover{background:#eef2f6}
 .drop-item.danger{color:#dc2626}
-.hero{max-width:1450px;margin:22px auto 0}
-.hero h1{margin:0;font-size:23px}
-.hero p{margin:5px 0 0;opacity:.84;font-size:13px}
-.container{padding:0 18px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
-.stat,.tools-card,.activity-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 6px 22px #12264d0b}
-.stat{padding:17px;display:flex;gap:12px}
-.icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none}
-.i-blue{background:#e8f0ff}
-.i-green{background:#e3f8ec}
-.i-purple{background:#eee8ff}
-.i-orange{background:#fff0dc}
-.stat-title{font-size:13px;color:#475467}
-.stat-value{font-size:21px;font-weight:850;margin:4px 0}
-.stat-note{font-size:11px;color:#667085}
-.progress{height:7px;background:#e5eaf2;border-radius:8px;overflow:hidden;margin:7px 0}
-.progress span{display:block;height:100%;background:#1463e6;border-radius:8px}
-.tools-card{padding:20px;margin-top:15px}
-.section-title{font-size:20px;font-weight:850;margin:0 0 15px}
-.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.tool{border:1px solid #e2e6ee;border-radius:15px;padding:16px}
-.tool h3{margin:8px 0 6px;font-size:16px}
-.tool p{margin:0;color:#667085;font-size:12px;line-height:1.55;min-height:38px}
-.tool button{margin-top:13px;width:100%;border:0;border-radius:9px;color:#fff;padding:10px;font-weight:800;cursor:pointer}
-.bluebtn{background:#1463e6}
+.hero{margin:20px 0 12px}
+.hero h1{font-size:26px;font-weight:800;margin:0}
+.hero p{color:rgba(255,255,255,.85);font-size:15px;margin:4px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.stat-title{font-size:13px;color:#64748b;font-weight:600}
+.stat-value{font-size:22px;font-weight:800;margin:4px 0 2px}
+.stat-note{font-size:12px;color:#64748b}
+.progress{height:6px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin:6px 0}
+.progress span{display:block;height:100%;background:#2563eb;border-radius:8px}
+.tools-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.section-title{font-size:22px;font-weight:800;margin:0 0 16px}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tool{border:1px solid #e2e8f0;border-radius:16px;padding:18px;background:#fafcff;transition:.2s}
+.tool:hover{border-color:#94a3b8;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.tool h3{font-size:17px;margin:8px 0 4px}
+.tool p{color:#475569;font-size:13px;line-height:1.5;min-height:40px}
+.tool button{width:100%;border:0;border-radius:12px;color:#fff;padding:10px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.bluebtn{background:#2563eb}
 .greenbtn{background:#16a34a}
-.purplebtn{background:#6d42e8}
-.orangebtn{background:#f28a17}
-.workspace{display:none;margin-top:15px}
+.purplebtn{background:#7c3aed}
+.orangebtn{background:#ea580c}
+.workspace{display:none;margin:20px 0}
 .workspace.active{display:block}
-.workspace .box{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:20px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.tab{border:1px solid #dbe1ea;background:#fff;padding:9px 14px;border-radius:9px;font-weight:800;cursor:pointer;color:#475467}
-.tab.active{background:#eaf1ff;color:#1463e6;border-color:#bfd3ff}
-label{display:block;font-size:13px;font-weight:800;margin:12px 0 6px}
-input,select{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;outline:none}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.action{width:100%;border:0;border-radius:9px;padding:11px;color:#fff;font-weight:850;cursor:pointer;margin-top:9px}
-.status{padding:11px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px;margin-top:11px;font-size:13px}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th,td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:12px;text-align:left}
-th{background:#f8fafc}
-.good{color:#16a34a;font-weight:800}
-.bad{color:#dc2626;font-weight:800}
-.lower{display:grid;grid-template-columns:1fr;gap:15px;margin-top:15px}
-.activity-card{padding:20px}
-.activity-table{width:100%;border-collapse:collapse}
-.activity-table td,.activity-table th{padding:10px;border-bottom:1px solid #e5e7eb;font-size:12px}
-.complete{color:#16a34a;font-weight:800}
-.premium-banner{margin-top:15px;background:linear-gradient(110deg,#fff7e6,#f2ebff);border:1px solid #eadcf9;border-radius:18px;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
-.premium-banner h2{margin:0 0 5px;font-size:19px}
-.premium-banner p{margin:0;color:#667085;font-size:12px}
-.plan-actions{display:flex;gap:8px;flex-wrap:wrap}
-.plan-btn{border:0;border-radius:9px;padding:11px 16px;color:#fff;font-weight:850;cursor:pointer}
-.footer{text-align:center;background:#09172f;color:#fff;padding:20px;font-size:12px;margin-top:25px}
-.footer b{color:#69d18a}
-.modal{display:none;position:fixed;inset:0;background:#0b173bcc;z-index:1000;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.workspace .box{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:1px solid #e2e8f0;background:#f8fafc;padding:10px 18px;border-radius:30px;font-weight:600;cursor:pointer;color:#475569;transition:.2s}
+.tab.active{background:#dbeafe;color:#1e3a8a;border-color:#93c5fd}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px;color:#334155}
+input,select{width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;outline:none;font-size:14px;transition:.2s}
+input:focus,select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.action{width:100%;border:0;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;margin-top:8px;transition:.2s}
+.action:disabled{opacity:.5;cursor:not-allowed}
+.status{padding:12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;margin-top:12px;font-size:14px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+th,td{padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f8fafc;font-weight:600}
+.processing-progress{display:none;margin-top:12px}
+.processing-progress.show{display:block}
+.processing-progress .bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.processing-progress .fill{height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .15s ease}
+.processing-progress .line{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-top:4px;color:#475569}
+.premium-banner{margin:20px 0;background:linear-gradient(110deg,#fef9c3,#e0e7ff);border:1px solid #fde047;border-radius:20px;padding:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.premium-banner h2{margin:0;font-size:20px}
+.premium-banner p{margin:4px 0 0;color:#475569}
+.plan-btn{border:0;border-radius:30px;padding:10px 20px;color:#fff;font-weight:700;cursor:pointer;transition:.2s}
+.plan-btn:hover{transform:scale(1.02)}
+.footer{text-align:center;background:#0f172a;color:#cbd5e1;padding:20px;font-size:14px;margin-top:30px}
+.footer b{color:#facc15}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .modal.show{display:flex}
-.modal-card{width:min(460px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 25px 80px #0004;position:relative}
-.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:#fff;z-index:3;padding-bottom:10px;border-bottom:1px solid #eef2f6}
+.modal-card{width:min(480px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .modal-head h3{margin:0;font-size:20px}
-.modal-tools{display:flex;gap:6px}
-.modal-tools button{width:34px;height:34px;flex:none;border:0;border-radius:8px;cursor:pointer;font-weight:900;background:#eef2f7;color:#344054}
+.modal-tools button{width:36px;height:36px;border:0;border-radius:50%;background:#e2e8f0;cursor:pointer;font-weight:700;transition:.2s}
 .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
-.register-container{max-width:420px;margin:0 auto;padding:5px 0}
-.register-container .social-login{display:flex;gap:12px;justify-content:center;margin:16px 0}
-.register-container .social-btn{flex:1;padding:10px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;cursor:pointer;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px}
-.register-container .social-btn:hover{background:#f8fafc;border-color:#1463e6}
-.register-container .social-btn .icon{font-size:18px}
-.register-container .social-btn.facebook .icon{color:#1877f2}
-.register-container .social-btn.google .icon{color:#ea4335}
-.register-container .social-btn.sso .icon{color:#6d42e8}
+.register-container .social-login{display:flex;gap:12px;margin:12px 0}
+.register-container .social-btn{flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.register-container .social-btn:hover{background:#f1f5f9}
 .register-container .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0}
-.register-container .auth-divider hr{flex:1;border:0;border-top:1px solid #e5e7eb}
-.register-container .auth-divider span{color:#667085;font-size:12px}
+.register-container .auth-divider hr{flex:1;border:0;border-top:1px solid #e2e8f0}
+.register-container .auth-divider span{color:#64748b;font-size:13px}
 .register-container .form-group{margin-bottom:14px}
-.register-container .form-group label{display:block;font-size:12px;font-weight:600;color:#475467;margin-bottom:4px}
-.register-container .form-group input{width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px;background:#fff;outline:none}
-.register-container .form-group input:focus{border-color:#1463e6;box-shadow:0 0 0 3px rgba(20,99,230,0.1)}
-.register-container .register-btn{width:100%;padding:12px;background:#1463e6;color:#fff;border:0;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;margin-top:6px}
-.register-container .register-btn:hover{background:#0b4fb0}
-.register-container .register-btn:disabled{opacity:0.6}
-.register-container .login-link{text-align:center;margin-top:14px;font-size:13px;color:#475467}
-.register-container .login-link a{color:#1463e6;font-weight:600;cursor:pointer;text-decoration:none}
-.register-container .login-link a:hover{text-decoration:underline}
-.register-container .terms-text{font-size:11px;color:#667085;text-align:center;margin-top:12px;line-height:1.5}
-.register-container .terms-text a{color:#1463e6;text-decoration:none}
-.register-container .terms-text a:hover{text-decoration:underline}
-.register-container .status-msg{padding:10px 12px;border-radius:9px;font-size:13px;margin-top:10px}
+.register-container .register-btn{width:100%;padding:12px;background:#2563eb;color:#fff;border:0;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s}
+.register-container .register-btn:hover{background:#1d4ed8}
+.register-container .login-link{text-align:center;margin-top:14px;font-size:14px;color:#475569}
+.register-container .login-link a{color:#2563eb;font-weight:600;cursor:pointer;text-decoration:none}
+.register-container .status-msg{padding:10px 14px;border-radius:12px;font-size:14px;margin-top:10px}
 .register-container .status-msg.success{background:#ecfdf3;color:#166534;border:1px solid #bbf7d0}
 .register-container .status-msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .register-container .status-msg.info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
-.auth-buttons{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.user-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;margin-left:8px}
-.user-badge.admin{background:#1a4a7a;color:#fff}
-.user-badge.premium{background:#4a2a7a;color:#fff}
-.user-badge.registered{background:#1463e6;color:#fff}
-.user-badge.guest{background:#6b7280;color:#fff}
-.upi{font-family:monospace;background:#f8fafc;border:1px dashed #cbd5e1;padding:10px;border-radius:9px;margin:8px 0;word-break:break-all}
-.qr-wrap{display:flex;justify-content:center;margin:12px 0}
-.qr-box{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center}
-.qr-box small{display:block;color:#667085;margin-top:7px}
-.payment-plan{border:1px solid #e4e7ec;border-radius:13px;padding:14px;margin:9px 0}
-.payment-plan strong{font-size:18px}
-.premium-overlay{position:fixed;inset:0;background:#0b173bcc;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
-.premium-overlay.show{display:flex}
-.premium-overlay .modal-card{max-width:380px;width:100%}
-.payment-minimized{display:flex!important;inset:auto 18px 18px auto!important;width:auto!important;height:auto!important;background:transparent!important;align-items:flex-end!important;justify-content:flex-end!important}
-.payment-minimized .modal-card{width:220px!important;padding:12px!important;border-radius:12px!important}
-.payment-minimized .modal-card>*:not(.modal-head){display:none}
-.payment-minimized .modal-head h3{font-size:13px}
-.payment-minimized .modal-tools button{width:28px;height:28px}
-body.admin-theme{background:#e8edf5}
-body.admin-theme .header{background:linear-gradient(135deg,#1a2a4a,#2a4a7a 62%,#3a5a8a)!important}
-body.admin-theme .stat,body.admin-theme .tools-card,body.admin-theme .activity-card,body.admin-theme .workspace .box,
-body.admin-theme .tool,body.admin-theme .dropdown,body.admin-theme .drop-head,body.admin-theme .drop-item,
-body.admin-theme .modal-card,body.admin-theme .modal-head{background:#ffffff;border-color:#d0d8e0;color:#172033}
-body.admin-theme .stat-title,body.admin-theme .stat-note,body.admin-theme .tool p{color:#475467}
-body.admin-theme .status,body.admin-theme table th,body.admin-theme .modal-card .status,
-body.admin-theme .modal-card input,body.admin-theme .modal-card select,
-body.admin-theme .modal-card .upi,body.admin-theme .payment-plan{background:#f0f4fa;border-color:#d0d8e0;color:#172033}
-body.admin-theme table td{color:#475467;border-color:#d0d8e0}
-body.admin-theme .tabs .tab{background:#ffffff;border-color:#d0d8e0;color:#475467}
-body.admin-theme .tabs .tab.active{background:#e0e8f5;color:#1a4a7a;border-color:#3a7aae}
-body.admin-theme .progress{background:#d0d8e0}
-body.admin-theme .icon.i-blue{background:#d0e0f5;color:#1a4a7a}
-body.admin-theme .icon.i-green{background:#d0f0d8;color:#1a6a3a}
-body.admin-theme .icon.i-purple{background:#e0d0f5;color:#5a3a8a}
-body.admin-theme .icon.i-orange{background:#f5e8d0;color:#b87a2a}
-body.admin-theme .authbar button{color:#ffffff}
-body.admin-theme .authbar .light{background:#2a4a7a;color:#ffffff}
-body.admin-theme .footer{background:#1a2a4a}
-body.admin-theme .footer b{color:#6a9ad0}
-body.admin-theme .drop-item:hover{background:#e8edf5}
-body.admin-theme .modal-tools button{background:#e8edf5;color:#344054}
-body.admin-theme .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
-body.admin-theme .premium-banner{background:linear-gradient(110deg,#e8f0ff,#f0e8ff);border-color:#c0d0e8}
-body.admin-theme .premium-banner h2{color:#172033}
-body.admin-theme .premium-banner p{color:#475467}
-body.premium-theme{background:#f0ecf5}
-body.premium-theme .header{background:linear-gradient(135deg,#2a1a4a,#4a2a7a 62%,#5a3a8a)!important}
-body.premium-theme .stat,body.premium-theme .tools-card,body.premium-theme .activity-card,body.premium-theme .workspace .box,
-body.premium-theme .tool,body.premium-theme .dropdown,body.premium-theme .drop-head,body.premium-theme .drop-item,
-body.premium-theme .modal-card,body.premium-theme .modal-head{background:#ffffff;border-color:#d8d0e0;color:#172033}
-body.premium-theme .stat-title,body.premium-theme .stat-note,body.premium-theme .tool p{color:#475467}
-body.premium-theme .status,body.premium-theme table th,body.premium-theme .modal-card .status,
-body.premium-theme .modal-card input,body.premium-theme .modal-card select,
-body.premium-theme .modal-card .upi,body.premium-theme .payment-plan{background:#f4f0fa;border-color:#d8d0e0;color:#172033}
-body.premium-theme table td{color:#475467;border-color:#d8d0e0}
-body.premium-theme .tabs .tab{background:#ffffff;border-color:#d8d0e0;color:#475467}
-body.premium-theme .tabs .tab.active{background:#f0e8f5;color:#4a2a7a;border-color:#7a4aae}
-body.premium-theme .progress{background:#d8d0e0}
-body.premium-theme .icon.i-blue{background:#e0d8f5;color:#3a2a7a}
-body.premium-theme .icon.i-green{background:#d0f0d8;color:#1a6a3a}
-body.premium-theme .icon.i-purple{background:#e8d8f5;color:#5a3a8a}
-body.premium-theme .icon.i-orange{background:#f5e8d0;color:#b87a2a}
-body.premium-theme .authbar button{color:#ffffff}
-body.premium-theme .authbar .light{background:#4a2a7a;color:#ffffff}
-body.premium-theme .footer{background:#2a1a4a}
-body.premium-theme .footer b{color:#9a7ad0}
-body.premium-theme .drop-item:hover{background:#f0ecf5}
-body.premium-theme .modal-tools button{background:#f0ecf5;color:#344054}
-body.premium-theme .modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
-body.premium-theme .premium-banner{background:linear-gradient(110deg,#f0e8ff,#f8e8f0);border-color:#d8c0e8}
-body.premium-theme .premium-banner h2{color:#172033}
-body.premium-theme .premium-banner p{color:#475467}
-@media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:650px){.modal{padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:13px}.modal-head h3{font-size:16px}.modal-tools button{width:32px;height:32px}.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
-</style>
-
-<style>
-#adminPaymentRows td small{color:#667085}
-#adminModal .modal-card{max-width:900px}
-.action:disabled{opacity:.55;cursor:not-allowed}
-button{touch-action:manipulation}
-</style>
-
-<style id="fixed-progress-css">
-.processing-progress{display:none;margin-top:10px}
-.processing-progress.show{display:block}
-.processing-progress .bar{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden}
-.processing-progress .fill{height:100%;width:0%;background:linear-gradient(90deg,#1463e6,#7c3aed);transition:width .12s ease}
-.processing-progress .line{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:800;margin-top:5px;color:#475467}
-.limit-popup{position:fixed;inset:0;background:rgba(11,23,47,.72);z-index:99999;display:none;align-items:center;justify-content:center;padding:18px}
+.limit-popup{position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
 .limit-popup.show{display:flex}
-.limit-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:25px;box-shadow:0 25px 80px #0005;text-align:center}
-.limit-card h2{margin:8px 0;color:#172033}
-.limit-card p{color:#667085;line-height:1.55}
-.limit-card button{width:100%;border:0;border-radius:10px;padding:12px;margin-top:9px;font-weight:850;cursor:pointer}
-.limit-card .buy{background:#6d42e8;color:#fff}
-.limit-card .close{background:#e5e7eb;color:#172033}
+.limit-card{width:min(400px,100%);background:#fff;border-radius:24px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.25);text-align:center}
+.limit-card h2{margin:8px 0;color:#0f172a}
+.limit-card p{color:#475569;line-height:1.6}
+.limit-card button{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font-weight:700;cursor:pointer;transition:.2s}
+.limit-card .buy{background:#7c3aed;color:#fff}
+.limit-card .close{background:#e2e8f0;color:#0f172a}
+@media(max-width:768px){.tools,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.header{padding:12px 0}.brand{font-size:18px}.authbar{width:100%;justify-content:flex-end}}
 </style>
 </head>
 <body>
 <header class="header"><div class="header-inner">
 <div class="top">
-<div class="brandbox"><div class="logo">📄</div><div><div class="brand">PDF Utility Hub</div><div class="tag">Professional PDF Workspace</div></div></div>
-<div class="builder">⭐ Build by Anwar</div>
+<div class="brand">📄 PDF Utility Hub <span>by Anwar</span></div>
 <div class="authbar">
 <div id="userMenu" class="user-menu">
-<button id="userBtn" class="user-btn" onclick="toggleDropdown()">👤 <span id="userShort">Account</span> <span id="role" class="role">GUEST</span> ▾</button>
+<button id="userBtn" class="user-btn" onclick="toggleDropdown()">👤 <span id="userShort">Account</span> ▾</button>
 <div id="dropdown" class="dropdown">
-<div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div><div style="margin-top:6px" id="dropPlan">👤 GUEST — 20 PAGES</div></div>
-<button class="drop-item" onclick="openProfile()">⚙️ Account Settings</button>
-<button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade to Premium</button>
+<div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div></div>
+<button class="drop-item" onclick="openProfile()">⚙️ Settings</button>
+<button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade</button>
 <button class="drop-item" id="adminBtn" style="display:none" onclick="openAdminDashboard()">🛡️ Admin Dashboard</button>
 <button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
 </div></div>
-<div class="auth-buttons">
 <button id="loginBtn" class="light" onclick="showLogin()">🔐 Login</button>
 <button id="registerBtn" class="light" onclick="showRegister()">✨ Register</button>
-<button id="adminLoginBtn" class="light" onclick="showAdminLogin()">🛡️ Admin Login</button>
-<button id="settingsBtn" class="light" onclick="openSettings()">⚙️ Settings</button>
-</div>
 </div></div>
-<div class="hero"><h1 id="welcomeTitle">👋 Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, compress, merge and ZIP your PDF files directly in your browser.</p></div>
+<div class="hero"><h1 id="welcomeTitle">👋 Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, Compress, Merge & ZIP PDFs in your browser.</p></div>
 </div></header>
 
 <main class="container">
 <section class="stats">
-<div class="stat"><div class="icon i-purple">📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 <small>/ 20</small></div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">👤 Guest: 20 pages limit</div></div></div>
-<div class="stat"><div class="icon i-green">👤</div><div><div class="stat-title">Account Type</div><div class="stat-value" id="accountType">👤 GUEST</div><div class="stat-note" id="accountNote">20 pages limit</div></div></div>
-<div class="stat"><div class="icon i-blue">♾️</div><div><div class="stat-title">Plan</div><div class="stat-value" id="planValue">Free</div><div class="stat-note" id="planNote">₹400 / 6 Months</div></div></div>
-<div class="stat"><div class="icon i-orange">🌍</div><div><div class="stat-title">Country</div><div class="stat-value" id="countryValue">India</div><div class="stat-note">Account setting</div></div></div>
+<div class="stat"><div>📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 / 20</div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">Guest: 20 pages</div></div></div>
+<div class="stat"><div>👤</div><div><div class="stat-title">Account</div><div class="stat-value" id="accountType">GUEST</div><div class="stat-note" id="accountNote">20 pages limit</div></div></div>
+<div class="stat"><div>⭐</div><div><div class="stat-title">Plan</div><div class="stat-value" id="planValue">Free</div><div class="stat-note" id="planNote">Upgrade to Unlimited</div></div></div>
 </section>
 
 <section class="premium-banner">
-<div><h2>⭐ Go Premium — Work Without Limits</h2><p>👤 Guest: 20 pages &nbsp;•&nbsp; 📝 Registered: 50 pages &nbsp;•&nbsp; ⭐ Premium/Admin: Unlimited</p></div>
-<div class="plan-actions"><button class="plan-btn purplebtn" onclick="openPayment('6')">₹400 / 6 Months</button><button class="plan-btn orangebtn" onclick="openPayment('12')">₹700 / 1 Year</button></div>
+<div><h2>⭐ Go Premium – Unlimited Pages</h2><p>Guest: 20 • Registered: 50 • Premium: ♾️ Unlimited</p></div>
+<div><button class="plan-btn purplebtn" onclick="openPayment('6')">₹400 / 6mo</button><button class="plan-btn orangebtn" onclick="openPayment('12')">₹700 / 1yr</button></div>
 </section>
 
-<section class="tools-card"><h2 class="section-title">PDF Workspace</h2><div class="tools">
-<div class="tool"><div class="icon i-blue">🔎</div><h3>PDF Search</h3><p>Search PDF files from Excel using names or proposals.</p><button class="bluebtn" onclick="openTool('search')">Open Tool →</button></div>
-<div class="tool"><div class="icon i-green">🗜️</div><h3>Compress PDF</h3><p>Compress multiple PDF files toward your selected target size.</p><button class="greenbtn" onclick="openTool('compress')">Open Tool →</button></div>
-<div class="tool"><div class="icon i-purple">🔗</div><h3>Merge PDF</h3><p>Merge multiple PDF files into one PDF document.</p><button class="purplebtn" onclick="openTool('merge')">Open Tool →</button></div>
-<div class="tool"><div class="icon i-orange">📦</div><h3>Create ZIP</h3><p>Create a ZIP file from multiple PDF files.</p><button class="orangebtn" onclick="openTool('zip')">Open Tool →</button></div>
+<section class="tools-card"><h2 class="section-title">📌 PDF Tools</h2><div class="tools">
+<div class="tool"><h3>🔎 Search</h3><p>Find PDFs from Excel list.</p><button class="bluebtn" onclick="openTool('search')">Open →</button></div>
+<div class="tool"><h3>🗜️ Compress</h3><p>Reduce PDF size up to 80%.</p><button class="greenbtn" onclick="openTool('compress')">Open →</button></div>
+<div class="tool"><h3>🔗 Merge</h3><p>Combine multiple PDFs.</p><button class="purplebtn" onclick="openTool('merge')">Open →</button></div>
+<div class="tool"><h3>📦 ZIP</h3><p>Pack PDFs into ZIP.</p><button class="orangebtn" onclick="openTool('zip')">Open →</button></div>
 </div></section>
 
 <section class="workspace" id="workspace"><div class="box">
 <div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
-<div id="tool-search"><h2>Search PDFs from Excel</h2><label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf,application/pdf" multiple><label>Excel File</label><input id="searchExcel" type="file" accept=".xlsx,.xls"><div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">DOWNLOAD SELECTED ZIP</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">MERGE SELECTED</button></div><div id="searchStatus" class="status">Ready</div>
-<div id="searchProgress" class="processing-progress"><div class="bar"><div id="searchProgressFill" class="fill"></div></div><div class="line"><span id="searchProgressLine">Processing...</span><span id="searchProgressPct">0%</span></div></div><table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table></div>
-<div id="tool-compress" style="display:none"><h2>Compress Multiple PDFs</h2><label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf,application/pdf" multiple><div class="grid2"><div><label>Target Maximum Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div><div><label>Quality</label><select id="quality"><option value="strong" selected>Maximum Compression — Target ~80% Smaller</option><option value="medium">Balanced — Target ~60% Smaller</option><option value="light">High Quality</option></select></div></div><div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div><div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">DOWNLOAD COMPRESSED ZIP</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">MERGE COMPRESSED</button></div><div id="compressStatus" class="status">Ready — Select PDF files.</div>
-<div id="compressProgress" class="processing-progress"><div class="bar"><div id="compressProgressFill" class="fill"></div></div><div class="line"><span id="compressProgressLine">Processing...</span><span id="compressProgressPct">0%</span></div></div><table><thead><tr><th>PDF</th><th>Original</th><th>Output</th><th>Result</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table></div>
-<div id="tool-merge" style="display:none"><h2>Merge PDFs</h2><label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf,application/pdf" multiple><label>Output File Name</label><input id="mergeName" value="Merged_PDF.pdf"><button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button><div id="mergeStatus" class="status">Ready — Select at least 2 PDFs.</div>
-<div id="mergeProgress" class="processing-progress"><div class="bar"><div id="mergeProgressFill" class="fill"></div></div><div class="line"><span id="mergeProgressLine">Processing...</span><span id="mergeProgressPct">0%</span></div></div></div>
-<div id="tool-zip" style="display:none"><h2>Create ZIP from PDFs</h2><label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf,application/pdf" multiple><label>ZIP File Name</label><input id="zipName" value="PDF_Files.zip"><button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button><div id="zipStatus" class="status">Ready — Select PDF files.</div>
-<div id="zipProgress" class="processing-progress"><div class="bar"><div id="zipProgressFill" class="fill"></div></div><div class="line"><span id="zipProgressLine">Processing...</span><span id="zipProgressPct">0%</span></div></div></div>
+
+<!-- Search -->
+<div id="tool-search"><h3>🔎 Search PDFs from Excel</h3>
+<label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf" multiple>
+<label>Excel File (.xlsx)</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
+<div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div>
+<div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">📦 ZIP SELECTED</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">🔗 MERGE SELECTED</button></div>
+<div id="searchStatus" class="status">Ready</div>
+<div id="searchProgress" class="processing-progress"><div class="bar"><div id="searchProgressFill" class="fill"></div></div><div class="line"><span id="searchProgressLine">Processing...</span><span id="searchProgressPct">0%</span></div></div>
+<table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
+</div>
+
+<!-- Compress (FIXED) -->
+<div id="tool-compress" style="display:none"><h3>🗜️ Compress PDFs (up to 80% smaller)</h3>
+<label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf" multiple>
+<div class="grid2"><div><label>Target Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div>
+<div><label>Quality</label><select id="quality"><option value="strong" selected>Maximum (80% smaller)</option><option value="medium">Balanced (60%)</option><option value="light">High Quality</option></select></div></div>
+<div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div>
+<div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">📦 ZIP COMPRESSED</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">🔗 MERGE COMPRESSED</button></div>
+<div id="compressStatus" class="status">Ready — select PDFs.</div>
+<div id="compressProgress" class="processing-progress"><div class="bar"><div id="compressProgressFill" class="fill"></div></div><div class="line"><span id="compressProgressLine">Processing...</span><span id="compressProgressPct">0%</span></div></div>
+<table><thead><tr><th>PDF</th><th>Original</th><th>Compressed</th><th>Reduction</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
+</div>
+
+<!-- Merge -->
+<div id="tool-merge" style="display:none"><h3>🔗 Merge PDFs</h3>
+<label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf" multiple>
+<label>Output Name</label><input id="mergeName" value="Merged.pdf">
+<button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button>
+<div id="mergeStatus" class="status">Ready — select at least 2 PDFs.</div>
+<div id="mergeProgress" class="processing-progress"><div class="bar"><div id="mergeProgressFill" class="fill"></div></div><div class="line"><span id="mergeProgressLine">Processing...</span><span id="mergeProgressPct">0%</span></div></div>
+</div>
+
+<!-- ZIP -->
+<div id="tool-zip" style="display:none"><h3>📦 Create ZIP</h3>
+<label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf" multiple>
+<label>ZIP Name</label><input id="zipName" value="PDFs.zip">
+<button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button>
+<div id="zipStatus" class="status">Ready — select PDFs.</div>
+<div id="zipProgress" class="processing-progress"><div class="bar"><div id="zipProgressFill" class="fill"></div></div><div class="line"><span id="zipProgressLine">Processing...</span><span id="zipProgressPct">0%</span></div></div>
+</div>
+
 </div></section>
-
-<section class="lower"><div class="activity-card"><h2 class="section-title">Recent Activity</h2><table class="activity-table"><thead><tr><th>Tool</th><th>Details</th><th>Status</th><th>Time</th></tr></thead><tbody id="activityBody"><tr><td>—</td><td>No activity yet</td><td>—</td><td>—</td></tr></tbody></table></div></section>
 </main>
-<footer class="footer">© 2026 PDF Utility Hub &nbsp;•&nbsp; <b>Build by Anwar</b> &nbsp;•&nbsp; Professional PDF Tools</footer>
+<footer class="footer">© 2026 PDF Utility Hub · <b>Build by Anwar</b> · Professional PDF Tools</footer>
 
-<!-- REGISTER MODAL -->
-<div class="modal" id="authModal"><div class="modal-card">
-<div class="modal-head"><h3>📝 Create your account</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
-<div class="register-container">
-  <div class="social-login">
-    <button class="social-btn facebook" onclick="showRegStatus('Facebook login coming soon!','info')"><span class="icon">f</span> Facebook</button>
-    <button class="social-btn google" onclick="showRegStatus('Google login coming soon!','info')"><span class="icon">G</span> Google</button>
-    <button class="social-btn sso" onclick="showRegStatus('SSO login coming soon!','info')"><span class="icon">🔑</span> SSO</button>
-  </div>
-  <div class="auth-divider"><hr><span>or sign up with email</span><hr></div>
-  <div class="form-group"><label>Full Name</label><input id="regName" type="text" placeholder="Enter your full name"></div>
-  <div class="form-group"><label>Email Address</label><input id="regEmail" type="email" placeholder="Enter your email address"></div>
-  <div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Create a password (min 6 characters)"></div>
-  <div id="regStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" onclick="handleRegister()">📝 Sign up</button>
-  <div class="login-link">Already member? <a onclick="switchToLogin()">Log in</a></div>
-  <div class="terms-text">By creating an account, you agree to PDF Utility Hub <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></div>
-</div>
+<!-- Modals -->
+<div class="modal" id="authModal"><div class="modal-card"><div class="modal-head"><h3>📝 Create Account</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div class="form-group"><label>Full Name</label><input id="regName" placeholder="Name"></div>
+<div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="Email"></div>
+<div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Min 6 chars"></div>
+<div id="regStatus" class="status-msg" style="display:none"></div>
+<button class="register-btn" onclick="handleRegister()">Sign up</button>
+<div class="login-link">Already a member? <a onclick="switchToLogin()">Login</a></div>
+</div></div></div>
+
+<div class="modal" id="loginModal"><div class="modal-card"><div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div>
+<div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div>
+<div id="loginStatus" class="status-msg" style="display:none"></div>
+<button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button>
+<div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div>
+</div></div></div>
+
+<div class="modal" id="paymentModal"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div id="paymentDetails"></div>
+<label>UPI ID</label><div class="upi" style="background:#f1f5f9;padding:12px;border-radius:12px;font-family:monospace;font-size:16px;text-align:center;margin:8px 0">md.anwar18@ybl</div>
+<div class="qr-wrap" style="text-align:center;margin:12px 0"><div id="upiQr"></div></div>
+<label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR">
+<button class="action bluebtn" onclick="submitPayment()">SUBMIT FOR APPROVAL</button>
+<div id="paymentMsg" class="status">Admin will verify and activate.</div>
 </div></div>
 
-<!-- LOGIN MODAL -->
-<div class="modal" id="loginModal"><div class="modal-card">
-<div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
-<div class="register-container">
-  <div class="social-login">
-    <button class="social-btn facebook" onclick="showLoginStatus('Facebook login coming soon!','info')"><span class="icon">f</span> Facebook</button>
-    <button class="social-btn google" onclick="showLoginStatus('Google login coming soon!','info')"><span class="icon">G</span> Google</button>
-    <button class="social-btn sso" onclick="showLoginStatus('SSO login coming soon!','info')"><span class="icon">🔑</span> SSO</button>
-  </div>
-  <div class="auth-divider"><hr><span>or login with email</span><hr></div>
-  <div class="form-group"><label>Email Address</label><input id="loginEmail" type="email" placeholder="Enter your email address"></div>
-  <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Enter your password"></div>
-  
-  <div style="text-align:right;margin-bottom:12px">
-    <a onclick="showForgotPassword()" style="color:#1463e6;cursor:pointer;font-size:12px;text-decoration:none">🔑 Forgot Password?</a>
-  </div>
-  
-  <div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border-radius:9px;border:1px solid #e5e7eb">
-    <div class="form-group" style="margin-bottom:8px">
-      <label style="font-size:13px;font-weight:600;color:#475467">📧 Email for reset</label>
-      <input id="resetEmail" type="email" placeholder="Enter your registered email address" style="width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:9px;font-size:14px;outline:none">
-    </div>
-    <button class="register-btn" style="background:#f28a17;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button>
-    <button class="register-btn" style="background:#e5e7eb;color:#172033;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button>
-  </div>
-  
-  <div id="loginStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">🔐 Login</button>
-  <div class="login-link">Don't have an account? <a onclick="switchToRegister()">Sign up</a></div>
-</div>
+<!-- Admin Dashboard Modal -->
+<div class="modal" id="adminModal"><div class="modal-card" style="width:min(800px,100%)"><div class="modal-head"><h3>🛡️ Admin Dashboard</h3><div class="modal-tools"><button onclick="loadAdminData()">↻</button><button class="close-pay" onclick="hideAdminDashboard()">✕</button></div></div>
+<div class="status" id="adminStatus">Loading admin data...</div>
+<div style="overflow:auto"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
 </div></div>
 
-<!-- Settings Modal -->
-<div class="modal" id="settingsModal"><div class="modal-card"><div class="modal-head"><h3>⚙️ Settings</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div><label>Country</label><select id="settingsCountry"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><button class="action greenbtn" onclick="saveSettings()">SAVE SETTINGS</button><div id="settingsMsg" class="status">Choose your country and save.</div></div></div>
-
-<div class="modal" id="profileModal"><div class="modal-card"><h3>⚙️ Account Settings</h3><label>Country</label><select id="countrySelect"><option>India</option><option>United States</option><option>United Kingdom</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Bangladesh</option><option>Nepal</option><option>Pakistan</option><option>Australia</option><option>Canada</option><option>Singapore</option><option>Other</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="greenbtn" onclick="saveProfile()">Save</button><button style="background:#e5e7eb;border:0;border-radius:9px;padding:10px;font-weight:800;cursor:pointer" onclick="hideAllModals()">Close</button></div></div></div>
-
-<div class="modal" id="paymentModal"><div class="modal-card" id="paymentCard"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button onclick="toggleMinimize()">—</button><button class="close-pay" onclick="hideAllModals()">✕</button></div></div><div id="paymentDetails"></div><label>UPI ID</label><div class="upi" id="upiText">md.anwar18@ybl</div><div class="qr-wrap"><div class="qr-box"><div id="upiQr"></div><small>Scan to pay with any UPI app</small></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="greenbtn" onclick="copyUPI()">COPY UPI</button><button class="purplebtn" onclick="openUPIApp()">OPEN UPI APP</button></div><label>Transaction ID / UTR</label><input id="utr" placeholder="Enter payment transaction ID"><button class="action bluebtn" onclick="submitPayment()">SUBMIT PAYMENT FOR APPROVAL</button><div id="paymentMsg" class="status">Payment will be activated after admin verification.</div><button class="action" style="background:#e5e7eb;color:#111" onclick="hideAllModals()">Close</button></div></div>
-
-
-<!-- ADMIN DASHBOARD MODAL -->
-<div class="modal" id="adminModal">
-  <div class="modal-card" style="width:min(900px,100%)">
-    <div class="modal-head">
-      <h3>🛡️ Admin Dashboard</h3>
-      <div class="modal-tools">
-        <button onclick="loadAdminData()">↻</button>
-        <button class="close-pay" onclick="hideAdminDashboard()">✕</button>
-      </div>
-    </div>
-    <div class="status" id="adminStatus">Loading admin data...</div>
-    <div style="overflow:auto">
-      <table>
-        <thead>
-          <tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr>
-        </thead>
-        <tbody id="adminPaymentRows"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="premium-overlay" id="premiumPopup"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Required</h3><div class="modal-tools"><button class="close-pay" onclick="hidePremiumPopup()">✕</button></div></div><p style="font-size:14px;color:#475467;margin:12px 0">You have reached your page limit.</p><div style="background:#f8fafc;border-radius:12px;padding:16px;margin:12px 0"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>👤 Guest</span><span>20 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>📝 Registered</span><span>50 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>⭐ Premium</span><span>♾️ Unlimited</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#1a4a7a;font-weight:800"><span>👑 Admin</span><span>♾️ Unlimited</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0"><button class="action purplebtn" onclick="openPayment('6');hidePremiumPopup()">₹400 / 6 Months</button><button class="action orangebtn" onclick="openPayment('12');hidePremiumPopup()">₹700 / 1 Year</button></div><button class="action" style="background:#e5e7eb;color:#111" onclick="hidePremiumPopup()">Close</button></div></div>
+<div class="limit-popup" id="limitReachedPopup"><div class="limit-card"><div style="font-size:48px">🚫</div><h2>Limit Reached</h2><p id="limitReachedText">You have used all your pages.</p><button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM</button><button class="close" onclick="closeLimitReached()">Close</button></div></div>
 
 <script type="importmap">
 {
@@ -385,11 +249,7 @@ button{touch-action:manipulation}
 
 <script type="module">
 import { initializeApp } from "firebase/app";
-import { 
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, updateProfile, signOut,
-  sendPasswordResetEmail
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -405,1032 +265,280 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const jspdf = window.jspdf;
 const PDFLib = window.PDFLib;
 
-// =============================================
-// 👑 ADMIN UID
-// =============================================
-const ADMIN_UIDS = [
-  "O2TjdGUFfdaET03CLusJehrgsNu2"
-];
+let currentUser = null, currentRole = 'guest', pageUsage = 0;
+const PAGE_LIMITS = { guest:20, registered:50, premium:Infinity, admin:Infinity };
+const ADMIN_UIDS = ["O2TjdGUFfdaET03CLusJehrgsNu2"];
 
-// =============================================
-// GLOBAL VARIABLES
-// =============================================
-let currentUser = null;
-let currentRole = 'guest';
-let pageUsage = 0;
-let found = [];
-let stopSearch = false;
-let stopCompression = false;
-let compressedResults = [];
-let selectedPlan = '6';
-let resetRequestCount = 0;
-let lastResetTime = 0;
+function loadPageUsage(){ const raw = localStorage.getItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages'); pageUsage = Math.max(0, parseInt(raw||'0',10)||0); }
+function savePageUsage(){ localStorage.setItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages', String(pageUsage)); }
+function currentPageLimit(){ return PAGE_LIMITS[currentRole]??20; }
 
-const PAGE_LIMITS = { 
-    guest: 20, 
-    registered: 50, 
-    premium: Infinity, 
-    admin: Infinity 
-};
+async function countPdfPages(files){ let total=0; for(const f of files){ const pdf=await PDFLib.PDFDocument.load(await f.arrayBuffer(),{ignoreEncryption:true}); total+=pdf.getPageCount(); } return total; }
 
-// =============================================
-// PAGE LIMIT CONTROL
-// Guest = 20 pages, Registered = 50 pages,
-// Premium/Admin = Unlimited.
-// Usage is stored separately for each logged-in user.
-// =============================================
-function usageKey() {
-    return currentUser ? ('pdfhub_pages_' + currentUser.uid) : 'pdfhub_guest_pages';
+async function checkPageLimit(files, statusId){
+ if(currentRole==='premium'||currentRole==='admin') return true;
+ const limit=currentPageLimit(), available=Math.max(0, limit-pageUsage);
+ let pages; try{ pages=await countPdfPages(files); }catch(e){ if(statusId) document.getElementById(statusId).textContent='❌ Cannot read pages: '+e.message; return false; }
+ if(pages>available){ const msg='❌ Limit reached. Need '+pages+' pages, only '+available+' left. '+(currentRole==='guest'?'Please login for 50 pages.':'Upgrade to Premium.'); if(statusId) document.getElementById(statusId).textContent=msg; return false; }
+ return true;
 }
 
-function loadPageUsage() {
-    const raw = localStorage.getItem(usageKey());
-    pageUsage = Math.max(0, parseInt(raw || '0', 10) || 0);
+function consumePages(pages){ if(pages && currentRole!=='premium'&&currentRole!=='admin'){ pageUsage+=pages; savePageUsage(); updateUI(); } }
+
+// UI Updates
+function updateUI(){
+ const isLoggedIn=!!currentUser, role=currentRole, limit=PAGE_LIMITS[role]??20, isUnlimited=limit===Infinity;
+ document.getElementById('loginBtn').style.display=isLoggedIn?'none':'inline-block';
+ document.getElementById('registerBtn').style.display=isLoggedIn?'none':'inline-block';
+ document.getElementById('userMenu').style.display=isLoggedIn?'block':'none';
+ const name=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Account';
+ document.getElementById('userShort').textContent=name;
+ document.getElementById('userEmail').textContent=currentUser?.email||'';
+ document.getElementById('accountType').textContent=isLoggedIn?(role==='premium'?'⭐ PREMIUM':role==='admin'?'👑 ADMIN':'📝 REGISTERED'):'👤 GUEST';
+ document.getElementById('accountNote').textContent=isUnlimited?'♾️ Unlimited':(role==='registered'?'50 pages limit':'20 pages limit');
+ document.getElementById('planValue').textContent=isUnlimited?'♾️ Unlimited':'Free';
+ document.getElementById('opsValue').innerHTML=isUnlimited?pageUsage+' / ♾️':pageUsage+' / '+limit;
+ document.getElementById('opsBar').style.width=isUnlimited?'100%':Math.min(100,(pageUsage/limit)*100)+'%';
+ document.getElementById('opsNote').textContent=isUnlimited?'♾️ Unlimited':Math.max(0,limit-pageUsage)+' pages remaining';
+ document.getElementById('welcomeTitle').textContent=isLoggedIn?`👋 Welcome, ${name}!`:'👋 Welcome to PDF Utility Hub';
+ document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()}`:'Search, Compress, Merge & ZIP PDFs.';
+ document.getElementById('adminBtn').style.display=role==='admin'?'block':'none';
+ document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
 }
 
-function savePageUsage() {
-    localStorage.setItem(usageKey(), String(pageUsage));
-}
-
-function currentPageLimit() {
-    return PAGE_LIMITS[currentRole] ?? 20;
-}
-
-function pageLimitMessage(needed, available) {
-    const limit = currentPageLimit();
-    const who = currentRole === 'guest' ? 'Guest' : 'Registered user';
-    return '❌ Page limit reached. ' + who + ' limit is ' + limit + ' pages. ' +
-           'This operation needs ' + needed + ' pages, but only ' + available + ' pages are remaining. ' +
-           (currentRole === 'guest' ? 'Please login for 50 pages.' : 'Upgrade to Premium for unlimited access.');
-}
-
-async function countPdfPages(files) {
-    let total = 0;
-    for (const file of files) {
-        const pdf = await PDFLib.PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
-        total += pdf.getPageCount();
-    }
-    return total;
-}
-
-async function checkPageLimit(files, statusElementId) {
-    if (currentRole === 'premium' || currentRole === 'admin') return true;
-
-    const limit = currentPageLimit();
-    const available = Math.max(0, limit - pageUsage);
-    let pages;
-    try {
-        pages = await countPdfPages(files);
-    } catch (e) {
-        const msg = '❌ Could not read PDF page count: ' + (e.message || e);
-        if (statusElementId) document.getElementById(statusElementId).textContent = msg;
-        else alert(msg);
-        return false;
-    }
-
-    if (pages > available) {
-        const msg = pageLimitMessage(pages, available);
-        if (statusElementId) document.getElementById(statusElementId).textContent = msg;
-        else alert(msg);
-        return false;
-    }
-
-    return { pages };
-}
-
-function consumePages(pages) {
-    if (!pages || currentRole === 'premium' || currentRole === 'admin') return;
-    pageUsage += pages;
-    savePageUsage();
-    updateUI();
-}
-
-const ROLE_DISPLAY = {
-    guest: { label: '👤 GUEST', badge: 'guest', note: '20 pages limit', plan: 'Free' },
-    registered: { label: '📝 REGISTERED', badge: 'registered', note: '50 pages limit', plan: 'Free' },
-    premium: { label: '⭐ PREMIUM', badge: 'premium', note: '♾️ Unlimited Access', plan: '♾️ Unlimited' },
-    admin: { label: '👑 ADMIN', badge: 'admin', note: '♾️ Unlimited Access', plan: '♾️ Unlimited' }
+// Auth Handlers
+window.handleRegister=async function(){
+ const name=document.getElementById('regName').value.trim(), email=document.getElementById('regEmail').value.trim(), password=document.getElementById('regPassword').value;
+ if(!name||!email||password.length<6){ showRegStatus('Fill all fields. Password min 6 chars.','error'); return; }
+ try{ const u=await createUserWithEmailAndPassword(auth,email,password); await updateProfile(u.user,{displayName:name}); await setDoc(doc(db,'users',u.user.uid),{name,email,role:'registered',createdAt:new Date()}); showRegStatus('✅ Account created!','success'); setTimeout(()=>hideAllModals(),1200); }catch(e){ showRegStatus('❌ '+e.message,'error'); }
 };
 
-// =============================================
-// MODAL FUNCTIONS
-// =============================================
-window.showRegister = function() { 
-    document.getElementById('authModal').classList.add('show'); 
+window.handleLogin=async function(){
+ const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPassword').value;
+ if(!email||!password){ showLoginStatus('Enter email & password.','error'); return; }
+ try{ await signInWithEmailAndPassword(auth,email,password); showLoginStatus('✅ Login success!','success'); setTimeout(()=>hideAllModals(),1200); }catch(e){ showLoginStatus('❌ '+e.message,'error'); }
 };
 
-window.showLogin = function() { 
-    document.getElementById('loginModal').classList.add('show'); 
-};
+window.logoutUser=async function(){ try{ await signOut(auth); document.getElementById('dropdown').classList.remove('show'); }catch(e){ console.error(e); } };
 
-window.showAdminLogin = function() { 
-    showLogin(); 
-    showLoginStatus('🔐 Enter admin credentials from Firebase', 'info');
-};
-
-window.hideAllModals = function() {
-    document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
-};
-
-window.switchToLogin = function() { 
-    hideAllModals(); 
-    showLogin(); 
-};
-
-window.switchToRegister = function() { 
-    hideAllModals(); 
-    showRegister(); 
-};
-
-// =============================================
-// FORGOT PASSWORD - WITH RATE LIMITING
-// =============================================
-window.showForgotPassword = function() {
-    document.getElementById('forgotBox').style.display = 'block';
-    document.getElementById('loginSubmitBtn').style.display = 'none';
-    document.getElementById('loginStatus').style.display = 'none';
-    document.getElementById('resetEmail').value = '';
-    document.getElementById('resetEmail').focus();
-    resetRequestCount = 0;
-};
-
-window.hideForgotPassword = function() {
-    document.getElementById('forgotBox').style.display = 'none';
-    document.getElementById('loginSubmitBtn').style.display = 'block';
-    document.getElementById('loginStatus').style.display = 'none';
-};
-
-window.sendResetLink = async function() {
-    const email = document.getElementById('resetEmail').value.trim();
-    
-    if (!email) {
-        showLoginStatus('❌ Please enter your email address.', 'error');
-        return;
+onAuthStateChanged(auth, async (user)=>{
+ if(user){
+  currentUser=user; currentRole='registered'; loadPageUsage();
+  if(ADMIN_UIDS.includes(user.uid)){ currentRole='admin'; }
+  else {
+   try {
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (adminDoc.exists() && adminDoc.data().active !== false) currentRole='admin';
+    else {
+     const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
+     if (premiumDoc.exists() && premiumDoc.data().active !== false && premiumDoc.data().validTill?.toDate?.() > new Date()) currentRole='premium';
     }
-    
-    if (!email.includes('@') || !email.includes('.')) {
-        showLoginStatus('❌ Please enter a valid email address.', 'error');
-        return;
-    }
-    
-    // Rate limiting - prevent too many requests
-    const now = Date.now();
-    if (now - lastResetTime < 30000) { // 30 seconds cooldown
-        showLoginStatus('⏳ Please wait 30 seconds before sending another request.', 'info');
-        return;
-    }
-    
-    resetRequestCount++;
-    if (resetRequestCount > 3) {
-        showLoginStatus('❌ Too many requests. Please try again after 15 minutes.', 'error');
-        return;
-    }
-    
-    try {
-        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Sending reset link to ' + email + '...', 'info');
-        
-        // Send reset email
-        await sendPasswordResetEmail(auth, email);
-        
-        lastResetTime = now;
-        showLoginStatus('✅ Password reset link sent to ' + email + '! Please check your inbox/spam folder.', 'success');
-        document.getElementById('resetEmail').value = '';
-        btn.disabled = false;
-        btn.textContent = originalText;
-        
-        setTimeout(() => {
-            hideForgotPassword();
-        }, 6000);
-        
-    } catch (error) {
-        console.error('Reset error:', error);
-        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
-        btn.disabled = false;
-        btn.textContent = '📧 Send Reset Link';
-        
-        if (error.code === 'auth/too-many-requests') {
-            showLoginStatus('❌ Too many requests. Please wait 15 minutes and try again.', 'error');
-        } else if (error.code === 'auth/user-not-found') {
-            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
-        } else {
-            showLoginStatus('❌ ' + error.message, 'error');
-        }
-    }
-};
-
-// =============================================
-// FIREBASE AUTH - REGISTER
-// =============================================
-window.handleRegister = async function() {
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const password = document.getElementById('regPassword').value;
-    
-    if (!name || !email || !password) {
-        showRegStatus('Please fill all fields.', 'error');
-        return;
-    }
-    if (password.length < 6) {
-        showRegStatus('Password must be at least 6 characters.', 'error');
-        return;
-    }
-    
-    try {
-        const btn = document.querySelector('#authModal .register-btn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Creating...';
-        showRegStatus('Creating account...', 'info');
-        
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await updateProfile(user, { displayName: name });
-        
-        await setDoc(doc(db, 'users', user.uid), {
-            name: name,
-            email: email,
-            role: 'registered',
-            createdAt: new Date()
-        });
-        
-        showRegStatus('✅ Account created successfully! Welcome, ' + name + '!', 'success');
-        btn.textContent = '✅ Done!';
-        
-        setTimeout(() => {
-            hideAllModals();
-            btn.disabled = false;
-            btn.textContent = '📝 Sign up';
-            document.getElementById('regName').value = '';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPassword').value = '';
-        }, 1500);
-        
-    } catch (error) {
-        showRegStatus('❌ ' + error.message, 'error');
-        const btn = document.querySelector('#authModal .register-btn');
-        btn.disabled = false;
-        btn.textContent = '📝 Sign up';
-    }
-};
-
-// =============================================
-// FIREBASE AUTH - LOGIN
-// =============================================
-window.handleLogin = async function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        showLoginStatus('Please enter email and password.', 'error');
-        return;
-    }
-    
-    try {
-        const btn = document.getElementById('loginSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = '⏳ Logging in...';
-        showLoginStatus('Logging in...', 'info');
-        
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        showLoginStatus('✅ Login successful! Welcome, ' + (user.displayName || email.split('@')[0]) + '!', 'success');
-        btn.textContent = '✅ Done!';
-        
-        setTimeout(() => {
-            hideAllModals();
-            btn.disabled = false;
-            btn.textContent = '🔐 Login';
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-        }, 1500);
-        
-    } catch (error) {
-        showLoginStatus('❌ ' + error.message, 'error');
-        const btn = document.getElementById('loginSubmitBtn');
-        btn.disabled = false;
-        btn.textContent = '🔐 Login';
-    }
-};
-
-// =============================================
-// FIREBASE AUTH - LOGOUT
-// =============================================
-window.logoutUser = async function() {
-    try {
-        await signOut(auth);
-        document.getElementById('dropdown').classList.remove('show');
-        addActivity('Logout', (currentUser?.email || 'User') + ' logged out');
-    } catch (error) {
-        console.error('Logout error:', error);
-    }
-};
-
-// =============================================
-// FIREBASE AUTH STATE
-// =============================================
-onAuthStateChanged(auth, async (user) => {
-    console.log('🔐 Auth state changed:', user ? user.email : 'No user');
-    
-    if (user) {
-        currentUser = user;
-        currentRole = 'registered';
-        loadPageUsage();
-        
-        if (ADMIN_UIDS.includes(user.uid)) {
-            currentRole = 'admin';
-            console.log('👑✅ ADMIN found! Email:', user.email);
-        } else {
-            try {
-                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-                if (adminDoc.exists() && adminDoc.data().active !== false) {
-                    currentRole = 'admin';
-                } else {
-                    const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
-                    if (premiumDoc.exists() && premiumDoc.data().active !== false && 
-                        premiumDoc.data().validTill?.toDate?.() > new Date()) {
-                        currentRole = 'premium';
-                    }
-                }
-            } catch (error) {
-                console.warn('Error checking role:', error);
-            }
-        }
-        
-        console.log('✅ Final Role:', currentRole);
-        updateUI();
-        addActivity('Login', user.email + ' (' + currentRole.toUpperCase() + ')');
-    } else {
-        currentUser = null;
-        currentRole = 'guest';
-        loadPageUsage();
-        console.log('👤 Guest user');
-        updateUI();
-    }
+   } catch(e){ console.warn('Error checking role:', e); }
+  }
+ } else { currentUser=null; currentRole='guest'; loadPageUsage(); }
+ updateUI();
 });
 
-// =============================================
-// UPDATE UI
-// =============================================
-function updateUI() {
-    const isLoggedIn = currentUser !== null;
-    const role = currentRole;
-    const limit = PAGE_LIMITS[role] || 20;
-    const isUnlimited = limit === Infinity;
-    const roleInfo = ROLE_DISPLAY[role] || ROLE_DISPLAY['guest'];
-    
-    document.getElementById('loginBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
-    document.getElementById('registerBtn').style.display = isLoggedIn ? 'none' : 'inline-block';
-    document.getElementById('adminLoginBtn').style.display = (isLoggedIn && role === 'admin') ? 'none' : 'inline-block';
-    document.getElementById('userMenu').style.display = isLoggedIn ? 'block' : 'none';
-    
-    const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Account';
-    document.getElementById('userShort').textContent = displayName;
-    document.getElementById('userEmail').textContent = currentUser?.email || '';
-    
-    document.getElementById('accountType').textContent = roleInfo.label;
-    document.getElementById('accountNote').textContent = roleInfo.note;
-    
-    document.getElementById('planValue').textContent = roleInfo.plan;
-    document.getElementById('planValue').style.color = isUnlimited ? '#16a34a' : '#172033';
-    document.getElementById('planNote').textContent = isUnlimited ? '♾️ Unlimited Access' : '₹400 / 6 Months';
-    
-    const roleDisplay = role === 'admin' ? 'ADMIN' : role === 'premium' ? 'PREMIUM' : role === 'registered' ? 'USER' : 'GUEST';
-    document.getElementById('role').textContent = roleDisplay;
-    document.getElementById('role').style.background = role === 'admin' ? '#1a4a7a' : role === 'premium' ? '#4a2a7a' : role === 'registered' ? '#1463e6' : '#6b7280';
-    
-    const planText = role === 'admin' ? '👑 ADMIN — UNLIMITED' : role === 'premium' ? '⭐ PREMIUM — UNLIMITED' : role === 'registered' ? '📝 REGISTERED — 50 PAGES' : '👤 GUEST — 20 PAGES';
-    document.getElementById('dropPlan').textContent = planText;
-    
-    document.getElementById('premiumMenuBtn').style.display = (role === 'premium' || role === 'admin') ? 'none' : 'block';
-    document.getElementById('adminBtn').style.display = role === 'admin' ? 'block' : 'none';
-    
-    const badge = role === 'admin' ? ' <span class="user-badge admin">👑 ADMIN</span>' :
-                  role === 'premium' ? ' <span class="user-badge premium">⭐ PREMIUM</span>' :
-                  role === 'registered' ? ' <span class="user-badge registered">📝 USER</span>' :
-                  ' <span class="user-badge guest">👤 GUEST</span>';
-    document.getElementById('dropName').innerHTML = displayName + badge;
-    
-    document.getElementById('opsValue').innerHTML = isUnlimited ? pageUsage + ' <small>/ ♾️</small>' : pageUsage + ' <small>/ ' + limit + '</small>';
-    document.getElementById('opsBar').style.width = isUnlimited ? '100%' : Math.min(100, (pageUsage / limit) * 100) + '%';
-    document.getElementById('opsNote').textContent = isUnlimited ? '♾️ Unlimited pages' : Math.max(0, limit - pageUsage) + ' pages remaining';
-    
-    if (isLoggedIn) {
-        const welcomeEmoji = role === 'admin' ? '👑' : role === 'premium' ? '⭐' : '👤';
-        document.getElementById('welcomeTitle').textContent = welcomeEmoji + ' Welcome, ' + displayName + '!';
-        document.getElementById('welcomeText').textContent = '🔐 Logged in as ' + currentUser.email + ' | ' + role.toUpperCase() + ' | ' + (isUnlimited ? '♾️ Unlimited' : role === 'registered' ? '📝 50 pages' : '👤 20 pages');
-    } else {
-        document.getElementById('welcomeTitle').textContent = '👋 Welcome to PDF Utility Hub';
-        document.getElementById('welcomeText').textContent = 'Search, compress, merge and ZIP your PDF files directly in your browser.';
-    }
-    
-    document.body.classList.remove('admin-theme', 'premium-theme');
-    if (role === 'admin') document.body.classList.add('admin-theme');
-    else if (role === 'premium') document.body.classList.add('premium-theme');
-}
+// Modals
+window.showRegister=()=>document.getElementById('authModal').classList.add('show');
+window.showLogin=()=>document.getElementById('loginModal').classList.add('show');
+window.hideAllModals=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'));
+window.switchToLogin=()=>{ hideAllModals(); showLogin(); };
+window.switchToRegister=()=>{ hideAllModals(); showRegister(); };
+function showRegStatus(msg,type){ const el=document.getElementById('regStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
+function showLoginStatus(msg,type){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
 
-// =============================================
-// STATUS MESSAGES
-// =============================================
-window.showRegStatus = function(message, type) {
-    const el = document.getElementById('regStatus');
-    el.textContent = message;
-    el.className = 'status-msg ' + type;
-    el.style.display = 'block';
-}
+// Dropdown
+window.toggleDropdown=function(){ document.getElementById('dropdown').classList.toggle('show'); };
+document.addEventListener('click', e=>{ const d=document.getElementById('dropdown'); if(d&&!document.getElementById('userMenu').contains(e.target)) d.classList.remove('show'); });
 
-window.showLoginStatus = function(message, type) {
-    const el = document.getElementById('loginStatus');
-    el.textContent = message;
-    el.className = 'status-msg ' + type;
-    el.style.display = 'block';
-}
-
-// =============================================
-// ACTIVITY
-// =============================================
-function addActivity(tool, detail) {
-    const b = document.getElementById('activityBody');
-    if (b.children.length === 1 && b.children[0].children[1]?.textContent === 'No activity yet') {
-        b.innerHTML = '';
-    }
-    const tr = document.createElement('tr');
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    tr.innerHTML = '<td>' + tool + '</td><td>' + detail + '</td><td class="complete">✓ Completed</td><td>' + time + '</td>';
-    b.prepend(tr);
-}
-
-// =============================================
-// DROPDOWN
-// =============================================
-window.toggleDropdown = function() {
-    document.getElementById('dropdown').classList.toggle('show');
+// Admin Dashboard
+window.openAdminDashboard=function(){ document.getElementById('dropdown').classList.remove('show'); document.getElementById('adminModal').classList.add('show'); loadAdminData(); };
+window.hideAdminDashboard=function(){ document.getElementById('adminModal').classList.remove('show'); };
+window.loadAdminData=async function(){
+ document.getElementById('adminStatus').textContent='Loading...';
+ try{
+  const snap=await getDocs(collection(db,'paymentRequests'));
+  const rows=document.getElementById('adminPaymentRows'); rows.innerHTML='';
+  snap.forEach(doc=>{
+   const d=doc.data();
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td>
+    <td><button class="action greenbtn" style="padding:4px 12px;font-size:12px" onclick="approvePayment('${doc.id}')">Approve</button>
+    <button class="action" style="background:#dc2626;padding:4px 12px;font-size:12px" onclick="rejectPayment('${doc.id}')">Reject</button></td>`;
+   rows.appendChild(tr);
+  });
+  document.getElementById('adminStatus').textContent='✅ Data loaded.';
+ }catch(e){ document.getElementById('adminStatus').textContent='❌ Error: '+e.message; }
 };
 
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('dropdown');
-    const userMenu = document.getElementById('userMenu');
-    if (dropdown && userMenu && !userMenu.contains(e.target)) {
-        dropdown.classList.remove('show');
-    }
-});
-
-// =============================================
-// SETTINGS & PROFILE
-// =============================================
-window.openSettings = function() {
-    const c = localStorage.getItem('pdfhub_country') || 'India';
-    document.getElementById('settingsCountry').value = c;
-    document.getElementById('settingsModal').classList.add('show');
+window.approvePayment=async function(id){
+ try{ await updateDoc(doc(db,'paymentRequests',id),{status:'approved'}); loadAdminData(); }catch(e){ alert('Error: '+e.message); }
+};
+window.rejectPayment=async function(id){
+ try{ await updateDoc(doc(db,'paymentRequests',id),{status:'rejected'}); loadAdminData(); }catch(e){ alert('Error: '+e.message); }
 };
 
-window.saveSettings = function() {
-    const c = document.getElementById('settingsCountry').value;
-    localStorage.setItem('pdfhub_country', c);
-    document.getElementById('countryValue').textContent = c;
-    document.getElementById('settingsMsg').textContent = '✅ Settings saved successfully.';
-    document.getElementById('settingsMsg').style.color = '#166534';
-    setTimeout(() => document.getElementById('settingsModal').classList.remove('show'), 1000);
+// Payment
+window.openPayment=function(plan){
+ const amt=plan==='6'?'400':'700', dur=plan==='6'?'6 Months':'1 Year';
+ document.getElementById('paymentDetails').innerHTML=`<div style="background:#f1f5f9;padding:14px;border-radius:12px;text-align:center"><strong>₹${amt}</strong> / ${dur}<br><small>Unlimited PDF tools</small></div>`;
+ document.getElementById('paymentModal').classList.add('show');
+ document.getElementById('upiQr').innerHTML='';
+ new QRCode(document.getElementById('upiQr'),{text:`upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=${amt}&cu=INR`,width:180,height:180});
 };
 
-window.openProfile = function() {
-    document.getElementById('dropdown').classList.remove('show');
-    const c = localStorage.getItem('pdfhub_country') || 'India';
-    document.getElementById('countrySelect').value = c;
-    document.getElementById('profileModal').classList.add('show');
+window.openPremium=function(){ document.getElementById('dropdown').classList.remove('show'); openPayment('6'); };
+
+window.submitPayment=async function(){
+ const utr=document.getElementById('utr').value.trim();
+ if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first.'; return; }
+ if(!utr){ document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; return; }
+ try{ await setDoc(doc(db,'paymentRequests',currentUser.uid+'_'+Date.now()),{uid:currentUser.uid,email:currentUser.email,utr,amount:selectedPlan==='6'?400:700,status:'pending',createdAt:new Date()}); document.getElementById('paymentMsg').textContent='✅ Request submitted. Admin will verify.'; document.getElementById('utr').value=''; }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
 };
 
-window.saveProfile = function() {
-    const c = document.getElementById('countrySelect').value;
-    localStorage.setItem('pdfhub_country', c);
-    document.getElementById('countryValue').textContent = c;
-    document.getElementById('profileModal').classList.remove('show');
+// Limit
+window.closeLimitReached=()=>document.getElementById('limitReachedPopup').classList.remove('show');
+window.buyPremiumFromLimit=()=>{ closeLimitReached(); openPayment('6'); };
+
+// Tools
+window.openTool=function(t){
+ document.getElementById('workspace').classList.add('active');
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.textContent.toLowerCase().includes(t)));
+ ['search','compress','merge','zip'].forEach(x=>document.getElementById('tool-'+x).style.display=x===t?'block':'none');
+ document.getElementById('workspace').scrollIntoView({behavior:'smooth'});
 };
 
-// =============================================
-// PREMIUM PAYMENT
-// =============================================
-window.openPayment = function(plan) {
-    selectedPlan = plan;
-    const amount = plan === '6' ? '400' : '700';
-    const duration = plan === '6' ? '6 Months' : '1 Year';
-    document.getElementById('paymentDetails').innerHTML = '<div class="payment-plan"><strong>₹' + amount + '</strong> / ' + duration + '<br><small>Unlimited PDF tools</small></div>';
-    document.getElementById('upiText').textContent = 'md.anwar18@ybl';
-    document.getElementById('paymentMsg').textContent = 'Payment will be activated after admin verification.';
-    document.getElementById('paymentModal').classList.add('show');
-    document.getElementById('upiQr').innerHTML = '';
-    new QRCode(document.getElementById('upiQr'), {
-        text: 'upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=' + amount + '&cu=INR',
-        width: 190,
-        height: 190
-    });
-};
+// Helpers
+function size(b){ b=Number(b)||0; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(1)+' KB'; if(b<1073741824)return (b/1048576).toFixed(2)+' MB'; return (b/1073741824).toFixed(2)+' GB'; }
+function setProgress(tool,p,text){ const f=document.getElementById(tool+'ProgressFill'); if(!f)return; document.getElementById(tool+'Progress').classList.add('show'); f.style.width=Math.min(100,Math.max(0,Math.round(p)))+'%'; if(document.getElementById(tool+'ProgressPct')) document.getElementById(tool+'ProgressPct').textContent=Math.round(p)+'%'; if(document.getElementById(tool+'ProgressLine')) document.getElementById(tool+'ProgressLine').textContent=text||'Processing...'; }
+function hideProgress(tool){ const e=document.getElementById(tool+'Progress'); if(e)e.classList.remove('show'); }
+function safeDownload(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000); }
 
-window.openPremium = function() {
-    document.getElementById('dropdown').classList.remove('show');
-    openPayment('6');
-};
-
-window.toggleMinimize = function() {
-    document.getElementById('paymentModal').classList.toggle('payment-minimized');
-};
-
-window.copyUPI = async function() {
-    const value = 'md.anwar18@ybl';
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(value);
-        } else {
-            const ta = document.createElement('textarea');
-            ta.value = value;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            ta.remove();
-        }
-        document.getElementById('paymentMsg').textContent = '✅ UPI ID copied!';
-        document.getElementById('paymentMsg').style.color = '#166534';
-    } catch (e) {
-        document.getElementById('paymentMsg').textContent = 'UPI ID: ' + value;
-        document.getElementById('paymentMsg').style.color = '#172033';
-    }
-};
-
-window.openUPIApp = function() {
-    const amt = document.querySelector('#paymentDetails .payment-plan strong')?.textContent?.replace('₹', '') || '400';
-    location.href = 'upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=' + amt + '&cu=INR';
-};
-
-window.submitPayment = async function() {
-    const utr = document.getElementById('utr').value.trim();
-    const msg = document.getElementById('paymentMsg');
-
-    if (!currentUser) {
-        msg.textContent = '❌ Please login before submitting payment.';
-        msg.style.color = '#991b1b';
-        return;
-    }
-    if (!utr) {
-        msg.textContent = '❌ Please enter Transaction ID / UTR.';
-        msg.style.color = '#991b1b';
-        return;
-    }
-
-    try {
-        const amount = selectedPlan === '6' ? 400 : 700;
-        const duration = selectedPlan === '6' ? '6 Months' : '1 Year';
-
-        await setDoc(doc(db, 'paymentRequests', currentUser.uid + '_' + Date.now()), {
-            uid: currentUser.uid,
-            email: currentUser.email || '',
-            name: currentUser.displayName || '',
-            utr: utr,
-            amount: amount,
-            plan: duration,
-            status: 'pending',
-            createdAt: new Date()
-        });
-
-        msg.textContent = '✅ Payment request submitted. Admin will verify it.';
-        msg.style.color = '#166534';
-        document.getElementById('utr').value = '';
-        addActivity('Premium Payment', '₹' + amount + ' request submitted');
-    } catch (error) {
-        console.error('Payment submit error:', error);
-        msg.textContent = '❌ Could not submit request: ' + (error.message || error);
-        msg.style.color = '#991b1b';
-    }
-};
-
-window.hidePremiumPopup = function() {
-    document.getElementById('premiumPopup').classList.remove('show');
-};
-
-
-
-// =============================================
-// GLOBAL FILE SIZE FORMATTER
-// =============================================
-window.size = function(bytes) {
-    bytes = Number(bytes) || 0;
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-};
-function size(bytes) {
-    return window.size(bytes);
-}
-
-// =============================================
-// ROBUST GLOBAL HELPERS
-// =============================================
-
-
-
-
-function setProgress(tool, percent, text) {
-    const wrap = document.getElementById(tool + 'Progress');
-    const fill = document.getElementById(tool + 'ProgressFill');
-    const pct = document.getElementById(tool + 'ProgressPct');
-    const line = document.getElementById(tool + 'ProgressLine');
-    if (!wrap || !fill) return;
-    wrap.classList.add('show');
-    const p = Math.max(0, Math.min(100, Math.round(percent)));
-    fill.style.width = p + '%';
-    if (pct) pct.textContent = p + '%';
-    if (line) line.textContent = text || 'Processing...';
-}
-function hideProgress(tool) {
-    const wrap = document.getElementById(tool + 'Progress');
-    if (wrap) wrap.classList.remove('show');
-}
-function safeDownload(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-}
-function getLimit() {
-    if (currentRole === 'admin' || currentRole === 'premium') return Infinity;
-    return currentRole === 'registered' ? 50 : 20;
-}
-async function countPages(file) {
-    const doc = await PDFLib.PDFDocument.load(await file.arrayBuffer(), {ignoreEncryption:true});
-    return doc.getPageCount();
-}
-async function checkLimit(files) {
-    const limit = getLimit();
-    if (limit === Infinity) return true;
-    let pages = 0;
-    for (const f of files) pages += await countPages(f);
-    const remaining = Math.max(0, limit - pageUsage);
-    if (pageUsage + pages > limit) {
-        document.getElementById('limitReachedText').textContent =
-            'Limit reached. You have ' + remaining + ' page(s) remaining, but selected files contain ' +
-            pages + ' page(s). Login users get 50 pages. Premium gives Unlimited pages.';
-        document.getElementById('limitReachedPopup').classList.add('show');
-        return false;
-    }
-    return true;
-}
-
-window.closeLimitReached = function() {
-    document.getElementById('limitReachedPopup').classList.remove('show');
-};
-window.buyPremiumFromLimit = function() {
-    closeLimitReached();
-    openPayment('6');
-};
-window.stopCompress = function() {
-    stopCompression = true;
-    document.getElementById('compressStatus').textContent = '⏹ Stopping compression...';
-};
-
-// =============================================
-// TOOL OPEN
-// =============================================
-window.openTool = function(t) {
-    document.getElementById('workspace').classList.add('active');
-    document.querySelectorAll('.tab').forEach(x => {
-        const text = x.textContent.toLowerCase();
-        x.classList.toggle('active', text.includes(t.toLowerCase()));
-    });
-    ['search','compress','merge','zip'].forEach(x => {
-        document.getElementById('tool-' + x).style.display = x === t ? 'block' : 'none';
-    });
-    document.getElementById('workspace').scrollIntoView({behavior:'smooth', block:'start'});
-};
-
-// =============================================
 // SEARCH
-// =============================================
-window.startSearch = async function() {
-    found = [];
-    stopSearch = false;
-    document.getElementById('searchRows').innerHTML = '';
-    const fs = [...document.getElementById('searchPdfs').files];
-    const ef = document.getElementById('searchExcel').files[0];
-
-    if (!fs.length || !ef) {
-        alert('Select PDF files and Excel file.');
-        return;
-    }
-    if (!await checkLimit(fs)) return;
-
-    try {
-        setProgress('search', 0, 'Reading Excel...');
-        const wb = XLSX.read(await ef.arrayBuffer(), {type:'array'});
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
-        let names = rows.map(r => String(r[0] || '').trim()).filter(Boolean);
-        if (names[0] && /proposal|search/i.test(names[0])) names.shift();
-
-        let f = 0, n = 0;
-        for (let i=0; i<names.length; i++) {
-            if (stopSearch) break;
-            const name = names[i];
-            const file = fs.find(x => x.name.toLowerCase().includes(name.toLowerCase()));
-            const tr = document.createElement('tr');
-
-            if (file) {
-                f++;
-                const item = {file, checked:false};
-                found.push(item);
-                tr.innerHTML = '<td></td><td>' + name + '</td><td class="good">✅ FOUND</td><td>' + file.name + '</td>';
-                const c = document.createElement('input');
-                c.type = 'checkbox';
-                c.onchange = () => {item.checked=c.checked; refreshSearch();};
-                tr.cells[0].appendChild(c);
-            } else {
-                n++;
-                tr.innerHTML = '<td></td><td>' + name + '</td><td class="bad">❌ NOT FOUND</td><td></td>';
-            }
-            document.getElementById('searchRows').appendChild(tr);
-            setProgress('search', ((i+1)/Math.max(1,names.length))*100,
-                        'Searching ' + (i+1) + ' of ' + names.length);
-            await new Promise(r=>setTimeout(r,0));
-        }
-
-        consumePages(fs.reduce((a,f)=>a,0)); // search is counted by selected PDF pages below
-        document.getElementById('searchStatus').textContent =
-            (stopSearch ? '⏹ STOPPED' : '✅ COMPLETE') + ' | Found ' + f + ' | Not Found ' + n;
-        addActivity('PDF Search','Found ' + f + ' / ' + names.length);
-        setProgress('search',100,stopSearch?'Stopped':'Search complete');
-        refreshSearch();
-    } catch(e) {
-        document.getElementById('searchStatus').textContent = '❌ Error: ' + e.message;
-    }
+let found=[], stopSearch=false;
+window.startSearch=async function(){
+ found=[]; stopSearch=false; document.getElementById('searchRows').innerHTML='';
+ const fs=[...document.getElementById('searchPdfs').files], ef=document.getElementById('searchExcel').files[0];
+ if(!fs.length||!ef){ alert('Select PDFs and Excel.'); return; }
+ if(!await checkPageLimit(fs,'searchStatus')) return;
+ try{
+  setProgress('search',0,'Reading Excel...');
+  const wb=XLSX.read(await ef.arrayBuffer(),{type:'array'});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+  let names=rows.map(r=>String(r[0]||'').trim()).filter(Boolean);
+  if(names[0]&&/proposal|search/i.test(names[0])) names.shift();
+  let f=0,n=0;
+  for(let i=0;i<names.length;i++){
+   if(stopSearch) break;
+   const name=names[i], file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase()));
+   const tr=document.createElement('tr');
+   if(file){ f++; const item={file,checked:false}; found.push(item); tr.innerHTML=`<td></td><td>${name}</td><td class="good">✅ FOUND</td><td>${file.name}</td>`; const c=document.createElement('input'); c.type='checkbox'; c.onchange=()=>{item.checked=c.checked; refreshSearch();}; tr.cells[0].appendChild(c); }
+   else { n++; tr.innerHTML=`<td></td><td>${name}</td><td class="bad">❌ NOT FOUND</td><td></td>`; }
+   document.getElementById('searchRows').appendChild(tr);
+   setProgress('search',((i+1)/names.length)*100,`Searching ${i+1} of ${names.length}`);
+   await new Promise(r=>setTimeout(r,0));
+  }
+  document.getElementById('searchStatus').textContent=(stopSearch?'⏹ STOPPED':'✅ COMPLETE')+` | Found ${f} | Not Found ${n}`;
+  refreshSearch();
+  hideProgress('search');
+ }catch(e){ document.getElementById('searchStatus').textContent='❌ Error: '+e.message; }
 };
-window.stopSearch = function() {
-    stopSearch = true;
-    document.getElementById('searchStatus').textContent = '⏹ Stopping...';
+window.stopSearch=function(){ stopSearch=true; document.getElementById('searchStatus').textContent='⏹ Stopping...'; };
+function refreshSearch(){ const h=found.some(x=>x.checked); document.getElementById('searchZip').disabled=!h; document.getElementById('searchMerge').disabled=!h; }
+window.downloadSearchZip=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; const z=new JSZip(); a.forEach((x,i)=>{ z.file(x.file.name,x.file); setProgress('search',((i+1)/a.length)*80,`Adding ${i+1} of ${a.length}`); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Selected_PDFs.zip'); };
+window.mergeSearchResults=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<a.length;i++){ const s=await PDFLib.PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); setProgress('search',((i+1)/a.length)*100,`Merging ${i+1} of ${a.length}`); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Merged_Search.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
+
+// COMPRESS (FIXED - Safely gets jsPDF constructor)
+let compressedResults=[], stopCompression=false;
+window.compressFiles=async function(){
+ const fs=[...document.getElementById('compressFiles').files];
+ if(!fs.length){alert('Select PDFs.'); return;}
+ if(!await checkPageLimit(fs,'compressStatus')) return;
+ stopCompression=false; compressedResults=[];
+ document.getElementById('compressRows').innerHTML='';
+ document.getElementById('compressZip').disabled=true; document.getElementById('compressMerge').disabled=true;
+ try{
+  for(let i=0;i<fs.length;i++){
+   if(stopCompression) break;
+   const file=fs[i];
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td>${file.name}</td><td>${size(file.size)}</td><td>⏳</td><td>Processing</td><td></td>`;
+   document.getElementById('compressRows').appendChild(tr);
+   
+   const pdfjs = window.pdfjsLib;
+   if(!pdfjs){ document.getElementById('compressStatus').textContent='❌ PDF.js not loaded.'; return; }
+   
+   const pdf = await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
+   const total=pdf.numPages;
+   const quality=document.getElementById('quality').value;
+   const jpegQuality = quality==='strong'?0.4 : quality==='medium'?0.55 : 0.7;
+   const scale = quality==='strong'?0.8 : quality==='medium'?0.95 : 1.1;
+   
+   // ⚠️ ULTIMATE FIX: Safely get jsPDF constructor
+   const jsPDF = window.jspdf.jsPDF || window.jspdf;
+   if(!jsPDF){ document.getElementById('compressStatus').textContent='❌ jsPDF not loaded.'; return; }
+
+   const pdfOut = new jsPDF({unit:'pt', format:'a4', compress:true});
+   for(let p=1;p<=total;p++){
+    if(stopCompression) break;
+    const page = await pdf.getPage(p);
+    const vp = page.getViewport({scale:Math.min(scale, 1100/Math.max(page.getViewport({scale:1}).width,page.getViewport({scale:1}).height))});
+    const canvas = document.createElement('canvas');
+    canvas.width=vp.width; canvas.height=vp.height;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    const jpg = canvas.toDataURL('image/jpeg', jpegQuality);
+    if(p===1) pdfOut.deletePage(1);
+    pdfOut.addPage([vp.width, vp.height], vp.width>vp.height?'l':'p');
+    pdfOut.addImage(jpg,'JPEG',0,0,vp.width,vp.height,'','FAST');
+    canvas.width=1; canvas.height=1;
+    const overall=((i+(p/total))/fs.length)*100;
+    setProgress('compress', overall, `Compressing ${i+1} of ${fs.length} — page ${p}/${total}`);
+    tr.cells[2].textContent=Math.round((p/total)*100)+'%';
+    await new Promise(r=>setTimeout(r,0));
+   }
+   if(!stopCompression){
+    const outputBlob = pdfOut.output('blob');
+    const name=file.name.replace(/\.pdf$/i,'')+'_compressed.pdf';
+    compressedResults.push({name,blob:outputBlob});
+    const reduction=Math.max(0,Math.round((1-outputBlob.size/file.size)*100));
+    tr.cells[2].textContent=size(outputBlob.size);
+    tr.cells[3].textContent=reduction+'% smaller';
+    const btn=document.createElement('button'); btn.textContent='⬇️ Download'; btn.className='action greenbtn'; btn.onclick=()=>safeDownload(outputBlob,name); tr.cells[4].appendChild(btn);
+   }
+  }
+  document.getElementById('compressStatus').textContent=stopCompression?'⏹ STOPPED — '+compressedResults.length+' PDF(s) ready.':'✅ DONE — '+compressedResults.length+' PDF(s) ready.';
+  document.getElementById('compressZip').disabled=!compressedResults.length;
+  document.getElementById('compressMerge').disabled=!compressedResults.length;
+  hideProgress('compress');
+ }catch(e){ document.getElementById('compressStatus').textContent='❌ Error: '+e.message; console.error(e); }
 };
-function refreshSearch() {
-    const h = found.some(x=>x.checked);
-    document.getElementById('searchZip').disabled = !h;
-    document.getElementById('searchMerge').disabled = !h;
-}
-window.downloadSearchZip = async function() {
-    const a = found.filter(x=>x.checked);
-    if (!a.length) {alert('Select at least one PDF.');return;}
-    const z = new JSZip();
-    for(let i=0;i<a.length;i++){
-        z.file(a[i].file.name,a[i].file);
-        setProgress('search',((i+1)/a.length)*100,'Adding selected PDF '+(i+1)+' of '+a.length);
-        await new Promise(r=>setTimeout(r,0));
-    }
-    const blob = await z.generateAsync({type:'blob'},m=>setProgress('search',m.percent,'Building ZIP...'));
-    safeDownload(blob,'Selected_PDFs.zip');
-    addActivity('PDF Search','Selected PDFs ZIP');
-};
-window.mergeSearchResults = async function() {
-    const a = found.filter(x=>x.checked);
-    if (!a.length) {alert('Select at least one PDF.');return;}
-    try{
-        const out = await PDFLib.PDFDocument.create();
-        for(let i=0;i<a.length;i++){
-            const s=await PDFLib.PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true});
-            (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p));
-            setProgress('search',((i+1)/a.length)*100,'Merging '+(i+1)+' of '+a.length);
-        }
-        safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Selected_Merged_PDF.pdf');
-        addActivity('PDF Search',a.length+' PDFs merged');
-    }catch(e){alert('Merge failed: '+e.message);}
-};
+window.stopCompress=function(){ stopCompression=true; document.getElementById('compressStatus').textContent='⏹ Stopping...'; };
+window.downloadCompressedZip=async function(){ if(!compressedResults.length)return; const z=new JSZip(); compressedResults.forEach((x,i)=>{ z.file(x.name,x.blob); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Compressed_PDFs.zip'); };
+window.mergeCompressed=async function(){ if(!compressedResults.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<compressedResults.length;i++){ const s=await PDFLib.PDFDocument.load(await compressedResults[i].blob.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Compressed_Merged.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
 
-// =============================================
-// REAL 80% PDF COMPRESSION
-// =============================================
-// This uses PDF.js to render pages and rebuilds them as JPEG images.
-// "80%" means target is roughly 20% of original size when possible.
-// Text-heavy PDFs may not reach exactly 80%; the smaller of the rebuilt
-// PDF and the original is always returned.
-async function compressOnePdf(file, qualityMode, onProgress) {
-    const data = new Uint8Array(await file.arrayBuffer());
-    const pdfjs = await getPdfJs();
-    const pdf = await pdfjs.getDocument({data}).promise;
-
-    const total = pdf.numPages;
-    const originalMB = file.size / 1048576;
-    const targetBytes = file.size * 0.20;
-
-    let jpegQuality = qualityMode === 'strong' ? 0.42 :
-                      qualityMode === 'medium' ? 0.55 : 0.68;
-    let scale = qualityMode === 'strong' ? 0.82 :
-                qualityMode === 'medium' ? 0.95 : 1.08;
-
-    async function renderBuild(q, sc) {
-        const pdfOut = new jspdf.jsPDF({unit:'pt',format:'a4',compress:true});
-        for(let pno=1;pno<=total;pno++){
-            const page = await pdf.getPage(pno);
-            const base = page.getViewport({scale:1});
-            const pageScale = Math.min(sc, 1100 / Math.max(base.width,base.height));
-            const viewport = page.getViewport({scale:pageScale});
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.ceil(viewport.width);
-            canvas.height = Math.ceil(viewport.height);
-            const ctx = canvas.getContext('2d',{alpha:false});
-            await page.render({canvasContext:ctx,viewport}).promise;
-            const jpg = canvas.toDataURL('image/jpeg',q);
-
-            if(pno===1) pdfOut.deletePage(1);
-            const pw = viewport.width, ph = viewport.height;
-            pdfOut.addPage([pw,ph], pw > ph ? 'l':'p');
-            pdfOut.addImage(jpg,'JPEG',0,0,pw,ph,'','FAST');
-            canvas.width=1; canvas.height=1;
-
-            if(onProgress) onProgress(pno,total);
-            await new Promise(r=>setTimeout(r,0));
-        }
-        return pdfOut.output('blob');
-    }
-
-    let best = await renderBuild(jpegQuality,scale);
-
-    // Try harder if the first pass is still above 20% of original.
-    if(best.size > targetBytes){
-        best = await renderBuild(Math.max(.28,jpegQuality-.10), Math.max(.68,scale-.10));
-    }
-    if(best.size > targetBytes){
-        best = await renderBuild(Math.max(.22,jpegQuality-.08), Math.max(.58,scale-.08));
-    }
-
-    return best.size < file.size ? best : file;
-}
-
-window.compressFiles = async function() {
-    const fs=[...document.getElementById('compressFiles').files];
-    if(!fs.length){alert('Select PDFs.');return;}
-    if(!await checkLimit(fs))return;
-
-    stopCompression=false;
-    compressedResults=[];
-    document.getElementById('compressRows').innerHTML='';
-    document.getElementById('compressZip').disabled=true;
-    document.getElementById('compressMerge').disabled=true;
-
-    try{
-        for(let i=0;i<fs.length;i++){
-            if(stopCompression)break;
-            const file=fs[i];
-            const tr=document.createElement('tr');
-            tr.innerHTML='<td>'+file.name+'</td><td>'+size(file.size)+'</td><td>⏳ 0%</td><td>Processing</td><td></td>';
-            document.getElementById('compressRows').appendChild(tr);
-
-            const quality=document.getElementById('quality').value;
-            const final=await compressOnePdf(file,quality,(p,total)=>{
-                const overall=((i+p/total)/fs.length)*100;
-                setProgress('compress',overall,'Compressing '+(i+1)+' of '+fs.length+' — page '+p+' of '+total);
-                tr.cells[2].textContent=Math.round((p/total)*100)+'%';
-            });
-
-            const name=file.name.replace(/\.pdf$/i,'')+'_compressed.pdf';
-            compressedResults.push({name,blob:final});
-
-            const reduction=Math.max(0,Math.round((1-final.size/file.size)*100));
-            tr.cells[2].textContent=size(final.size);
-            tr.cells[3].textContent=reduction>=80?'✅ '+reduction+'% smaller':'✅ '+reduction+'% smaller';
-
-            const btn=document.createElement('button');
-            btn.textContent='⬇️ Download';
-            btn.className='action greenbtn';
-            btn.onclick=()=>safeDownload(final,name);
-            tr.cells[4].appendChild(btn);
-        }
-
-        document.getElementById('compressStatus').textContent=
-            stopCompression?'⏹ STOPPED — '+compressedResults.length+' PDF(s) ready.':
-            '✅ DONE — '+compressedResults.length+' PDF(s) ready.';
-        document.getElementById('compressZip').disabled=!compressedResults.length;
-        document.getElementById('compressMerge').disabled=!compressedResults.length;
-        setProgress('compress',100,stopCompression?'Stopped':'Compression complete');
-        if(compressedResults.length)addActivity('Compress PDF',compressedResults.length+' PDF(s) processed');
-    }catch(e){
-        console.error(e);
-        document.getElementById('compressStatus').textContent='❌ Error: '+e.message;
-    }
-};
-
-window.downloadCompressedZip=async function(){
-    if(!compressedResults.length){alert('No compressed PDFs available.');return;}
-    const z=new JSZip();
-    for(let i=0;i<compressedResults.length;i++){
-        z.file(compressedResults[i].name,compressedResults[i].blob);
-        setProgress('compress',((i+1)/compressedResults.length)*80,'Adding compressed PDF '+(i+1)+' of '+compressedResults.length);
-    }
-    const blob=await z.generateAsync({type:'blob'},m=>setProgress('compress',80+m.percent*.2,'Creating ZIP...'));
-    safeDownload(blob,'Compressed_PDFs.zip');
-};
-
-window.mergeCompressed=async function(){
-    if(!compressedResults.length){alert('No compressed PDFs available.');return;}
-    try{
-        const out=await PDFLib.PDFDocument.create();
-        for(let i=0;i<compressedResults.length;i++){
-            const s=await PDFLib.PDFDocument.load(await compressedResults[i].blob.arrayBuffer(),{ignoreEncryption:true});
-            (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p));
-            setProgress('compress',((i+1)/compressedResults.length)*100,'Merging compressed '+(i+1)+' of '+compressedResults.length);
-        }
-        safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Compressed_Merged_PDF.pdf');
-    }catch(e){alert('Merge failed: '+e.message);}
-};
-
-// =============================================
 // MERGE
-// =============================================
 window.mergePDFs=async function(){
-    const fs=[...document.getElementById('mergeFiles').files];
-    if(fs.length<2){alert('Select at least 2 PDFs.');return;}
-    if(!await checkLimit(fs))return;
-    try{
-        const out=await PDFLib.PDFDocument.create();
-        for(let i=0;i<fs.length;i++){
-            const s=await PDFLib.PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true});
-            (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p));
-            setProgress('merge',((i+1)/fs.length)*100,'Merging '+(i+1)+' of '+fs.length);
-        }
-        let name=document.getElementById('mergeName').value||'Merged_PDF.pdf';
-        if(!/\.pdf$/i.test(name))name+='.pdf';
-        safeDownload(new Blob([await out.save()],{type:'application/pdf'}),name);
-        document.getElementById('mergeStatus').textContent='✅ Merge complete.';
-        addActivity('Merge PDF',fs.length+' files merged');
-    }catch(e){document.getElementById('mergeStatus').textContent='❌ Error: '+e.message;}
+ const fs=[...document.getElementById('mergeFiles').files];
+ if(fs.length<2){alert('Select at least 2 PDFs.'); return;}
+ if(!await checkPageLimit(fs,'mergeStatus')) return;
+ try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<fs.length;i++){ const s=await PDFLib.PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); setProgress('merge',((i+1)/fs.length)*100,`Merging ${i+1} of ${fs.length}`); } let name=document.getElementById('mergeName').value||'Merged.pdf'; if(!/\.pdf$/i.test(name))name+='.pdf'; safeDownload(new Blob([await out.save()],{type:'application/pdf'}),name); document.getElementById('mergeStatus').textContent='✅ Merge complete.'; hideProgress('merge'); }catch(e){ document.getElementById('mergeStatus').textContent='❌ Error: '+e.message; }
 };
 
-// =============================================
 // ZIP
-// =============================================
 window.createZip=async function(){
-    const fs=[...document.getElementById('zipFiles').files];
-    if(!fs.length){alert('Select PDFs.');return;}
-    if(!await checkLimit(fs))return;
-    try{
-        const z=new JSZip();
-        for(let i=0;i<fs.length;i++){
-            z.file(fs[i].name,fs[i]);
-            setProgress('zip',((i+1)/fs.length)*80,'Adding '+(i+1)+' of '+fs.length);
-            await new Promise(r=>setTimeout(r,0));
-        }
-        const blob=await z.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:9}},
-            m=>setProgress('zip',80+m.percent*.2,'Building ZIP...'));
-        let name=document.getElementById('zipName').value||'PDF_Files.zip';
-        if(!/\.zip$/i.test(name))name+='.zip';
-        safeDownload(blob,name);
-        document.getElementById('zipStatus').textContent='✅ '+fs.length+' PDF(s) saved in ZIP.';
-        addActivity('Create ZIP',fs.length+' PDF(s) zipped');
-    }catch(e){document.getElementById('zipStatus').textContent='❌ Error: '+e.message;}
+ const fs=[...document.getElementById('zipFiles').files];
+ if(!fs.length){alert('Select PDFs.'); return;}
+ if(!await checkPageLimit(fs,'zipStatus')) return;
+ try{ const z=new JSZip(); for(let i=0;i<fs.length;i++){ z.file(fs[i].name,fs[i]); setProgress('zip',((i+1)/fs.length)*80,`Adding ${i+1} of ${fs.length}`); await new Promise(r=>setTimeout(r,0)); } const blob=await z.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:9}},m=>setProgress('zip',80+m.percent*.2,'Building ZIP...')); let name=document.getElementById('zipName').value||'PDFs.zip'; if(!/\.zip$/i.test(name))name+='.zip'; safeDownload(blob,name); document.getElementById('zipStatus').textContent=`✅ ${fs.length} PDF(s) zipped.`; hideProgress('zip'); }catch(e){ document.getElementById('zipStatus').textContent='❌ Error: '+e.message; }
 };
 
-console.log('✅ PDF Utility Hub fixed build loaded');
+// Init
+loadPageUsage(); updateUI();
+console.log('✅ PDF Utility Hub ready');
 </script>
-
-<div class="limit-popup" id="limitReachedPopup">
-  <div class="limit-card">
-    <div style="font-size:48px">🚫</div>
-    <h2>Limit Reached</h2>
-    <p id="limitReachedText">Your PDF page limit has been reached.</p>
-    <button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM PLAN</button>
-    <button class="close" onclick="closeLimitReached()">Close</button>
-  </div>
-</div>
-
-window.addEventListener('error', function(e) {
-    console.error('PDF Utility Hub error:', e.error || e.message);
-});
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('PDF Utility Hub promise error:', e.reason);
-});
 </body>
 </html>
-let pdfjsReadyPromise = null;
-async function getPdfJs() {
-    if (window.pdfjsLib) return window.pdfjsLib;
-    if (!pdfjsReadyPromise) {
-        pdfjsReadyPromise = new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-            s.onload = () => {
-                if (window.pdfjsLib) resolve(window.pdfjsLib);
-                else reject(new Error('PDF.js failed to load.'));
-            };
-            s.onerror = () => reject(new Error('Could not load PDF.js. Check internet connection.'));
-            document.head.appendChild(s);
-        });
-    }
-    return pdfjsReadyPromise;
-}
-
-

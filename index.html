@@ -114,6 +114,19 @@ th{background:#f8fafc;font-weight:600}
 .limit-card .close{background:#e2e8f0;color:#0f172a}
 @media(max-width:768px){.tools,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.header{padding:12px 0}.brand{font-size:18px}.authbar{width:100%;justify-content:flex-end}}
 </style>
+
+<!-- Admin Dashboard Styles (Screen) -->
+<style>
+#adminDashboard{margin-top:20px;display:none}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:16px}
+.admin-tab{border:0;background:transparent;padding:10px 18px;border-radius:30px;font-weight:600;cursor:pointer;color:#64748b;transition:.2s}
+.admin-tab.active{background:#dbeafe;color:#1e3a8a}
+.admin-tab:hover:not(.active){background:#f1f5f9}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.admin-card-table{overflow-x:auto;background:#fafcff;border-radius:12px;border:1px solid #e2e8f0;padding:4px}
+.admin-refresh{background:#e2e8f0;border:0;border-radius:30px;padding:8px 16px;cursor:pointer;font-weight:600;margin-left:auto}
+</style>
 </head>
 <body>
 <header class="header"><div class="header-inner">
@@ -126,7 +139,6 @@ th{background:#f8fafc;font-weight:600}
 <div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div></div>
 <button class="drop-item" onclick="openProfile()">⚙️ Settings</button>
 <button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade</button>
-<button class="drop-item" id="adminBtn" style="display:none" onclick="openAdminDashboard()">🛡️ Admin Dashboard</button>
 <button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
 </div></div>
 <button id="loginBtn" class="light" onclick="showLogin()">🔐 Login</button>
@@ -156,7 +168,6 @@ th{background:#f8fafc;font-weight:600}
 
 <section class="workspace" id="workspace"><div class="box">
 <div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
-
 <!-- Search -->
 <div id="tool-search"><h3>🔎 Search PDFs from Excel</h3>
 <label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf" multiple>
@@ -167,8 +178,7 @@ th{background:#f8fafc;font-weight:600}
 <div id="searchProgress" class="processing-progress"><div class="bar"><div id="searchProgressFill" class="fill"></div></div><div class="line"><span id="searchProgressLine">Processing...</span><span id="searchProgressPct">0%</span></div></div>
 <table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
 </div>
-
-<!-- Compress (FIXED) -->
+<!-- Compress -->
 <div id="tool-compress" style="display:none"><h3>🗜️ Compress PDFs (up to 80% smaller)</h3>
 <label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf" multiple>
 <div class="grid2"><div><label>Target Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div>
@@ -179,7 +189,6 @@ th{background:#f8fafc;font-weight:600}
 <div id="compressProgress" class="processing-progress"><div class="bar"><div id="compressProgressFill" class="fill"></div></div><div class="line"><span id="compressProgressLine">Processing...</span><span id="compressProgressPct">0%</span></div></div>
 <table><thead><tr><th>PDF</th><th>Original</th><th>Compressed</th><th>Reduction</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
 </div>
-
 <!-- Merge -->
 <div id="tool-merge" style="display:none"><h3>🔗 Merge PDFs</h3>
 <label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf" multiple>
@@ -188,7 +197,6 @@ th{background:#f8fafc;font-weight:600}
 <div id="mergeStatus" class="status">Ready — select at least 2 PDFs.</div>
 <div id="mergeProgress" class="processing-progress"><div class="bar"><div id="mergeProgressFill" class="fill"></div></div><div class="line"><span id="mergeProgressLine">Processing...</span><span id="mergeProgressPct">0%</span></div></div>
 </div>
-
 <!-- ZIP -->
 <div id="tool-zip" style="display:none"><h3>📦 Create ZIP</h3>
 <label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf" multiple>
@@ -197,8 +205,34 @@ th{background:#f8fafc;font-weight:600}
 <div id="zipStatus" class="status">Ready — select PDFs.</div>
 <div id="zipProgress" class="processing-progress"><div class="bar"><div id="zipProgressFill" class="fill"></div></div><div class="line"><span id="zipProgressLine">Processing...</span><span id="zipProgressPct">0%</span></div></div>
 </div>
-
 </div></section>
+
+<!-- 🟢 NEW: ADMIN DASHBOARD ON SCREEN -->
+<div id="adminDashboard">
+<div class="tools-card">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+<h2 class="section-title" style="margin:0;">🛡️ Admin Dashboard</h2>
+</div>
+<div class="admin-tabs">
+<button class="admin-tab active" onclick="switchAdminTab('users')">👥 All Users</button>
+<button class="admin-tab" onclick="switchAdminTab('premium')">⭐ Premium Users</button>
+<button class="admin-tab" onclick="switchAdminTab('payments')">💳 Payment History</button>
+<button class="admin-refresh" onclick="loadAdminData()">↻ Refresh</button>
+</div>
+<div class="status" id="adminStatus">Click "Refresh" to load data. (Make sure Firebase Rules allow reading).</div>
+
+<div id="admin-section-users" class="admin-section active">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Joined On</th></tr></thead><tbody id="adminUsersRows"></tbody></table></div>
+</div>
+<div id="admin-section-premium" class="admin-section">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Valid Till</th><th>Days Left</th><th>Upgraded On</th></tr></thead><tbody id="adminPremiumRows"></tbody></table></div>
+</div>
+<div id="admin-section-payments" class="admin-section">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
+</div>
+</div>
+</div>
+
 </main>
 <footer class="footer">© 2026 PDF Utility Hub · <b>Build by Anwar</b> · Professional PDF Tools</footer>
 
@@ -212,30 +246,19 @@ th{background:#f8fafc;font-weight:600}
 <div class="login-link">Already a member? <a onclick="switchToLogin()">Login</a></div>
 </div></div></div>
 
-<!-- LOGIN MODAL (WITH FORGOT PASSWORD) -->
 <div class="modal" id="loginModal"><div class="modal-card"><div class="modal-head"><h3>🔐 Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
 <div class="register-container">
-  <div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div>
-  <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div>
-  
-  <!-- Forgot Password Link -->
-  <div style="text-align:right;margin-bottom:12px">
-    <a onclick="showForgotPassword()" style="color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none;font-weight:600">🔑 Forgot Password?</a>
-  </div>
-  
-  <!-- Forgot Password Box -->
-  <div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0">
-    <div class="form-group" style="margin-bottom:8px">
-      <label style="font-size:13px;font-weight:600;color:#475569">📧 Enter registered email</label>
-      <input id="resetEmail" type="email" placeholder="Enter your registered email" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none">
-    </div>
-    <button class="register-btn" style="background:#ea580c;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button>
-    <button class="register-btn" style="background:#e2e8f0;color:#0f172a;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button>
-  </div>
-  
-  <div id="loginStatus" class="status-msg" style="display:none"></div>
-  <button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button>
-  <div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div>
+<div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div>
+<div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div>
+<div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none;font-weight:600">🔑 Forgot Password?</a></div>
+<div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0">
+<div class="form-group" style="margin-bottom:8px"><label style="font-size:13px;font-weight:600;color:#475569">📧 Enter registered email</label><input id="resetEmail" type="email" placeholder="Enter your registered email" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none"></div>
+<button class="register-btn" style="background:#ea580c;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button>
+<button class="register-btn" style="background:#e2e8f0;color:#0f172a;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button>
+</div>
+<div id="loginStatus" class="status-msg" style="display:none"></div>
+<button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button>
+<div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div>
 </div></div></div>
 
 <div class="modal" id="paymentModal"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
@@ -245,12 +268,6 @@ th{background:#f8fafc;font-weight:600}
 <label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR">
 <button class="action bluebtn" onclick="submitPayment()">SUBMIT & ACTIVATE PREMIUM</button>
 <div id="paymentMsg" class="status">Premium will be activated instantly upon submission.</div>
-</div></div>
-
-<!-- Admin Dashboard Modal -->
-<div class="modal" id="adminModal"><div class="modal-card" style="width:min(800px,100%)"><div class="modal-head"><h3>🛡️ Admin Dashboard</h3><div class="modal-tools"><button onclick="loadAdminData()">↻</button><button class="close-pay" onclick="hideAdminDashboard()">✕</button></div></div>
-<div class="status" id="adminStatus">Loading payment history...</div>
-<div style="overflow:auto"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
 </div></div>
 
 <div class="limit-popup" id="limitReachedPopup"><div class="limit-card"><div style="font-size:48px">🚫</div><h2>Limit Reached</h2><p id="limitReachedText">You have used all your pages.</p><button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM</button><button class="close" onclick="closeLimitReached()">Close</button></div></div>
@@ -267,11 +284,7 @@ th{background:#f8fafc;font-weight:600}
 
 <script type="module">
 import { initializeApp } from "firebase/app";
-import { 
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, updateProfile, signOut,
-  sendPasswordResetEmail 
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -290,11 +303,8 @@ const db = getFirestore(app);
 const PDFLib = window.PDFLib;
 
 let currentUser = null, currentRole = 'guest', pageUsage = 0;
-let resetRequestCount = 0;
-let lastResetTime = 0;
-let selectedPlan = '6';
+let resetRequestCount = 0, lastResetTime = 0, selectedPlan = '6';
 
-// ✅ PAGE LIMITS (Guest: 60, Registered: 100)
 const PAGE_LIMITS = { guest:60, registered:100, premium:Infinity, admin:Infinity };
 const ADMIN_UIDS = ["O2TjdGUFfdaET03CLusJehrgsNu2"];
 
@@ -314,7 +324,6 @@ async function checkPageLimit(files, statusId){
 
 function consumePages(pages){ if(pages && currentRole!=='premium'&&currentRole!=='admin'){ pageUsage+=pages; savePageUsage(); updateUI(); } }
 
-// UI Updates
 function updateUI(){
  const isLoggedIn=!!currentUser, role=currentRole, limit=PAGE_LIMITS[role]??20, isUnlimited=limit===Infinity;
  document.getElementById('loginBtn').style.display=isLoggedIn?'none':'inline-block';
@@ -333,12 +342,20 @@ function updateUI(){
  document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()} | ${isUnlimited?'♾️ Unlimited':(role==='registered'?'📝 100 pages':'👤 60 pages')}`:'Search, Compress, Merge & ZIP PDFs.';
  document.getElementById('adminBtn').style.display=role==='admin'?'block':'none';
  document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
- 
  const planText = role==='admin'?'👑 ADMIN — UNLIMITED':role==='premium'?'⭐ PREMIUM — UNLIMITED':role==='registered'?'📝 REGISTERED — 100 PAGES':'👤 GUEST — 60 PAGES';
  document.getElementById('dropPlan').textContent = planText;
+
+ // 🟢 Show/Hide Admin Dashboard on Screen
+ const adminDash = document.getElementById('adminDashboard');
+ if(role === 'admin') {
+   adminDash.style.display = 'block';
+   loadAdminData(); // Auto-load data when admin logs in
+ } else {
+   adminDash.style.display = 'none';
+ }
 }
 
-// Auth Handlers
+// Auth
 window.handleRegister=async function(){
  const name=document.getElementById('regName').value.trim(), email=document.getElementById('regEmail').value.trim(), password=document.getElementById('regPassword').value;
  if(!name||!email||password.length<6){ showRegStatus('Fill all fields. Password min 6 chars.','error'); return; }
@@ -373,20 +390,14 @@ onAuthStateChanged(auth, async (user)=>{
 
 // Modals
 window.showRegister=()=>document.getElementById('authModal').classList.add('show');
-window.showLogin=()=>{
-  document.getElementById('loginModal').classList.add('show');
-  document.getElementById('forgotBox').style.display = 'none';
-  document.getElementById('loginSubmitBtn').style.display = 'block';
-};
+window.showLogin=()=>{ document.getElementById('loginModal').classList.add('show'); document.getElementById('forgotBox').style.display='none'; document.getElementById('loginSubmitBtn').style.display='block'; };
 window.hideAllModals=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'));
 window.switchToLogin=()=>{ hideAllModals(); showLogin(); };
 window.switchToRegister=()=>{ hideAllModals(); showRegister(); };
 function showRegStatus(msg,type){ const el=document.getElementById('regStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
 function showLoginStatus(msg,type){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
 
-// =============================================
-// FORGOT PASSWORD
-// =============================================
+// Forgot Password
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
     document.getElementById('loginSubmitBtn').style.display = 'none';
@@ -394,70 +405,32 @@ window.showForgotPassword = function() {
     document.getElementById('resetEmail').value = '';
     resetRequestCount = 0;
 };
-
 window.hideForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'none';
     document.getElementById('loginSubmitBtn').style.display = 'block';
     document.getElementById('loginStatus').style.display = 'none';
 };
-
 window.sendResetLink = async function() {
     const email = document.getElementById('resetEmail').value.trim();
-    const statusEl = document.getElementById('loginStatus');
-    
-    if (!email) {
-        showLoginStatus('❌ Please enter your email address.', 'error');
-        return;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-        showLoginStatus('❌ Please enter a valid email address.', 'error');
-        return;
-    }
-    
+    if (!email) { showLoginStatus('❌ Please enter your email address.', 'error'); return; }
+    if (!email.includes('@') || !email.includes('.')) { showLoginStatus('❌ Please enter a valid email address.', 'error'); return; }
     const now = Date.now();
-    if (now - lastResetTime < 30000) { // 30 seconds cooldown
-        showLoginStatus('⏳ Please wait 30 seconds before sending another request.', 'info');
-        return;
-    }
-    
+    if (now - lastResetTime < 30000) { showLoginStatus('⏳ Please wait 30 seconds.', 'info'); return; }
     resetRequestCount++;
-    if (resetRequestCount > 3) {
-        showLoginStatus('❌ Too many requests. Please try again after 15 minutes.', 'error');
-        return;
-    }
-    
+    if (resetRequestCount > 3) { showLoginStatus('❌ Too many requests. Try after 15 minutes.', 'error'); return; }
     try {
         const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = '⏳ Sending...';
-        showLoginStatus('⏳ Sending reset link to ' + email + '...', 'info');
-        
+        btn.disabled = true; btn.textContent = '⏳ Sending...';
         await sendPasswordResetEmail(auth, email);
-        
         lastResetTime = now;
-        showLoginStatus('✅ Password reset link sent to ' + email + '! Please check inbox/spam.', 'success');
-        document.getElementById('resetEmail').value = '';
-        btn.disabled = false;
-        btn.textContent = originalText;
-        
-        setTimeout(() => {
-            hideForgotPassword();
-        }, 5000);
-        
+        showLoginStatus('✅ Reset link sent to ' + email + '!', 'success');
+        btn.disabled = false; btn.textContent = '📧 Send Reset Link';
+        setTimeout(() => hideForgotPassword(), 5000);
     } catch (error) {
-        console.error('Reset error:', error);
         const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
-        btn.disabled = false;
-        btn.textContent = '📧 Send Reset Link';
-        
-        if (error.code === 'auth/too-many-requests') {
-            showLoginStatus('❌ Too many requests. Please wait 15 minutes and try again.', 'error');
-        } else if (error.code === 'auth/user-not-found') {
-            showLoginStatus('❌ No account found with this email address. Please register first.', 'error');
-        } else {
-            showLoginStatus('❌ ' + error.message, 'error');
-        }
+        btn.disabled = false; btn.textContent = '📧 Send Reset Link';
+        if (error.code === 'auth/user-not-found') showLoginStatus('❌ No account found. Register first.', 'error');
+        else showLoginStatus('❌ ' + error.message, 'error');
     }
 };
 
@@ -465,27 +438,72 @@ window.sendResetLink = async function() {
 window.toggleDropdown=function(){ document.getElementById('dropdown').classList.toggle('show'); };
 document.addEventListener('click', e=>{ const d=document.getElementById('dropdown'); if(d&&!document.getElementById('userMenu').contains(e.target)) d.classList.remove('show'); });
 
-// Admin Dashboard (View Only)
-window.openAdminDashboard=function(){ document.getElementById('dropdown').classList.remove('show'); document.getElementById('adminModal').classList.add('show'); loadAdminData(); };
-window.hideAdminDashboard=function(){ document.getElementById('adminModal').classList.remove('show'); };
-window.loadAdminData=async function(){
- document.getElementById('adminStatus').textContent='Loading...';
- try{
-  const snap=await getDocs(collection(db,'paymentRequests'));
-  const rows=document.getElementById('adminPaymentRows'); rows.innerHTML='';
-  snap.forEach(doc=>{
-   const d=doc.data();
-   const tr=document.createElement('tr');
-   // Removed Action buttons since auto-approval is active
-   tr.innerHTML=`<td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td>`;
-   rows.appendChild(tr);
-  });
-  document.getElementById('adminStatus').textContent='✅ History loaded. No approval required.';
- }catch(e){ document.getElementById('adminStatus').textContent='❌ Error: '+e.message; }
+// =============================================
+// ADMIN DASHBOARD (SCREEN VERSION)
+// =============================================
+window.switchAdminTab = function(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('admin-tab-' + tab).classList.add('active');
+  document.getElementById('admin-section-' + tab).classList.add('active');
+};
+
+window.loadAdminData = async function() {
+  const statusEl = document.getElementById('adminStatus');
+  statusEl.textContent = '🔄 Fetching all data...';
+  statusEl.style.color = '#1e40af';
+  
+  try {
+    const [usersSnap, premiumSnap, paymentSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'premiumUsers')),
+      getDocs(collection(db, 'paymentRequests'))
+    ]);
+
+    // 1. All Users
+    let userHtml = '';
+    usersSnap.forEach(doc => {
+      const d = doc.data();
+      const dateStr = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleDateString() : 'N/A';
+      userHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.name||'N/A'}</td><td>${d.role||'registered'}</td><td>${dateStr}</td></tr>`;
+    });
+    document.getElementById('adminUsersRows').innerHTML = userHtml || '<tr><td colspan="4">No registered users found.</td></tr>';
+
+    // 2. Premium Users
+    let premiumHtml = '';
+    premiumSnap.forEach(doc => {
+      const d = doc.data();
+      const validTill = d.validTill?.toDate?.() || null;
+      const upgradedAt = d.upgradedAt?.toDate?.() ? d.upgradedAt.toDate().toLocaleDateString() : 'N/A';
+      let daysLeft = 'N/A';
+      if(validTill) {
+        const now = new Date();
+        daysLeft = Math.max(0, Math.ceil((validTill - now) / (1000 * 60 * 60 * 24)));
+      }
+      premiumHtml += `<tr><td>${d.email||'N/A'}</td><td>${validTill?validTill.toLocaleDateString():'N/A'}</td><td>${daysLeft}</td><td>${upgradedAt}</td></tr>`;
+    });
+    document.getElementById('adminPremiumRows').innerHTML = premiumHtml || '<tr><td colspan="4">No premium users found.</td></tr>';
+
+    // 3. Payment History
+    let payHtml = '';
+    paymentSnap.forEach(doc => {
+      const d = doc.data();
+      const createdAt = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleString() : 'N/A';
+      payHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td><td>${createdAt}</td></tr>`;
+    });
+    document.getElementById('adminPaymentRows').innerHTML = payHtml || '<tr><td colspan="6">No payment history found.</td></tr>';
+
+    statusEl.textContent = '✅ Data loaded successfully.';
+    statusEl.style.color = '#166534';
+  } catch(e) {
+    console.error('Admin Load Error:', e);
+    statusEl.textContent = '❌ Error loading data: ' + e.message + ' (Please check Firebase Console -> Firestore -> Rules to allow read access for authenticated users).';
+    statusEl.style.color = '#991b1b';
+  }
 };
 
 // =============================================
-// AUTO-APPROVE PAYMENT (NO ADMIN NEEDED)
+// AUTO-APPROVE PAYMENT
 // =============================================
 window.openPayment=function(plan){
  selectedPlan = plan;
@@ -501,53 +519,24 @@ window.openPremium=function(){ document.getElementById('dropdown').classList.rem
 
 window.submitPayment=async function(){
  const utr=document.getElementById('utr').value.trim();
- 
- if(!currentUser){ 
-     document.getElementById('paymentMsg').textContent='❌ Please login first. You must have a registered account to buy Premium.'; 
-     return; 
- }
- if(!utr){ 
-     document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; 
-     return; 
- }
- 
+ if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first. You must have a registered account to buy Premium.'; return; }
+ if(!utr){ document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; return; }
  const months = selectedPlan === '6' ? 6 : 12;
  const amount = selectedPlan === '6' ? 199 : 299;
  const duration = selectedPlan === '6' ? '6 Months' : '1 Year';
  const validTill = new Date();
  validTill.setMonth(validTill.getMonth() + months);
- 
  try{ 
-     // 1. Save for record-keeping (auto_approved)
      await setDoc(doc(db,'paymentRequests',currentUser.uid+'_'+Date.now()),{
-         uid:currentUser.uid,
-         email:currentUser.email,
-         utr:utr,
-         amount:amount,
-         plan:duration,
-         status:'auto_approved',
-         createdAt:new Date()
+         uid:currentUser.uid, email:currentUser.email, utr:utr, amount:amount, plan:duration, status:'auto_approved', createdAt:new Date()
      });
-     
-     // 2. AUTO-ACTIVATE PREMIUM INSTANTLY
      await setDoc(doc(db, 'premiumUsers', currentUser.uid), {
-         uid: currentUser.uid,
-         email: currentUser.email,
-         active: true,
-         validTill: validTill,
-         upgradedAt: new Date()
+         uid: currentUser.uid, email: currentUser.email, active: true, validTill: validTill, upgradedAt: new Date()
      }, { merge: true });
-
-     // 3. Update UI immediately so user sees Premium icon without refreshing
-     currentRole = 'premium';
-     updateUI();
-     
+     currentRole = 'premium'; updateUI();
      document.getElementById('paymentMsg').textContent='✅ Payment recorded! You are now a PREMIUM user. Enjoy Unlimited pages!'; 
      document.getElementById('utr').value=''; 
-     
-     // Close modal after 3 seconds
      setTimeout(() => hideAllModals(), 3000);
-     
  }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
 };
 
@@ -563,7 +552,6 @@ window.openTool=function(t){
  document.getElementById('workspace').scrollIntoView({behavior:'smooth'});
 };
 
-// Helpers
 function size(b){ b=Number(b)||0; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(1)+' KB'; if(b<1073741824)return (b/1048576).toFixed(2)+' MB'; return (b/1073741824).toFixed(2)+' GB'; }
 function setProgress(tool,p,text){ const f=document.getElementById(tool+'ProgressFill'); if(!f)return; document.getElementById(tool+'Progress').classList.add('show'); f.style.width=Math.min(100,Math.max(0,Math.round(p)))+'%'; if(document.getElementById(tool+'ProgressPct')) document.getElementById(tool+'ProgressPct').textContent=Math.round(p)+'%'; if(document.getElementById(tool+'ProgressLine')) document.getElementById(tool+'ProgressLine').textContent=text||'Processing...'; }
 function hideProgress(tool){ const e=document.getElementById(tool+'Progress'); if(e)e.classList.remove('show'); }
@@ -594,16 +582,15 @@ window.startSearch=async function(){
    await new Promise(r=>setTimeout(r,0));
   }
   document.getElementById('searchStatus').textContent=(stopSearch?'⏹ STOPPED':'✅ COMPLETE')+` | Found ${f} | Not Found ${n}`;
-  refreshSearch();
-  hideProgress('search');
+  refreshSearch(); hideProgress('search');
  }catch(e){ document.getElementById('searchStatus').textContent='❌ Error: '+e.message; }
 };
 window.stopSearch=function(){ stopSearch=true; document.getElementById('searchStatus').textContent='⏹ Stopping...'; };
 function refreshSearch(){ const h=found.some(x=>x.checked); document.getElementById('searchZip').disabled=!h; document.getElementById('searchMerge').disabled=!h; }
-window.downloadSearchZip=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; const z=new JSZip(); a.forEach((x,i)=>{ z.file(x.file.name,x.file); setProgress('search',((i+1)/a.length)*80,`Adding ${i+1} of ${a.length}`); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Selected_PDFs.zip'); };
-window.mergeSearchResults=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<a.length;i++){ const s=await PDFLib.PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); setProgress('search',((i+1)/a.length)*100,`Merging ${i+1} of ${a.length}`); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Merged_Search.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
+window.downloadSearchZip=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; const z=new JSZip(); a.forEach((x,i)=>{ z.file(x.file.name,x.file); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Selected_PDFs.zip'); };
+window.mergeSearchResults=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<a.length;i++){ const s=await PDFLib.PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Merged_Search.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
 
-// COMPRESS (FIXED - Safely gets jsPDF constructor)
+// COMPRESS
 let compressedResults=[], stopCompression=false;
 window.compressFiles=async function(){
  const fs=[...document.getElementById('compressFiles').files];
@@ -619,19 +606,15 @@ window.compressFiles=async function(){
    const tr=document.createElement('tr');
    tr.innerHTML=`<td>${file.name}</td><td>${size(file.size)}</td><td>⏳</td><td>Processing</td><td></td>`;
    document.getElementById('compressRows').appendChild(tr);
-   
    const pdfjs = window.pdfjsLib;
    if(!pdfjs){ document.getElementById('compressStatus').textContent='❌ PDF.js not loaded.'; return; }
-   
    const pdf = await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
    const total=pdf.numPages;
    const quality=document.getElementById('quality').value;
    const jpegQuality = quality==='strong'?0.4 : quality==='medium'?0.55 : 0.7;
    const scale = quality==='strong'?0.8 : quality==='medium'?0.95 : 1.1;
-   
    const jsPDF = window.jspdf.jsPDF || window.jspdf;
    if(!jsPDF){ document.getElementById('compressStatus').textContent='❌ jsPDF not loaded.'; return; }
-
    const pdfOut = new jsPDF({unit:'pt', format:'a4', compress:true});
    for(let p=1;p<=total;p++){
     if(stopCompression) break;
@@ -684,12 +667,11 @@ window.createZip=async function(){
  const fs=[...document.getElementById('zipFiles').files];
  if(!fs.length){alert('Select PDFs.'); return;}
  if(!await checkPageLimit(fs,'zipStatus')) return;
- try{ const z=new JSZip(); for(let i=0;i<fs.length;i++){ z.file(fs[i].name,fs[i]); setProgress('zip',((i+1)/fs.length)*80,`Adding ${i+1} of ${fs.length}`); await new Promise(r=>setTimeout(r,0)); } const blob=await z.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:9}},m=>setProgress('zip',80+m.percent*.2,'Building ZIP...')); let name=document.getElementById('zipName').value||'PDFs.zip'; if(!/\.zip$/i.test(name))name+='.zip'; safeDownload(blob,name); document.getElementById('zipStatus').textContent=`✅ ${fs.length} PDF(s) zipped.`; hideProgress('zip'); }catch(e){ document.getElementById('zipStatus').textContent='❌ Error: '+e.message; }
+ try{ const z=new JSZip(); for(let i=0;i<fs.length;i++){ z.file(fs[i].name,fs[i]); setProgress('zip',((i+1)/fs.length)*80,`Adding ${i+1} of ${fs.length}`); } const blob=await z.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:9}},m=>setProgress('zip',80+m.percent*.2,'Building ZIP...')); let name=document.getElementById('zipName').value||'PDFs.zip'; if(!/\.zip$/i.test(name))name+='.zip'; safeDownload(blob,name); document.getElementById('zipStatus').textContent=`✅ ${fs.length} PDF(s) zipped.`; hideProgress('zip'); }catch(e){ document.getElementById('zipStatus').textContent='❌ Error: '+e.message; }
 };
 
-// Init
 loadPageUsage(); updateUI();
-console.log('✅ PDF Utility Hub ready (Auto Premium Active)');
+console.log('✅ PDF Utility Hub ready (Admin Dashboard on Screen)');
 </script>
 </body>
 </html>

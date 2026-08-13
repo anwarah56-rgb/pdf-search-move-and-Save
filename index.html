@@ -204,6 +204,13 @@ body.premium-theme .premium-banner p{color:#475467}
 @media(max-width:1000px){.stats,.tools{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.modal{padding:10px}.modal-card{max-height:calc(100vh - 20px);padding:13px}.modal-head h3{font-size:16px}.modal-tools button{width:32px;height:32px}.header{padding:14px}.top{align-items:flex-start;flex-wrap:wrap}.builder{order:3}.brand{font-size:22px}.stats,.tools,.grid2{grid-template-columns:1fr}.container{padding:0 10px}.authbar{width:100%;justify-content:flex-end}.premium-banner{flex-direction:column;align-items:flex-start}}
 </style>
+
+<style>
+#adminPaymentRows td small{color:#667085}
+#adminModal .modal-card{max-width:900px}
+.action:disabled{opacity:.55;cursor:not-allowed}
+button{touch-action:manipulation}
+</style>
 </head>
 <body>
 <header class="header"><div class="header-inner">
@@ -217,7 +224,7 @@ body.premium-theme .premium-banner p{color:#475467}
 <div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div><div style="margin-top:6px" id="dropPlan">👤 GUEST — 20 PAGES</div></div>
 <button class="drop-item" onclick="openProfile()">⚙️ Account Settings</button>
 <button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade to Premium</button>
-<button class="drop-item" id="adminBtn" style="display:none" onclick="alert('Admin Dashboard')">🛡️ Admin Dashboard</button>
+<button class="drop-item" id="adminBtn" style="display:none" onclick="openAdminDashboard()">🛡️ Admin Dashboard</button>
 <button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
 </div></div>
 <div class="auth-buttons">
@@ -321,6 +328,29 @@ body.premium-theme .premium-banner p{color:#475467}
 
 <div class="modal" id="paymentModal"><div class="modal-card" id="paymentCard"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button onclick="toggleMinimize()">—</button><button class="close-pay" onclick="hideAllModals()">✕</button></div></div><div id="paymentDetails"></div><label>UPI ID</label><div class="upi" id="upiText">md.anwar18@ybl</div><div class="qr-wrap"><div class="qr-box"><div id="upiQr"></div><small>Scan to pay with any UPI app</small></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="greenbtn" onclick="copyUPI()">COPY UPI</button><button class="purplebtn" onclick="openUPIApp()">OPEN UPI APP</button></div><label>Transaction ID / UTR</label><input id="utr" placeholder="Enter payment transaction ID"><button class="action bluebtn" onclick="submitPayment()">SUBMIT PAYMENT FOR APPROVAL</button><div id="paymentMsg" class="status">Payment will be activated after admin verification.</div><button class="action" style="background:#e5e7eb;color:#111" onclick="hideAllModals()">Close</button></div></div>
 
+
+<!-- ADMIN DASHBOARD MODAL -->
+<div class="modal" id="adminModal">
+  <div class="modal-card" style="width:min(900px,100%)">
+    <div class="modal-head">
+      <h3>🛡️ Admin Dashboard</h3>
+      <div class="modal-tools">
+        <button onclick="loadAdminData()">↻</button>
+        <button class="close-pay" onclick="hideAdminDashboard()">✕</button>
+      </div>
+    </div>
+    <div class="status" id="adminStatus">Loading admin data...</div>
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="adminPaymentRows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="premium-overlay" id="premiumPopup"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Required</h3><div class="modal-tools"><button class="close-pay" onclick="hidePremiumPopup()">✕</button></div></div><p style="font-size:14px;color:#475467;margin:12px 0">You have reached your page limit.</p><div style="background:#f8fafc;border-radius:12px;padding:16px;margin:12px 0"><div style="display:flex;justify-content:space-between;padding:6px 0"><span>👤 Guest</span><span>20 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0"><span>📝 Registered</span><span>50 pages</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#16a34a;font-weight:800"><span>⭐ Premium</span><span>♾️ Unlimited</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;color:#1a4a7a;font-weight:800"><span>👑 Admin</span><span>♾️ Unlimited</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0"><button class="action purplebtn" onclick="openPayment('6');hidePremiumPopup()">₹400 / 6 Months</button><button class="action orangebtn" onclick="openPayment('12');hidePremiumPopup()">₹700 / 1 Year</button></div><button class="action" style="background:#e5e7eb;color:#111" onclick="hidePremiumPopup()">Close</button></div></div>
 
 <script type="importmap">
@@ -340,7 +370,7 @@ import {
   createUserWithEmailAndPassword, updateProfile, signOut,
   sendPasswordResetEmail
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",
@@ -371,6 +401,7 @@ let currentRole = 'guest';
 let pageUsage = 0;
 let found = [];
 let stopSearch = false;
+let stopCompression = false;
 let compressedResults = [];
 let selectedPlan = '6';
 let resetRequestCount = 0;
@@ -713,14 +744,14 @@ function updateUI() {
 // =============================================
 // STATUS MESSAGES
 // =============================================
-function showRegStatus(message, type) {
+window.showRegStatus = function(message, type) {
     const el = document.getElementById('regStatus');
     el.textContent = message;
     el.className = 'status-msg ' + type;
     el.style.display = 'block';
 }
 
-function showLoginStatus(message, type) {
+window.showLoginStatus = function(message, type) {
     const el = document.getElementById('loginStatus');
     el.textContent = message;
     el.className = 'status-msg ' + type;
@@ -817,11 +848,27 @@ window.toggleMinimize = function() {
     document.getElementById('paymentModal').classList.toggle('payment-minimized');
 };
 
-window.copyUPI = function() {
-    navigator.clipboard.writeText('md.anwar18@ybl').then(function() {
+window.copyUPI = async function() {
+    const value = 'md.anwar18@ybl';
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(value);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = value;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+        }
         document.getElementById('paymentMsg').textContent = '✅ UPI ID copied!';
         document.getElementById('paymentMsg').style.color = '#166534';
-    });
+    } catch (e) {
+        document.getElementById('paymentMsg').textContent = 'UPI ID: ' + value;
+        document.getElementById('paymentMsg').style.color = '#172033';
+    }
 };
 
 window.openUPIApp = function() {
@@ -829,16 +876,45 @@ window.openUPIApp = function() {
     location.href = 'upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=' + amt + '&cu=INR';
 };
 
-window.submitPayment = function() {
+window.submitPayment = async function() {
     const utr = document.getElementById('utr').value.trim();
-    if (!utr) {
-        document.getElementById('paymentMsg').textContent = 'Please enter Transaction ID.';
-        document.getElementById('paymentMsg').style.color = '#991b1b';
+    const msg = document.getElementById('paymentMsg');
+
+    if (!currentUser) {
+        msg.textContent = '❌ Please login before submitting payment.';
+        msg.style.color = '#991b1b';
         return;
     }
-    document.getElementById('paymentMsg').textContent = '✅ Payment request submitted. Admin will verify it.';
-    document.getElementById('paymentMsg').style.color = '#166534';
-    document.getElementById('utr').value = '';
+    if (!utr) {
+        msg.textContent = '❌ Please enter Transaction ID / UTR.';
+        msg.style.color = '#991b1b';
+        return;
+    }
+
+    try {
+        const amount = selectedPlan === '6' ? 400 : 700;
+        const duration = selectedPlan === '6' ? '6 Months' : '1 Year';
+
+        await setDoc(doc(db, 'paymentRequests', currentUser.uid + '_' + Date.now()), {
+            uid: currentUser.uid,
+            email: currentUser.email || '',
+            name: currentUser.displayName || '',
+            utr: utr,
+            amount: amount,
+            plan: duration,
+            status: 'pending',
+            createdAt: new Date()
+        });
+
+        msg.textContent = '✅ Payment request submitted. Admin will verify it.';
+        msg.style.color = '#166534';
+        document.getElementById('utr').value = '';
+        addActivity('Premium Payment', '₹' + amount + ' request submitted');
+    } catch (error) {
+        console.error('Payment submit error:', error);
+        msg.textContent = '❌ Could not submit request: ' + (error.message || error);
+        msg.style.color = '#991b1b';
+    }
 };
 
 window.hidePremiumPopup = function() {
@@ -851,7 +927,7 @@ window.hidePremiumPopup = function() {
 window.openTool = function(t) {
     document.getElementById('workspace').classList.add('active');
     document.querySelectorAll('.tab').forEach(x => {
-        x.classList.toggle('active', x.textContent.includes(t.charAt(0).toUpperCase() + t.slice(1)));
+        x.classList.toggle('active', x.textContent.toLowerCase().includes(t.toLowerCase()));
     });
     ['search','compress','merge','zip'].forEach(x => {
         document.getElementById('tool-' + x).style.display = x === t ? 'block' : 'none';
@@ -937,9 +1013,9 @@ window.downloadSearchZip = async function() {
 window.mergeSearchResults = async function() {
     const a = found.filter(x => x.checked);
     if (!a.length) return;
-    const out = await PDFDocument.create();
+    const out = await PDFLib.PDFDocument.create();
     for (const x of a) {
-        const s = await PDFDocument.load(await x.file.arrayBuffer(), { ignoreEncryption: true });
+        const s = await PDFLib.PDFDocument.load(await x.file.arrayBuffer(), { ignoreEncryption: true });
         (await out.copyPages(s, s.getPageIndices())).forEach(p => out.addPage(p));
     }
     const blob = new Blob([await out.save()], { type: 'application/pdf' });
@@ -958,57 +1034,93 @@ function size(n) {
     return n < 1048576 ? Math.round(n / 1024) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
 }
 
-window.stopCompress = function() {};
+window.stopCompress = function() {
+    stopCompression = true;
+    const el = document.getElementById('compressStatus');
+    if (el) el.textContent = '⏹ Stopping compression...';
+};
 
 window.compressFiles = async function() {
     const fs = [...document.getElementById('compressFiles').files];
+    const rows = document.getElementById('compressRows');
+    const status = document.getElementById('compressStatus');
+
     if (!fs.length) {
-        alert('Select PDFs.');
+        alert('Select PDF files.');
         return;
     }
-    document.getElementById('compressRows').innerHTML = '';
+
+    stopCompression = false;
+    rows.innerHTML = '';
     compressedResults = [];
-    
-    try {
-        for (const file of fs) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = '<td>' + file.name + '</td><td>' + size(file.size) + '</td><td>⏳ Processing...</td><td>...</td><td></td>';
-            document.getElementById('compressRows').appendChild(tr);
-            
-            const pdfDoc = await PDFDocument.load(await file.arrayBuffer());
-            const compressed = await pdfDoc.save();
-            const blob = new Blob([compressed], { type: 'application/pdf' });
-            const final = blob.size < file.size ? blob : file;
-            
-            tr.cells[2].textContent = size(final.size);
-            tr.cells[3].textContent = final === file ? 'Original kept' : '✅ Reduced';
+    document.getElementById('compressZip').disabled = true;
+    document.getElementById('compressMerge').disabled = true;
+
+    let done = 0;
+
+    for (const file of fs) {
+        if (stopCompression) break;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + file.name + '</td><td>' + size(file.size) +
+            '</td><td>⏳ Processing...</td><td>...</td><td></td>';
+        rows.appendChild(tr);
+
+        try {
+            const input = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(input, { ignoreEncryption: true });
+            const targetMB = parseFloat(document.getElementById('target').value || '5');
+            const quality = document.getElementById('quality').value;
+
+            // pdf-lib can rebuild/optimize PDF structure, but it cannot
+            // recompress embedded images like a desktop PDF compressor.
+            const saveOptions = {
+                useObjectStreams: quality !== 'light',
+                addDefaultPage: false
+            };
+            const rebuilt = await pdfDoc.save(saveOptions);
+            const rebuiltBlob = new Blob([rebuilt], { type: 'application/pdf' });
+
+            // Never make the file larger.
+            const finalBlob = rebuiltBlob.size < file.size ? rebuiltBlob : file;
+            const reduced = finalBlob.size < file.size;
+
             const name = file.name.replace(/\.pdf$/i, '') + '_compressed.pdf';
-            compressedResults.push({ name: name, blob: final });
-            
+            compressedResults.push({ name, blob: finalBlob });
+
+            tr.cells[2].textContent = size(finalBlob.size);
+            tr.cells[3].textContent = reduced
+                ? '✅ Reduced'
+                : ('↔ Kept original (' + targetMB + ' MB target)');
+
             const btn = document.createElement('button');
             btn.textContent = '⬇️ Download';
             btn.className = 'action greenbtn';
-            btn.onclick = function() {
-                const url = URL.createObjectURL(final);
-                const aTag = document.createElement('a');
-                aTag.href = url;
-                aTag.download = name;
-                document.body.appendChild(aTag);
-                aTag.click();
-                aTag.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 3000);
-            };
+            btn.onclick = () => downloadBlob(finalBlob, name);
             tr.cells[4].appendChild(btn);
+
+            done++;
+            status.textContent = 'Processed ' + done + ' / ' + fs.length + ' PDF(s)';
+        } catch (e) {
+            tr.cells[2].textContent = 'Failed';
+            tr.cells[3].textContent = '❌ ' + (e.message || e);
         }
-        document.getElementById('compressStatus').textContent = '✅ DONE — ' + compressedResults.length + ' PDF(s) ready.';
-        addActivity('Compress PDF', compressedResults.length + ' PDF(s) processed');
+
+        await new Promise(r => setTimeout(r, 0));
+    }
+
+    if (stopCompression) {
+        status.textContent = '⏹ STOPPED — ' + compressedResults.length + ' PDF(s) ready.';
+    } else {
+        status.textContent = '✅ DONE — ' + compressedResults.length + ' PDF(s) ready.';
+    }
+
+    if (compressedResults.length) {
         document.getElementById('compressZip').disabled = false;
         document.getElementById('compressMerge').disabled = false;
-    } catch (e) {
-        document.getElementById('compressStatus').textContent = 'Error: ' + e.message;
+        addActivity('Compress PDF', compressedResults.length + ' PDF(s) processed');
     }
 };
-
 window.downloadCompressedZip = async function() {
     const z = new JSZip();
     compressedResults.forEach(x => z.file(x.name, x.blob));
@@ -1024,9 +1136,9 @@ window.downloadCompressedZip = async function() {
 };
 
 window.mergeCompressed = async function() {
-    const out = await PDFDocument.create();
+    const out = await PDFLib.PDFDocument.create();
     for (const x of compressedResults) {
-        const s = await PDFDocument.load(await x.blob.arrayBuffer(), { ignoreEncryption: true });
+        const s = await PDFLib.PDFDocument.load(await x.blob.arrayBuffer(), { ignoreEncryption: true });
         (await out.copyPages(s, s.getPageIndices())).forEach(p => out.addPage(p));
     }
     const blob = new Blob([await out.save()], { type: 'application/pdf' });
@@ -1047,9 +1159,9 @@ window.mergePDFs = async function() {
         return;
     }
     try {
-        const out = await PDFDocument.create();
+        const out = await PDFLib.PDFDocument.create();
         for (const f of fs) {
-            const s = await PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption: true });
+            const s = await PDFLib.PDFDocument.load(await f.arrayBuffer(), { ignoreEncryption: true });
             (await out.copyPages(s, s.getPageIndices())).forEach(p => out.addPage(p));
         }
         let name = document.getElementById('mergeName').value || 'Merged_PDF.pdf';
@@ -1092,6 +1204,145 @@ window.createZip = async function() {
     document.getElementById('zipStatus').textContent = '✅ ' + fs.length + ' PDF(s) saved in ZIP.';
     addActivity('Create ZIP', fs.length + ' PDF(s) zipped');
 };
+
+// =============================================
+// SAFE DOWNLOAD HELPER
+// =============================================
+window.downloadBlob = function(blob, filename) {
+    try {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (e) {
+        console.error('Download error:', e);
+        alert('Download failed: ' + (e.message || e));
+    }
+};
+
+// =============================================
+// ADMIN DASHBOARD
+// =============================================
+window.openAdminDashboard = async function() {
+    if (currentRole !== 'admin') {
+        alert('Admin access required.');
+        return;
+    }
+    document.getElementById('dropdown').classList.remove('show');
+    document.getElementById('adminModal').classList.add('show');
+    await loadAdminData();
+};
+
+window.hideAdminDashboard = function() {
+    document.getElementById('adminModal').classList.remove('show');
+};
+
+window.loadAdminData = async function() {
+    const status = document.getElementById('adminStatus');
+    const body = document.getElementById('adminPaymentRows');
+
+    if (currentRole !== 'admin') {
+        status.textContent = '❌ Admin access required.';
+        return;
+    }
+
+    status.textContent = '⏳ Loading payment requests...';
+    body.innerHTML = '';
+
+    try {
+        const snap = await getDocs(collection(db, 'paymentRequests'));
+        if (snap.empty) {
+            body.innerHTML = '<tr><td colspan="6">No payment requests found.</td></tr>';
+            status.textContent = 'No payment requests.';
+            return;
+        }
+
+        snap.forEach(itemDoc => {
+            const d = itemDoc.data();
+            const tr = document.createElement('tr');
+            const date = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : '';
+            tr.innerHTML =
+                '<td>' + escapeHtml(d.email || '') + '<br><small>' + escapeHtml(date) + '</small></td>' +
+                '<td>' + escapeHtml(d.plan || '') + '</td>' +
+                '<td>' + escapeHtml(d.utr || '') + '</td>' +
+                '<td>₹' + escapeHtml(String(d.amount || '')) + '</td>' +
+                '<td>' + escapeHtml(d.status || 'pending') + '</td>' +
+                '<td></td>';
+
+            if ((d.status || 'pending') === 'pending') {
+                const btn = document.createElement('button');
+                btn.className = 'action greenbtn';
+                btn.style.marginTop = '0';
+                btn.textContent = '✅ Approve';
+                btn.onclick = () => approvePayment(itemDoc.id, d);
+                tr.cells[5].appendChild(btn);
+            } else {
+                tr.cells[5].textContent = '—';
+            }
+            body.appendChild(tr);
+        });
+
+        status.textContent = '✅ Loaded ' + snap.size + ' payment request(s).';
+    } catch (e) {
+        console.error('Admin load error:', e);
+        status.textContent = '❌ Could not load admin data: ' + (e.message || e);
+    }
+};
+
+window.approvePayment = async function(requestId, payment) {
+    if (currentRole !== 'admin') {
+        alert('Admin access required.');
+        return;
+    }
+
+    if (!payment?.uid) {
+        alert('Invalid payment request.');
+        return;
+    }
+
+    try {
+        const months = payment.plan === '1 Year' ? 12 : 6;
+        const validTill = new Date();
+        validTill.setMonth(validTill.getMonth() + months);
+
+        await setDoc(doc(db, 'premiumUsers', payment.uid), {
+            uid: payment.uid,
+            email: payment.email || '',
+            active: true,
+            plan: payment.plan || (months === 12 ? '1 Year' : '6 Months'),
+            amount: payment.amount || (months === 12 ? 700 : 400),
+            validTill: validTill,
+            approvedAt: new Date(),
+            approvedBy: currentUser?.email || ''
+        }, { merge: true });
+
+        await updateDoc(doc(db, 'paymentRequests', requestId), {
+            status: 'approved',
+            approvedAt: new Date(),
+            approvedBy: currentUser?.email || ''
+        });
+
+        alert('✅ Premium approved successfully.');
+        await loadAdminData();
+    } catch (e) {
+        console.error('Approval error:', e);
+        alert('❌ Approval failed: ' + (e.message || e));
+    }
+};
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);

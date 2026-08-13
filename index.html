@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
@@ -384,7 +385,6 @@ button{touch-action:manipulation}
 </script>
 
 <script type="module">
-import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
 import { initializeApp } from "firebase/app";
 import { 
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
@@ -1209,7 +1209,8 @@ window.mergeSearchResults = async function() {
 // PDF and the original is always returned.
 async function compressOnePdf(file, qualityMode, onProgress) {
     const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjsLib.getDocument({data}).promise;
+    const pdfjs = await getPdfJs();
+    const pdf = await pdfjs.getDocument({data}).promise;
 
     const total = pdf.numPages;
     const originalMB = file.size / 1048576;
@@ -1394,5 +1395,31 @@ console.log('✅ PDF Utility Hub fixed build loaded');
     <button class="close" onclick="closeLimitReached()">Close</button>
   </div>
 </div>
+
+window.addEventListener('error', function(e) {
+    console.error('PDF Utility Hub error:', e.error || e.message);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('PDF Utility Hub promise error:', e.reason);
+});
 </body>
 </html>
+let pdfjsReadyPromise = null;
+async function getPdfJs() {
+    if (window.pdfjsLib) return window.pdfjsLib;
+    if (!pdfjsReadyPromise) {
+        pdfjsReadyPromise = new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js';
+            s.onload = () => {
+                if (window.pdfjsLib) resolve(window.pdfjsLib);
+                else reject(new Error('PDF.js failed to load.'));
+            };
+            s.onerror = () => reject(new Error('Could not load PDF.js. Check internet connection.'));
+            document.head.appendChild(s);
+        });
+    }
+    return pdfjsReadyPromise;
+}
+
+

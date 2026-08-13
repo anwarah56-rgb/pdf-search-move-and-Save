@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b57d0">
-<title>PDF Utility Hub </title>
+<title>PDF Utility Hub by Anwar</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -137,13 +137,13 @@ th{background:#f8fafc;font-weight:600}
 
 <main class="container">
 <section class="stats">
-<div class="stat"><div>📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 / 100</div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">Guest: 50 pages</div></div></div>
-<div class="stat"><div>👤</div><div><div class="stat-title">Account</div><div class="stat-value" id="accountType">GUEST</div><div class="stat-note" id="accountNote">50 pages limit</div></div></div>
+<div class="stat"><div>📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 / 60</div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">Guest: 60 pages</div></div></div>
+<div class="stat"><div>👤</div><div><div class="stat-title">Account</div><div class="stat-value" id="accountType">GUEST</div><div class="stat-note" id="accountNote">60 pages limit</div></div></div>
 <div class="stat"><div>⭐</div><div><div class="stat-title">Plan</div><div class="stat-value" id="planValue">Free</div><div class="stat-note" id="planNote">Upgrade to Unlimited</div></div></div>
 </section>
 
 <section class="premium-banner">
-<div><h2>⭐ Go Premium – Unlimited Pages</h2><p>Guest: 50 • Registered: 100 • Premium: ♾️ Unlimited</p></div>
+<div><h2>⭐ Go Premium – Unlimited Pages</h2><p>Guest: 60 • Registered: 100 • Premium: ♾️ Unlimited</p></div>
 <div><button class="plan-btn purplebtn" onclick="openPayment('6')">₹199 / 6mo</button><button class="plan-btn orangebtn" onclick="openPayment('12')">₹299 / 1yr</button></div>
 </section>
 
@@ -243,14 +243,14 @@ th{background:#f8fafc;font-weight:600}
 <label>UPI ID</label><div class="upi" style="background:#f1f5f9;padding:12px;border-radius:12px;font-family:monospace;font-size:16px;text-align:center;margin:8px 0">md.anwar18@ybl</div>
 <div class="qr-wrap" style="text-align:center;margin:12px 0"><div id="upiQr"></div></div>
 <label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR">
-<button class="action bluebtn" onclick="submitPayment()">SUBMIT FOR APPROVAL</button>
-<div id="paymentMsg" class="status">Admin will verify and activate.</div>
+<button class="action bluebtn" onclick="submitPayment()">SUBMIT & ACTIVATE PREMIUM</button>
+<div id="paymentMsg" class="status">Premium will be activated instantly upon submission.</div>
 </div></div>
 
 <!-- Admin Dashboard Modal -->
 <div class="modal" id="adminModal"><div class="modal-card" style="width:min(800px,100%)"><div class="modal-head"><h3>🛡️ Admin Dashboard</h3><div class="modal-tools"><button onclick="loadAdminData()">↻</button><button class="close-pay" onclick="hideAdminDashboard()">✕</button></div></div>
-<div class="status" id="adminStatus">Loading admin data...</div>
-<div style="overflow:auto"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
+<div class="status" id="adminStatus">Loading payment history...</div>
+<div style="overflow:auto"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
 </div></div>
 
 <div class="limit-popup" id="limitReachedPopup"><div class="limit-card"><div style="font-size:48px">🚫</div><h2>Limit Reached</h2><p id="limitReachedText">You have used all your pages.</p><button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM</button><button class="close" onclick="closeLimitReached()">Close</button></div></div>
@@ -272,7 +272,7 @@ import {
   createUserWithEmailAndPassword, updateProfile, signOut,
   sendPasswordResetEmail 
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",
@@ -292,8 +292,10 @@ const PDFLib = window.PDFLib;
 let currentUser = null, currentRole = 'guest', pageUsage = 0;
 let resetRequestCount = 0;
 let lastResetTime = 0;
+let selectedPlan = '6';
 
-const PAGE_LIMITS = { guest:20, registered:50, premium:Infinity, admin:Infinity };
+// ✅ PAGE LIMITS (Guest: 60, Registered: 100)
+const PAGE_LIMITS = { guest:60, registered:100, premium:Infinity, admin:Infinity };
 const ADMIN_UIDS = ["O2TjdGUFfdaET03CLusJehrgsNu2"];
 
 function loadPageUsage(){ const raw = localStorage.getItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages'); pageUsage = Math.max(0, parseInt(raw||'0',10)||0); }
@@ -306,7 +308,7 @@ async function checkPageLimit(files, statusId){
  if(currentRole==='premium'||currentRole==='admin') return true;
  const limit=currentPageLimit(), available=Math.max(0, limit-pageUsage);
  let pages; try{ pages=await countPdfPages(files); }catch(e){ if(statusId) document.getElementById(statusId).textContent='❌ Cannot read pages: '+e.message; return false; }
- if(pages>available){ const msg='❌ Limit reached. Need '+pages+' pages, only '+available+' left. '+(currentRole==='guest'?'Please login for 50 pages.':'Upgrade to Premium.'); if(statusId) document.getElementById(statusId).textContent=msg; return false; }
+ if(pages>available){ const msg='❌ Limit reached. Need '+pages+' pages, only '+available+' left. '+(currentRole==='guest'?'Please login for 100 pages.':'Upgrade to Premium.'); if(statusId) document.getElementById(statusId).textContent=msg; return false; }
  return true;
 }
 
@@ -328,9 +330,12 @@ function updateUI(){
  document.getElementById('opsBar').style.width=isUnlimited?'100%':Math.min(100,(pageUsage/limit)*100)+'%';
  document.getElementById('opsNote').textContent=isUnlimited?'♾️ Unlimited':Math.max(0,limit-pageUsage)+' pages remaining';
  document.getElementById('welcomeTitle').textContent=isLoggedIn?`👋 Welcome, ${name}!`:'👋 Welcome to PDF Utility Hub';
- document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()}`:'Search, Compress, Merge & ZIP PDFs.';
+ document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()} | ${isUnlimited?'♾️ Unlimited':(role==='registered'?'📝 100 pages':'👤 60 pages')}`:'Search, Compress, Merge & ZIP PDFs.';
  document.getElementById('adminBtn').style.display=role==='admin'?'block':'none';
  document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
+ 
+ const planText = role==='admin'?'👑 ADMIN — UNLIMITED':role==='premium'?'⭐ PREMIUM — UNLIMITED':role==='registered'?'📝 REGISTERED — 100 PAGES':'👤 GUEST — 60 PAGES';
+ document.getElementById('dropPlan').textContent = planText;
 }
 
 // Auth Handlers
@@ -370,7 +375,6 @@ onAuthStateChanged(auth, async (user)=>{
 window.showRegister=()=>document.getElementById('authModal').classList.add('show');
 window.showLogin=()=>{
   document.getElementById('loginModal').classList.add('show');
-  // Reset forgot password UI when opening login
   document.getElementById('forgotBox').style.display = 'none';
   document.getElementById('loginSubmitBtn').style.display = 'block';
 };
@@ -381,7 +385,7 @@ function showRegStatus(msg,type){ const el=document.getElementById('regStatus');
 function showLoginStatus(msg,type){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
 
 // =============================================
-// FORGOT PASSWORD (NEW ADDED)
+// FORGOT PASSWORD
 // =============================================
 window.showForgotPassword = function() {
     document.getElementById('forgotBox').style.display = 'block';
@@ -461,7 +465,7 @@ window.sendResetLink = async function() {
 window.toggleDropdown=function(){ document.getElementById('dropdown').classList.toggle('show'); };
 document.addEventListener('click', e=>{ const d=document.getElementById('dropdown'); if(d&&!document.getElementById('userMenu').contains(e.target)) d.classList.remove('show'); });
 
-// Admin Dashboard
+// Admin Dashboard (View Only)
 window.openAdminDashboard=function(){ document.getElementById('dropdown').classList.remove('show'); document.getElementById('adminModal').classList.add('show'); loadAdminData(); };
 window.hideAdminDashboard=function(){ document.getElementById('adminModal').classList.remove('show'); };
 window.loadAdminData=async function(){
@@ -472,25 +476,21 @@ window.loadAdminData=async function(){
   snap.forEach(doc=>{
    const d=doc.data();
    const tr=document.createElement('tr');
-   tr.innerHTML=`<td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td>
-    <td><button class="action greenbtn" style="padding:4px 12px;font-size:12px" onclick="approvePayment('${doc.id}')">Approve</button>
-    <button class="action" style="background:#dc2626;padding:4px 12px;font-size:12px" onclick="rejectPayment('${doc.id}')">Reject</button></td>`;
+   // Removed Action buttons since auto-approval is active
+   tr.innerHTML=`<td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td>`;
    rows.appendChild(tr);
   });
-  document.getElementById('adminStatus').textContent='✅ Data loaded.';
+  document.getElementById('adminStatus').textContent='✅ History loaded. No approval required.';
  }catch(e){ document.getElementById('adminStatus').textContent='❌ Error: '+e.message; }
 };
 
-window.approvePayment=async function(id){
- try{ await updateDoc(doc(db,'paymentRequests',id),{status:'approved'}); loadAdminData(); }catch(e){ alert('Error: '+e.message); }
-};
-window.rejectPayment=async function(id){
- try{ await updateDoc(doc(db,'paymentRequests',id),{status:'rejected'}); loadAdminData(); }catch(e){ alert('Error: '+e.message); }
-};
-
-// Payment
+// =============================================
+// AUTO-APPROVE PAYMENT (NO ADMIN NEEDED)
+// =============================================
 window.openPayment=function(plan){
- const amt=plan==='6'?'400':'700', dur=plan==='6'?'6 Months':'1 Year';
+ selectedPlan = plan;
+ const amt = plan === '6' ? '199' : '299';
+ const dur = plan === '6' ? '6 Months' : '1 Year';
  document.getElementById('paymentDetails').innerHTML=`<div style="background:#f1f5f9;padding:14px;border-radius:12px;text-align:center"><strong>₹${amt}</strong> / ${dur}<br><small>Unlimited PDF tools</small></div>`;
  document.getElementById('paymentModal').classList.add('show');
  document.getElementById('upiQr').innerHTML='';
@@ -501,9 +501,54 @@ window.openPremium=function(){ document.getElementById('dropdown').classList.rem
 
 window.submitPayment=async function(){
  const utr=document.getElementById('utr').value.trim();
- if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first.'; return; }
- if(!utr){ document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; return; }
- try{ await setDoc(doc(db,'paymentRequests',currentUser.uid+'_'+Date.now()),{uid:currentUser.uid,email:currentUser.email,utr,amount:selectedPlan==='6'?400:700,status:'pending',createdAt:new Date()}); document.getElementById('paymentMsg').textContent='✅ Request submitted. Admin will verify.'; document.getElementById('utr').value=''; }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
+ 
+ if(!currentUser){ 
+     document.getElementById('paymentMsg').textContent='❌ Please login first. You must have a registered account to buy Premium.'; 
+     return; 
+ }
+ if(!utr){ 
+     document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; 
+     return; 
+ }
+ 
+ const months = selectedPlan === '6' ? 6 : 12;
+ const amount = selectedPlan === '6' ? 199 : 299;
+ const duration = selectedPlan === '6' ? '6 Months' : '1 Year';
+ const validTill = new Date();
+ validTill.setMonth(validTill.getMonth() + months);
+ 
+ try{ 
+     // 1. Save for record-keeping (auto_approved)
+     await setDoc(doc(db,'paymentRequests',currentUser.uid+'_'+Date.now()),{
+         uid:currentUser.uid,
+         email:currentUser.email,
+         utr:utr,
+         amount:amount,
+         plan:duration,
+         status:'auto_approved',
+         createdAt:new Date()
+     });
+     
+     // 2. AUTO-ACTIVATE PREMIUM INSTANTLY
+     await setDoc(doc(db, 'premiumUsers', currentUser.uid), {
+         uid: currentUser.uid,
+         email: currentUser.email,
+         active: true,
+         validTill: validTill,
+         upgradedAt: new Date()
+     }, { merge: true });
+
+     // 3. Update UI immediately so user sees Premium icon without refreshing
+     currentRole = 'premium';
+     updateUI();
+     
+     document.getElementById('paymentMsg').textContent='✅ Payment recorded! You are now a PREMIUM user. Enjoy Unlimited pages!'; 
+     document.getElementById('utr').value=''; 
+     
+     // Close modal after 3 seconds
+     setTimeout(() => hideAllModals(), 3000);
+     
+ }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
 };
 
 // Limit
@@ -644,7 +689,7 @@ window.createZip=async function(){
 
 // Init
 loadPageUsage(); updateUI();
-console.log('✅ PDF Utility Hub ready');
+console.log('✅ PDF Utility Hub ready (Auto Premium Active)');
 </script>
 </body>
 </html>

@@ -1,1132 +1,778 @@
-// =====================================================
-// ADMIN LOGIN + AUTHENTICATION - FIXED VERSION
-// =====================================================
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b57d0">
+<title>PDF Utility Hub - Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-window.showAdminLogin = function () {
-  const modal = document.getElementById("adminLoginModal");
-  if (modal) modal.classList.add("show");
+<style>
+/* --- User & Common CSS --- */
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1e293b}
+.container{max-width:1320px;margin:auto;padding:0 20px}
+.header{background:linear-gradient(135deg,#0f172a,#1e3a8a 70%,#2563eb);color:#fff;padding:16px 0 24px}
+.header-inner{max-width:1320px;margin:auto;padding:0 20px}
+.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:700}
+.brand span{background:#facc15;color:#0f172a;padding:4px 12px;border-radius:20px;font-size:14px}
+.authbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.authbar button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 14px;border-radius:30px;font-weight:600;cursor:pointer;transition:.2s}
+.authbar button:hover{background:#fff;color:#1e3a8a}
+.authbar .light{background:#fff;color:#1e3a8a}
+.user-menu{position:relative;display:none}
+.user-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:8px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600}
+.dropdown{display:none;position:absolute;right:0;top:46px;width:250px;background:#fff;color:#1e293b;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);padding:10px;z-index:30}
+.dropdown.show{display:block}
+.drop-item{width:100%;border:0;background:#fff;text-align:left;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s}
+.drop-item:hover{background:#eef2f6}
+.drop-item.danger{color:#dc2626}
+.hero{margin:20px 0 12px}
+.hero h1{font-size:26px;font-weight:800;margin:0}
+.hero p{color:rgba(255,255,255,.85);font-size:15px;margin:4px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.stat{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.stat-title{font-size:13px;color:#64748b;font-weight:600}
+.stat-value{font-size:22px;font-weight:800;margin:4px 0 2px}
+.stat-note{font-size:12px;color:#64748b}
+.progress{height:6px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin:6px 0}
+.progress span{display:block;height:100%;background:#2563eb;border-radius:8px}
+.tools-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.section-title{font-size:22px;font-weight:800;margin:0 0 16px}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tool{border:1px solid #e2e8f0;border-radius:16px;padding:18px;background:#fafcff;transition:.2s}
+.tool:hover{border-color:#94a3b8;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.tool h3{font-size:17px;margin:8px 0 4px}
+.tool p{color:#475569;font-size:13px;line-height:1.5;min-height:40px}
+.tool button{width:100%;border:0;border-radius:12px;color:#fff;padding:10px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.bluebtn{background:#2563eb}
+.greenbtn{background:#16a34a}
+.purplebtn{background:#7c3aed}
+.orangebtn{background:#ea580c}
+.workspace{display:none;margin:20px 0}
+.workspace.active{display:block}
+.workspace .box{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:1px solid #e2e8f0;background:#f8fafc;padding:10px 18px;border-radius:30px;font-weight:600;cursor:pointer;color:#475569;transition:.2s}
+.tab.active{background:#dbeafe;color:#1e3a8a;border-color:#93c5fd}
+label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px;color:#334155}
+input,select{width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;outline:none;font-size:14px;transition:.2s}
+input:focus,select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.action{width:100%;border:0;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;margin-top:8px;transition:.2s}
+.action:disabled{opacity:.5;cursor:not-allowed}
+.status{padding:12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;margin-top:12px;font-size:14px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+th,td{padding:10px 8px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f8fafc;font-weight:600}
+.processing-progress{display:none;margin-top:12px}
+.processing-progress.show{display:block}
+.processing-progress .bar{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.processing-progress .fill{height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .15s ease}
+.processing-progress .line{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-top:4px;color:#475569}
+.premium-banner{margin:20px 0;background:linear-gradient(110deg,#fef9c3,#e0e7ff);border:1px solid #fde047;border-radius:20px;padding:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.premium-banner h2{margin:0;font-size:20px}
+.premium-banner p{margin:4px 0 0;color:#475569}
+.plan-btn{border:0;border-radius:30px;padding:10px 20px;color:#fff;font-weight:700;cursor:pointer;transition:.2s}
+.plan-btn:hover{transform:scale(1.02)}
+.footer{text-align:center;background:#0f172a;color:#cbd5e1;padding:20px;font-size:14px;margin-top:30px}
+.footer b{color:#facc15}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.modal-card{width:min(480px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-head h3{margin:0;font-size:20px}
+.modal-tools button{width:36px;height:36px;border:0;border-radius:50%;background:#e2e8f0;cursor:pointer;font-weight:700;transition:.2s}
+.modal-tools .close-pay{background:#fee2e2;color:#b91c1c}
+.register-container .social-login{display:flex;gap:12px;margin:12px 0}
+.register-container .social-btn{flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.register-container .social-btn:hover{background:#f1f5f9}
+.register-container .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0}
+.register-container .auth-divider hr{flex:1;border:0;border-top:1px solid #e2e8f0}
+.register-container .auth-divider span{color:#64748b;font-size:13px}
+.register-container .form-group{margin-bottom:14px}
+.register-container .register-btn{width:100%;padding:12px;background:#2563eb;color:#fff;border:0;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s}
+.register-container .register-btn:hover{background:#1d4ed8}
+.register-container .login-link{text-align:center;margin-top:14px;font-size:14px;color:#475569}
+.register-container .login-link a{color:#2563eb;font-weight:600;cursor:pointer;text-decoration:none}
+.register-container .status-msg{padding:10px 14px;border-radius:12px;font-size:14px;margin-top:10px}
+.register-container .status-msg.success{background:#ecfdf3;color:#166534;border:1px solid #bbf7d0}
+.register-container .status-msg.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.register-container .status-msg.info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+.limit-popup{position:fixed;inset:0;background:rgba(15,23,42,.75);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.limit-popup.show{display:flex}
+.limit-card{width:min(400px,100%);background:#fff;border-radius:24px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.25);text-align:center}
+.limit-card h2{margin:8px 0;color:#0f172a}
+.limit-card p{color:#475569;line-height:1.6}
+.limit-card button{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font-weight:700;cursor:pointer;transition:.2s}
+.limit-card .buy{background:#7c3aed;color:#fff}
+.limit-card .close{background:#e2e8f0;color:#0f172a}
+
+/* --- Admin Dashboard CSS (Appears below Tools) --- */
+#adminDashboard{margin-top:30px;display:none;padding-top:20px;border-top:3px dashed #2563eb}
+.admin-dashboard{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+.admin-stat{background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:18px;text-align:center}
+.admin-stat .val{font-size:28px;font-weight:800;color:#0f172a}
+.admin-stat .lbl{font-size:14px;color:#64748b}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:16px}
+.admin-tab{border:0;background:transparent;padding:10px 18px;border-radius:30px;font-weight:600;cursor:pointer;color:#64748b;transition:.2s}
+.admin-tab.active{background:#dbeafe;color:#1e3a8a}
+.admin-tab:hover:not(.active){background:#f1f5f9}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.admin-card-table{overflow-x:auto;background:#fafcff;border-radius:12px;border:1px solid #e2e8f0;padding:4px}
+.admin-actions{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+.admin-actions button{background:#e2e8f0;border:0;border-radius:30px;padding:8px 16px;cursor:pointer;font-weight:600}
+@media(max-width:768px){.tools,.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.header{padding:12px 0}.brand{font-size:18px}.authbar{width:100%;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-inner">
+<div class="top">
+<div class="brand">📄 PDF Utility Hub <span>by Anwar</span></div>
+<div class="authbar">
+<div id="userMenu" class="user-menu">
+<button id="userBtn" class="user-btn" onclick="toggleDropdown()">👤 <span id="userShort">Account</span> ▾</button>
+<div id="dropdown" class="dropdown">
+<div class="drop-head"><b id="dropName">Account</b><div class="drop-email" id="userEmail"></div></div>
+<button class="drop-item" onclick="openProfile()">⚙️ Settings</button>
+<button class="drop-item" id="premiumMenuBtn" onclick="openPremium()">⭐ Upgrade</button>
+<button class="drop-item danger" onclick="logoutUser()">🚪 Logout</button>
+</div></div>
+<button id="loginBtn" class="light" onclick="showLogin()">🔐 User Login</button>
+<button id="registerBtn" class="light" onclick="showRegister()">✨ Register</button>
+<!-- ✅ Always visible Admin Login button -->
+<button id="adminLoginBtn" class="light" style="background:#facc15;color:#0f172a;font-weight:800" onclick="showAdminLogin()">🛡️ Admin Login</button>
+</div></div>
+<div class="hero"><h1 id="welcomeTitle">👋 Welcome to PDF Utility Hub</h1><p id="welcomeText">Search, Compress, Merge & ZIP PDFs in your browser.</p></div>
+</div></header>
+
+<main class="container">
+
+<!-- ✅ USER PORTAL (Normal Users & Admin both see this) -->
+<div id="userPortal">
+<section class="stats">
+<div class="stat"><div>📄</div><div><div class="stat-title">Pages Used</div><div class="stat-value" id="opsValue">0 / 60</div><div class="progress"><span id="opsBar" style="width:0%"></span></div><div class="stat-note" id="opsNote">Guest: 60 pages</div></div></div>
+<div class="stat"><div>👤</div><div><div class="stat-title">Account</div><div class="stat-value" id="accountType">GUEST</div><div class="stat-note" id="accountNote">60 pages limit</div></div></div>
+<div class="stat"><div>⭐</div><div><div class="stat-title">Plan</div><div class="stat-value" id="planValue">Free</div><div class="stat-note" id="planNote">Upgrade to Unlimited</div></div></div>
+</section>
+
+<section class="premium-banner">
+<div><h2>⭐ Go Premium – Unlimited Pages</h2><p>Guest: 60 • Registered: 100 • Premium: ♾️ Unlimited</p></div>
+<div><button class="plan-btn purplebtn" onclick="openPayment('6')">₹199 / 6mo</button><button class="plan-btn orangebtn" onclick="openPayment('12')">₹299 / 1yr</button></div>
+</section>
+
+<section class="tools-card"><h2 class="section-title">📌 PDF Tools</h2><div class="tools">
+<div class="tool"><h3>🔎 Search</h3><p>Find PDFs from Excel list.</p><button class="bluebtn" onclick="openTool('search')">Open →</button></div>
+<div class="tool"><h3>🗜️ Compress</h3><p>Reduce PDF size up to 80%.</p><button class="greenbtn" onclick="openTool('compress')">Open →</button></div>
+<div class="tool"><h3>🔗 Merge</h3><p>Combine multiple PDFs.</p><button class="purplebtn" onclick="openTool('merge')">Open →</button></div>
+<div class="tool"><h3>📦 ZIP</h3><p>Pack PDFs into ZIP.</p><button class="orangebtn" onclick="openTool('zip')">Open →</button></div>
+</div></section>
+
+<section class="workspace" id="workspace"><div class="box">
+<div class="tabs"><button class="tab active" onclick="openTool('search')">🔎 Search</button><button class="tab" onclick="openTool('compress')">🗜️ Compress</button><button class="tab" onclick="openTool('merge')">🔗 Merge</button><button class="tab" onclick="openTool('zip')">📦 ZIP</button></div>
+
+<!-- Search -->
+<div id="tool-search"><h3>🔎 Search PDFs from Excel</h3>
+<label>PDF Files</label><input id="searchPdfs" type="file" accept=".pdf" multiple>
+<label>Excel File (.xlsx)</label><input id="searchExcel" type="file" accept=".xlsx,.xls">
+<div class="grid2"><button class="action bluebtn" onclick="startSearch()">START SEARCH</button><button class="action" style="background:#dc2626" onclick="stopSearch()">STOP</button></div>
+<div class="grid2"><button class="action greenbtn" id="searchZip" disabled onclick="downloadSearchZip()">📦 ZIP SELECTED</button><button class="action purplebtn" id="searchMerge" disabled onclick="mergeSearchResults()">🔗 MERGE SELECTED</button></div>
+<div id="searchStatus" class="status">Ready</div>
+<div id="searchProgress" class="processing-progress"><div class="bar"><div id="searchProgressFill" class="fill"></div></div><div class="line"><span id="searchProgressLine">Processing...</span><span id="searchProgressPct">0%</span></div></div>
+<table><thead><tr><th>Select</th><th>Search Name</th><th>Status</th><th>PDF</th></tr></thead><tbody id="searchRows"></tbody></table>
+</div>
+
+<!-- Compress -->
+<div id="tool-compress" style="display:none"><h3>🗜️ Compress PDFs (up to 80% smaller)</h3>
+<label>PDF Files</label><input id="compressFiles" type="file" accept=".pdf" multiple>
+<div class="grid2"><div><label>Target Size</label><select id="target"><option value="0.5">500 KB</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option></select></div>
+<div><label>Quality</label><select id="quality"><option value="strong" selected>Maximum (80% smaller)</option><option value="medium">Balanced (60%)</option><option value="light">High Quality</option></select></div></div>
+<div class="grid2"><button class="action orangebtn" onclick="compressFiles()">COMPRESS ALL</button><button class="action" style="background:#dc2626" onclick="stopCompress()">STOP</button></div>
+<div class="grid2"><button class="action greenbtn" id="compressZip" disabled onclick="downloadCompressedZip()">📦 ZIP COMPRESSED</button><button class="action purplebtn" id="compressMerge" disabled onclick="mergeCompressed()">🔗 MERGE COMPRESSED</button></div>
+<div id="compressStatus" class="status">Ready — select PDFs.</div>
+<div id="compressProgress" class="processing-progress"><div class="bar"><div id="compressProgressFill" class="fill"></div></div><div class="line"><span id="compressProgressLine">Processing...</span><span id="compressProgressPct">0%</span></div></div>
+<table><thead><tr><th>PDF</th><th>Original</th><th>Compressed</th><th>Reduction</th><th>Download</th></tr></thead><tbody id="compressRows"></tbody></table>
+</div>
+
+<!-- Merge -->
+<div id="tool-merge" style="display:none"><h3>🔗 Merge PDFs</h3>
+<label>PDF Files</label><input id="mergeFiles" type="file" accept=".pdf" multiple>
+<label>Output Name</label><input id="mergeName" value="Merged.pdf">
+<button class="action purplebtn" onclick="mergePDFs()">MERGE & DOWNLOAD</button>
+<div id="mergeStatus" class="status">Ready — select at least 2 PDFs.</div>
+<div id="mergeProgress" class="processing-progress"><div class="bar"><div id="mergeProgressFill" class="fill"></div></div><div class="line"><span id="mergeProgressLine">Processing...</span><span id="mergeProgressPct">0%</span></div></div>
+</div>
+
+<!-- ZIP -->
+<div id="tool-zip" style="display:none"><h3>📦 Create ZIP</h3>
+<label>PDF Files</label><input id="zipFiles" type="file" accept=".pdf" multiple>
+<label>ZIP Name</label><input id="zipName" value="PDFs.zip">
+<button class="action greenbtn" onclick="createZip()">CREATE ZIP & DOWNLOAD</button>
+<div id="zipStatus" class="status">Ready — select PDFs.</div>
+<div id="zipProgress" class="processing-progress"><div class="bar"><div id="zipProgressFill" class="fill"></div></div><div class="line"><span id="zipProgressLine">Processing...</span><span id="zipProgressPct">0%</span></div></div>
+</div>
+</div></section>
+
+<!-- ✅ ADMIN DASHBOARD (Appears only for Admin, right below PDF Tools) -->
+<div id="adminDashboard">
+<div class="admin-dashboard">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+<h2 class="section-title" style="margin:0;">🛡️ Admin Control Panel</h2>
+<div class="admin-actions">
+<button class="admin-tab" onclick="loadAdminData()">↻ Refresh Data</button>
+</div>
+</div>
+
+<!-- Admin Stats -->
+<div class="admin-stats">
+<div class="admin-stat"><div class="val" id="adminTotalUsers">0</div><div class="lbl">👥 Total Users</div></div>
+<div class="admin-stat"><div class="val" id="adminPremiumUsers">0</div><div class="lbl">⭐ Premium Users</div></div>
+<div class="admin-stat"><div class="val" id="adminTotalRevenue">₹0</div><div class="lbl">💰 Total Revenue</div></div>
+</div>
+
+<div class="admin-tabs">
+<button class="admin-tab active" onclick="switchAdminTab('users')">👥 All Users</button>
+<button class="admin-tab" onclick="switchAdminTab('premium')">⭐ Premium Users</button>
+<button class="admin-tab" onclick="switchAdminTab('payments')">💳 Payment History</button>
+</div>
+<div class="status" id="adminStatus">🔄 Loading data...</div>
+
+<div id="admin-section-users" class="admin-section active">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Joined On</th></tr></thead><tbody id="adminUsersRows"></tbody></table></div>
+</div>
+<div id="admin-section-premium" class="admin-section">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Valid Till</th><th>Days Left</th><th>Upgraded On</th></tr></thead><tbody id="adminPremiumRows"></tbody></table></div>
+</div>
+<div id="admin-section-payments" class="admin-section">
+<div class="admin-card-table"><table><thead><tr><th>Email</th><th>Plan</th><th>UTR</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="adminPaymentRows"></tbody></table></div>
+</div>
+</div>
+</div>
+
+</div> <!-- End User Portal -->
+</main>
+<footer class="footer">© 2026 PDF Utility Hub · <b>Build by Anwar</b> · Professional PDF Tools</footer>
+
+<!-- Modals: Login, Register, Admin Login, Payment -->
+<div class="modal" id="authModal"><div class="modal-card"><div class="modal-head"><h3>📝 Create Account</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div class="form-group"><label>Full Name</label><input id="regName" placeholder="Name"></div><div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="Email"></div><div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="Min 6 chars"></div><div id="regStatus" class="status-msg" style="display:none"></div><button class="register-btn" onclick="handleRegister()">Sign up</button><div class="login-link">Already a member? <a onclick="switchToLogin()">Login</a></div></div></div></div>
+
+<div class="modal" id="loginModal"><div class="modal-card"><div class="modal-head"><h3>🔐 User Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="Email"></div><div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div><div style="text-align:right;margin-bottom:12px"><a onclick="showForgotPassword()" style="color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none;font-weight:600">🔑 Forgot Password?</a></div><div id="forgotBox" style="display:none;margin-bottom:12px;padding:12px;background:#f1f5f9;border-radius:12px;border:1px solid #e2e8f0"><div class="form-group" style="margin-bottom:8px"><label style="font-size:13px;font-weight:600;color:#475569">📧 Enter registered email</label><input id="resetEmail" type="email" placeholder="Enter your registered email" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none"></div><button class="register-btn" style="background:#ea580c;padding:10px;font-size:14px" onclick="sendResetLink()">📧 Send Reset Link</button><button class="register-btn" style="background:#e2e8f0;color:#0f172a;margin-top:6px;padding:10px;font-size:14px" onclick="hideForgotPassword()">✕ Cancel</button></div><div id="loginStatus" class="status-msg" style="display:none"></div><button class="register-btn" id="loginSubmitBtn" onclick="handleLogin()">Login</button><div class="login-link">No account? <a onclick="switchToRegister()">Sign up</a></div></div></div></div>
+
+<!-- ✅ SEPARATE ADMIN LOGIN MODAL -->
+<div class="modal" id="adminLoginModal"><div class="modal-card"><div class="modal-head"><h3>🛡️ Admin Login</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div class="register-container"><div style="background:#fef9c3;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px;border:1px solid #fde047">🔑 Only authorized admins can login here.</div>
+<div class="form-group"><label>Admin Email</label><input id="adminLoginEmail" type="email" placeholder="Enter admin email"></div>
+<div class="form-group"><label>Admin Password</label><input id="adminLoginPassword" type="password" placeholder="Enter admin password"></div>
+<div id="adminLoginStatus" class="status-msg" style="display:none"></div>
+<button class="register-btn" id="adminLoginSubmitBtn" onclick="handleAdminLogin()">🛡️ Login as Admin</button>
+</div></div></div>
+
+<div class="modal" id="paymentModal"><div class="modal-card"><div class="modal-head"><h3>⭐ Premium Payment</h3><div class="modal-tools"><button class="close-pay" onclick="hideAllModals()">✕</button></div></div>
+<div id="paymentDetails"></div><label>UPI ID</label><div class="upi" style="background:#f1f5f9;padding:12px;border-radius:12px;font-family:monospace;font-size:16px;text-align:center;margin:8px 0">md.anwar18@ybl</div>
+<div class="qr-wrap" style="text-align:center;margin:12px 0"><div id="upiQr"></div></div><label>Transaction ID (UTR)</label><input id="utr" placeholder="Enter UTR"><button class="action bluebtn" onclick="submitPayment()">SUBMIT & ACTIVATE PREMIUM</button><div id="paymentMsg" class="status">Premium will be activated instantly.</div></div></div>
+
+<div class="limit-popup" id="limitReachedPopup"><div class="limit-card"><div style="font-size:48px">🚫</div><h2>Limit Reached</h2><p id="limitReachedText">You have used all your pages.</p><button class="buy" onclick="buyPremiumFromLimit()">⭐ BUY PREMIUM</button><button class="close" onclick="closeLimitReached()">Close</button></div></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+  }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBxyrR_HoXI0X3q-1DmbZKcept3Zduk_Q4",
+  authDomain: "pdf-utility-hu.firebaseapp.com",
+  projectId: "pdf-utility-hu",
+  storageBucket: "pdf-utility-hu.firebasestorage.app",
+  messagingSenderId: "838702125905",
+  appId: "1:838702125905:web:8f2d2f7e52e291bfbd7970",
+  measurementId: "G-BZCFEZS2SE"
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const PDFLib = window.PDFLib;
 
-window.handleAdminLogin = async function () {
+let currentUser = null, currentRole = 'guest', pageUsage = 0;
+let resetRequestCount = 0, lastResetTime = 0, selectedPlan = '6';
 
-  const emailEl = document.getElementById("adminLoginEmail");
-  const passwordEl = document.getElementById("adminLoginPassword");
-  const statusEl = document.getElementById("adminLoginStatus");
-  const btn = document.getElementById("adminLoginSubmitBtn");
+const PAGE_LIMITS = { guest:60, registered:100, premium:Infinity, admin:Infinity };
 
-  if (!emailEl || !passwordEl || !statusEl) {
-    console.error("Admin login elements missing.");
-    return;
-  }
+// ✅ अपना UID इस ऐरे में डालें! (Firebase Authentication से कॉपी करें)
+const ADMIN_UIDS = ["O2TjdGUFfdaET03CLusJehrgsNu2"];
 
-  const email = emailEl.value.trim();
-  const password = passwordEl.value;
+function loadPageUsage(){ const raw = localStorage.getItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages'); pageUsage = Math.max(0, parseInt(raw||'0',10)||0); }
+function savePageUsage(){ localStorage.setItem(currentUser?('pdfhub_pages_'+currentUser.uid):'pdfhub_guest_pages', String(pageUsage)); }
+function currentPageLimit(){ return PAGE_LIMITS[currentRole]??20; }
 
-  if (!email || !password) {
-    statusEl.textContent = "❌ Enter email and password.";
-    statusEl.className = "status-msg error";
-    statusEl.style.display = "block";
-    return;
-  }
+async function countPdfPages(files){ let total=0; for(const f of files){ const pdf=await PDFLib.PDFDocument.load(await f.arrayBuffer(),{ignoreEncryption:true}); total+=pdf.getPageCount(); } return total; }
+
+async function checkPageLimit(files, statusId){
+ if(currentRole==='premium'||currentRole==='admin') return true;
+ const limit=currentPageLimit(), available=Math.max(0, limit-pageUsage);
+ let pages; try{ pages=await countPdfPages(files); }catch(e){ if(statusId) document.getElementById(statusId).textContent='❌ Cannot read pages: '+e.message; return false; }
+ if(pages>available){ const msg='❌ Limit reached. Need '+pages+' pages, only '+available+' left. '+(currentRole==='guest'?'Please login for 100 pages.':'Upgrade to Premium.'); if(statusId) document.getElementById(statusId).textContent=msg; return false; }
+ return true;
+}
+
+function consumePages(pages){ if(pages && currentRole!=='premium'&&currentRole!=='admin'){ pageUsage+=pages; savePageUsage(); updateUI(); } }
+
+// =============================================
+// ✅ HARDENED UI UPDATE FUNCTION (Guarantees Dashboard shows)
+// =============================================
+function updateUI(){
+ const isLoggedIn=!!currentUser, role=currentRole, limit=PAGE_LIMITS[role]??20, isUnlimited=limit===Infinity;
+ document.getElementById('loginBtn').style.display=isLoggedIn?'none':'inline-block';
+ document.getElementById('registerBtn').style.display=isLoggedIn?'none':'inline-block';
+ document.getElementById('userMenu').style.display=isLoggedIn?'block':'none';
+ const name=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Account';
+ document.getElementById('userShort').textContent=name;
+ document.getElementById('userEmail').textContent=currentUser?.email||'';
+ 
+ // Update User Stats (always visible)
+ document.getElementById('accountType').textContent=isLoggedIn?(role==='premium'?'⭐ PREMIUM':role==='admin'?'👑 ADMIN':'📝 REGISTERED'):'👤 GUEST';
+ document.getElementById('accountNote').textContent=isUnlimited?'♾️ Unlimited':(role==='registered'?'100 pages limit':'60 pages limit');
+ document.getElementById('planValue').textContent=isUnlimited?'♾️ Unlimited':'Free';
+ document.getElementById('opsValue').innerHTML=isUnlimited?pageUsage+' / ♾️':pageUsage+' / '+limit;
+ document.getElementById('opsBar').style.width=isUnlimited?'100%':Math.min(100,(pageUsage/limit)*100)+'%';
+ document.getElementById('opsNote').textContent=isUnlimited?'♾️ Unlimited':Math.max(0,limit-pageUsage)+' pages remaining';
+ document.getElementById('welcomeTitle').textContent=isLoggedIn?`👋 Welcome, ${name}!`:'👋 Welcome to PDF Utility Hub';
+ document.getElementById('welcomeText').textContent=isLoggedIn?`🔐 ${currentUser?.email} | ${role.toUpperCase()} | ${isUnlimited?'♾️ Unlimited':(role==='registered'?'📝 100 pages':'👤 60 pages')}`:'Search, Compress, Merge & ZIP PDFs.';
+ const planText = role==='admin'?'👑 ADMIN — UNLIMITED':role==='premium'?'⭐ PREMIUM — UNLIMITED':role==='registered'?'📝 REGISTERED — 100 PAGES':'👤 GUEST — 60 PAGES';
+ document.getElementById('dropPlan').textContent = planText;
+ document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
+
+ // ✅ FORCE SHOW ADMIN DASHBOARD IF ROLE IS ADMIN
+ const adminDashboard = document.getElementById('adminDashboard');
+ if (role === 'admin') {
+     console.log('🛡️ ADMIN ROLE DETECTED! Forcefully showing Dashboard.');
+     adminDashboard.style.display = 'block';
+     // Load data only if empty or on demand
+     if (document.getElementById('adminUsersRows').children.length === 0) {
+         loadAdminData();
+     }
+ } else {
+     adminDashboard.style.display = 'none';
+ }
+}
+
+// ✅ Admin Login Handler
+window.showAdminLogin = function() {
+  document.getElementById('adminLoginModal').classList.add('show');
+};
+
+window.handleAdminLogin = async function() {
+  const email = document.getElementById('adminLoginEmail').value.trim();
+  const password = document.getElementById('adminLoginPassword').value;
+  const statusEl = document.getElementById('adminLoginStatus');
+
+  if(!email || !password){ statusEl.textContent = '❌ Enter email and password.'; statusEl.className = 'status-msg error'; statusEl.style.display='block'; return; }
 
   try {
-
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "⏳ Verifying...";
-    }
-
-    // Firebase Login
-    const userCred = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
+    const btn = document.getElementById('adminLoginSubmitBtn');
+    btn.disabled = true; btn.textContent = '⏳ Verifying...';
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
+    console.log('✅ Admin Login Attempt - User UID:', user.uid);
 
-    console.log("Admin login UID:", user.uid);
-
-    // =================================================
-    // CHECK 1 - HARD CODED ADMIN UID
-    // =================================================
-
-    const isHardcodedAdmin =
-      Array.isArray(ADMIN_UIDS) &&
-      ADMIN_UIDS.includes(user.uid);
-
-    // =================================================
-    // CHECK 2 - FIRESTORE ADMIN
-    // admins/{UID}
-    // =================================================
-
+    // Check if this user is an Admin
+    const isHardcodedAdmin = ADMIN_UIDS.includes(user.uid);
+    console.log('✅ Is Hardcoded Admin?', isHardcodedAdmin);
+    
     let isFirestoreAdmin = false;
-
     try {
-
-      const adminRef = doc(db, "admins", user.uid);
-      const adminDoc = await getDoc(adminRef);
-
-      if (
-        adminDoc.exists() &&
-        adminDoc.data().active !== false
-      ) {
-        isFirestoreAdmin = true;
-      }
-
-    } catch (error) {
-
-      console.warn(
-        "Admin Firestore check failed:",
-        error
-      );
-
-    }
-
-    // =================================================
-    // NOT ADMIN
-    // =================================================
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (adminDoc.exists() && adminDoc.data().active !== false) isFirestoreAdmin = true;
+    } catch(e) { /* ignore */ }
 
     if (!isHardcodedAdmin && !isFirestoreAdmin) {
-
-      await signOut(auth);
-
-      statusEl.textContent =
-        "❌ This account is not registered as Admin.";
-
-      statusEl.className = "status-msg error";
-      statusEl.style.display = "block";
-
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "🛡️ Login as Admin";
-      }
-
+      await signOut(auth); // Logout immediately if not admin
+      statusEl.textContent = '❌ Not an Admin. Access Denied.';
+      statusEl.className = 'status-msg error';
+      statusEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '🛡️ Login as Admin';
       return;
     }
 
-    // =================================================
-    // ADMIN VERIFIED
-    // =================================================
-
-    currentUser = user;
-    currentRole = "admin";
-
-    console.log("✅ ADMIN VERIFIED");
-
+    // ✅ Admin verified! Set role and update UI
+    currentRole = 'admin';
     updateUI();
-
-    statusEl.textContent =
-      "✅ Admin Verified! Dashboard Loading...";
-
-    statusEl.className = "status-msg success";
-    statusEl.style.display = "block";
-
-    if (btn) {
-      btn.textContent = "✅ Admin Login Successful";
-    }
-
-    // Close login window
-    setTimeout(() => {
-
-      hideAllModals();
-
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "🛡️ Login as Admin";
-      }
-
-      // Show Admin Dashboard
-      showAdminDashboard();
-
-    }, 800);
-
-  } catch (error) {
-
-    console.error("Admin Login Error:", error);
-
-    let message = error.message;
-
-    if (
-      error.code === "auth/invalid-credential" ||
-      error.code === "auth/wrong-password" ||
-      error.code === "auth/user-not-found"
-    ) {
-      message =
-        "Invalid admin email or password.";
-    }
-
-    else if (
-      error.code === "auth/operation-not-allowed"
-    ) {
-      message =
-        "Email/Password login is disabled in Firebase.";
-    }
-
-    else if (
-      error.code === "auth/too-many-requests"
-    ) {
-      message =
-        "Too many login attempts. Please try again later.";
-    }
-
-    statusEl.textContent = "❌ " + message;
-    statusEl.className = "status-msg error";
-    statusEl.style.display = "block";
-
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "🛡️ Login as Admin";
-    }
+    
+    statusEl.textContent = '✅ Admin Verified! Dashboard Loading...';
+    statusEl.className = 'status-msg success';
+    statusEl.style.display = 'block';
+    btn.textContent = '✅ Done';
+    
+    setTimeout(() => { hideAllModals(); btn.disabled=false; btn.textContent='🛡️ Login as Admin'; }, 1500);
+  } catch(e) {
+    console.error('Admin Login Error:', e);
+    const btn = document.getElementById('adminLoginSubmitBtn');
+    btn.disabled = false; btn.textContent = '🛡️ Login as Admin';
+    statusEl.textContent = '❌ ' + e.message;
+    statusEl.className = 'status-msg error';
+    statusEl.style.display = 'block';
   }
 };
 
+// User Login & Register
+window.handleRegister=async function(){
+ const name=document.getElementById('regName').value.trim(), email=document.getElementById('regEmail').value.trim(), password=document.getElementById('regPassword').value;
+ if(!name||!email||password.length<6){ showRegStatus('Fill all fields. Password min 6 chars.','error'); return; }
+ try{ const u=await createUserWithEmailAndPassword(auth,email,password); await updateProfile(u.user,{displayName:name}); await setDoc(doc(db,'users',u.user.uid),{name,email,role:'registered',createdAt:new Date()}); showRegStatus('✅ Account created!','success'); setTimeout(()=>hideAllModals(),1200); }catch(e){ showRegStatus('❌ '+e.message,'error'); }
+};
 
-// =====================================================
-// SHOW ADMIN DASHBOARD
-// =====================================================
+window.handleLogin=async function(){
+ const email=document.getElementById('loginEmail').value.trim(), password=document.getElementById('loginPassword').value;
+ if(!email||!password){ showLoginStatus('Enter email & password.','error'); return; }
+ try{ await signInWithEmailAndPassword(auth,email,password); showLoginStatus('✅ Login success!','success'); setTimeout(()=>hideAllModals(),1200); }catch(e){ showLoginStatus('❌ '+e.message,'error'); }
+};
 
-window.showAdminDashboard = function () {
+window.logoutUser=async function(){ try{ await signOut(auth); document.getElementById('dropdown').classList.remove('show'); }catch(e){ console.error(e); } };
 
-  console.log("Opening Admin Dashboard...");
-
-  const dashboard =
-    document.getElementById("adminDashboard");
-
-  if (dashboard) {
-
-    dashboard.style.display = "block";
-
-    dashboard.classList.add("show");
-
-    dashboard.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-
-    // Load data
-    if (typeof loadAdminData === "function") {
-      loadAdminData();
-    }
-
+// Auth State Listener
+onAuthStateChanged(auth, async (user)=>{
+ if(user){
+  currentUser=user; 
+  currentRole='registered'; // default
+  loadPageUsage();
+  
+  // Check Admin
+  if(ADMIN_UIDS.includes(user.uid)){ 
+    currentRole='admin'; 
+    console.log('✅ Admin found via UID array!');
   } else {
-
-    console.error(
-      "❌ adminDashboard element not found."
-    );
-
-    alert(
-      "Admin Dashboard HTML element is missing."
-    );
-  }
-};
-
-
-// =====================================================
-// USER LOGIN
-// =====================================================
-
-window.handleLogin = async function () {
-
-  const email =
-    document.getElementById("loginEmail").value.trim();
-
-  const password =
-    document.getElementById("loginPassword").value;
-
-  if (!email || !password) {
-
-    showLoginStatus(
-      "Enter email & password.",
-      "error"
-    );
-
-    return;
-  }
-
-  try {
-
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    showLoginStatus(
-      "✅ Login success!",
-      "success"
-    );
-
-    setTimeout(() => {
-      hideAllModals();
-    }, 1000);
-
-  } catch (error) {
-
-    console.error(error);
-
-    showLoginStatus(
-      "❌ " + error.message,
-      "error"
-    );
-  }
-};
-
-
-// =====================================================
-// REGISTER
-// =====================================================
-
-window.handleRegister = async function () {
-
-  const name =
-    document.getElementById("regName").value.trim();
-
-  const email =
-    document.getElementById("regEmail").value.trim();
-
-  const password =
-    document.getElementById("regPassword").value;
-
-  if (
-    !name ||
-    !email ||
-    password.length < 6
-  ) {
-
-    showRegStatus(
-      "Fill all fields. Password minimum 6 characters.",
-      "error"
-    );
-
-    return;
-  }
-
-  try {
-
-    const userCred =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-    await updateProfile(
-      userCred.user,
-      {
-        displayName: name
-      }
-    );
-
-    await setDoc(
-      doc(db, "users", userCred.user.uid),
-      {
-        name: name,
-        email: email,
-        role: "registered",
-        createdAt: new Date()
-      }
-    );
-
-    showRegStatus(
-      "✅ Account created!",
-      "success"
-    );
-
-    setTimeout(() => {
-      hideAllModals();
-    }, 1200);
-
-  } catch (error) {
-
-    showRegStatus(
-      "❌ " + error.message,
-      "error"
-    );
-  }
-};
-
-
-// =====================================================
-// LOGOUT
-// =====================================================
-
-window.logoutUser = async function () {
-
-  try {
-
-    await signOut(auth);
-
-    const dropdown =
-      document.getElementById("dropdown");
-
-    if (dropdown) {
-      dropdown.classList.remove("show");
-    }
-
-    const dashboard =
-      document.getElementById("adminDashboard");
-
-    if (dashboard) {
-      dashboard.style.display = "none";
-      dashboard.classList.remove("show");
-    }
-
-  } catch (error) {
-
-    console.error(
-      "Logout error:",
-      error
-    );
-  }
-};
-
-
-// =====================================================
-// AUTH STATE LISTENER
-// =====================================================
-
-onAuthStateChanged(auth, async (user) => {
-
-  if (user) {
-
-    currentUser = user;
-
-    currentRole = "registered";
-
-    console.log(
-      "Logged in user:",
-      user.email
-    );
-
-    // =================================================
-    // ADMIN CHECK
-    // =================================================
-
-    if (
-      Array.isArray(ADMIN_UIDS) &&
-      ADMIN_UIDS.includes(user.uid)
-    ) {
-
-      currentRole = "admin";
-
-      console.log(
-        "✅ Admin found using ADMIN_UIDS"
-      );
-
+   try {
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+    if (adminDoc.exists() && adminDoc.data().active !== false) {
+      currentRole='admin';
+      console.log('✅ Admin found via Firestore!');
     } else {
-
-      try {
-
-        const adminDoc =
-          await getDoc(
-            doc(db, "admins", user.uid)
-          );
-
-        if (
-          adminDoc.exists() &&
-          adminDoc.data().active !== false
-        ) {
-
-          currentRole = "admin";
-
-          console.log(
-            "✅ Admin found in Firestore"
-          );
-
-        } else {
-
-          // =============================================
-          // PREMIUM CHECK
-          // =============================================
-
-          const premiumDoc =
-            await getDoc(
-              doc(db, "premiumUsers", user.uid)
-            );
-
-          if (
-            premiumDoc.exists() &&
-            premiumDoc.data().active !== false
-          ) {
-
-            const validTill =
-              premiumDoc.data().validTill;
-
-            if (
-              validTill &&
-              validTill.toDate &&
-              validTill.toDate() > new Date()
-            ) {
-
-              currentRole = "premium";
-
-              console.log(
-                "✅ Premium user"
-              );
-            }
-          }
-        }
-
-      } catch (error) {
-
-        console.warn(
-          "Role checking error:",
-          error
-        );
-      }
+     const premiumDoc = await getDoc(doc(db, 'premiumUsers', user.uid));
+     if (premiumDoc.exists() && premiumDoc.data().active !== false && premiumDoc.data().validTill?.toDate?.() > new Date()) currentRole='premium';
     }
-
-    loadPageUsage();
-
-    // Update UI safely
-    setTimeout(() => {
-
-      try {
-        updateUI();
-      } catch (error) {
-
-        console.error(
-          "updateUI error:",
-          error
-        );
-      }
-
-    }, 100);
-
-    // Admin dashboard
-    if (currentRole === "admin") {
-
-      setTimeout(() => {
-
-        showAdminDashboard();
-
-      }, 300);
-    }
-
-  } else {
-
-    currentUser = null;
-
-    currentRole = "guest";
-
-    loadPageUsage();
-
-    try {
-      updateUI();
-    } catch (error) {
-      console.error(error);
-    }
+   } catch(e){ console.warn('Error checking role:', e); }
   }
+  
+  // Force re-run updateUI to ensure dashboard shows
+  setTimeout(() => updateUI(), 100);
+  
+ } else { 
+   currentUser=null; 
+   currentRole='guest'; 
+   loadPageUsage(); 
+   updateUI();
+ }
 });
 
+// Modals Helpers
+window.showRegister=()=>document.getElementById('authModal').classList.add('show');
+window.showLogin=()=>{ document.getElementById('loginModal').classList.add('show'); document.getElementById('forgotBox').style.display='none'; document.getElementById('loginSubmitBtn').style.display='block'; };
+window.hideAllModals=()=>document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'));
+window.switchToLogin=()=>{ hideAllModals(); showLogin(); };
+window.switchToRegister=()=>{ hideAllModals(); showRegister(); };
+function showRegStatus(msg,type){ const el=document.getElementById('regStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
+function showLoginStatus(msg,type){ const el=document.getElementById('loginStatus'); el.textContent=msg; el.className='status-msg '+type; el.style.display='block'; }
 
-// =====================================================
-// MODAL FUNCTIONS
-// =====================================================
-
-window.showRegister = function () {
-
-  const el =
-    document.getElementById("authModal");
-
-  if (el) {
-    el.classList.add("show");
-  }
+// Forgot Password
+window.showForgotPassword = function() {
+    document.getElementById('forgotBox').style.display = 'block';
+    document.getElementById('loginSubmitBtn').style.display = 'none';
+    document.getElementById('loginStatus').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+    resetRequestCount = 0;
+};
+window.hideForgotPassword = function() {
+    document.getElementById('forgotBox').style.display = 'none';
+    document.getElementById('loginSubmitBtn').style.display = 'block';
+    document.getElementById('loginStatus').style.display = 'none';
+};
+window.sendResetLink = async function() {
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) { showLoginStatus('❌ Please enter your email address.', 'error'); return; }
+    if (!email.includes('@') || !email.includes('.')) { showLoginStatus('❌ Please enter a valid email address.', 'error'); return; }
+    const now = Date.now();
+    if (now - lastResetTime < 30000) { showLoginStatus('⏳ Please wait 30 seconds.', 'info'); return; }
+    resetRequestCount++;
+    if (resetRequestCount > 3) { showLoginStatus('❌ Too many requests. Try after 15 minutes.', 'error'); return; }
+    try {
+        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
+        btn.disabled = true; btn.textContent = '⏳ Sending...';
+        await sendPasswordResetEmail(auth, email);
+        lastResetTime = now;
+        showLoginStatus('✅ Reset link sent to ' + email + '!', 'success');
+        btn.disabled = false; btn.textContent = '📧 Send Reset Link';
+        setTimeout(() => hideForgotPassword(), 5000);
+    } catch (error) {
+        const btn = document.querySelector('#forgotBox .register-btn:first-of-type');
+        btn.disabled = false; btn.textContent = '📧 Send Reset Link';
+        if (error.code === 'auth/user-not-found') showLoginStatus('❌ No account found. Register first.', 'error');
+        else showLoginStatus('❌ ' + error.message, 'error');
+    }
 };
 
+// Dropdown
+window.toggleDropdown=function(){ document.getElementById('dropdown').classList.toggle('show'); };
+document.addEventListener('click', e=>{ const d=document.getElementById('dropdown'); if(d&&!document.getElementById('userMenu').contains(e.target)) d.classList.remove('show'); });
 
-window.showLogin = function () {
-
-  const modal =
-    document.getElementById("loginModal");
-
-  if (modal) {
-    modal.classList.add("show");
-  }
-
-  const forgot =
-    document.getElementById("forgotBox");
-
-  if (forgot) {
-    forgot.style.display = "none";
-  }
-
-  const btn =
-    document.getElementById("loginSubmitBtn");
-
-  if (btn) {
-    btn.style.display = "block";
-  }
+// =============================================
+// ADMIN DASHBOARD (DATA LOADER)
+// =============================================
+window.switchAdminTab = function(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('admin-tab-' + tab).classList.add('active');
+  document.getElementById('admin-section-' + tab).classList.add('active');
 };
 
-
-window.hideAllModals = function () {
-
-  document
-    .querySelectorAll(".modal")
-    .forEach(
-      modal =>
-        modal.classList.remove("show")
-    );
-};
-
-
-window.switchToLogin = function () {
-
-  hideAllModals();
-
-  showLogin();
-};
-
-
-window.switchToRegister = function () {
-
-  hideAllModals();
-
-  showRegister();
-};
-
-
-function showRegStatus(message, type) {
-
-  const el =
-    document.getElementById("regStatus");
-
-  if (!el) return;
-
-  el.textContent = message;
-
-  el.className =
-    "status-msg " + type;
-
-  el.style.display = "block";
-}
-
-
-function showLoginStatus(message, type) {
-
-  const el =
-    document.getElementById("loginStatus");
-
-  if (!el) return;
-
-  el.textContent = message;
-
-  el.className =
-    "status-msg " + type;
-
-  el.style.display = "block";
-}
-
-
-// =====================================================
-// ADMIN TABS - FIXED
-// =====================================================
-
-window.switchAdminTab = function (tab) {
-
-  console.log(
-    "Switch Admin Tab:",
-    tab
-  );
-
-  // Remove active
-  document
-    .querySelectorAll(".admin-section")
-    .forEach(section => {
-      section.classList.remove("active");
-    });
-
-  document
-    .querySelectorAll(".admin-tabs .admin-tab")
-    .forEach(button => {
-      button.classList.remove("active");
-    });
-
-  // Show section
-  const section =
-    document.getElementById(
-      "admin-section-" + tab
-    );
-
-  if (section) {
-
-    section.classList.add("active");
-
-  } else {
-
-    console.warn(
-      "Admin section not found:",
-      "admin-section-" + tab
-    );
-  }
-
-  // Button mapping
-  const buttons =
-    document.querySelectorAll(
-      ".admin-tabs .admin-tab"
-    );
-
-  const index = {
-    users: 0,
-    premium: 1,
-    payments: 2
-  }[tab];
-
-  if (
-    index !== undefined &&
-    buttons[index]
-  ) {
-
-    buttons[index].classList.add("active");
-  }
-};
-
-
-// =====================================================
-// LOAD ADMIN DATA
-// =====================================================
-
-window.loadAdminData = async function () {
-
-  const statusEl =
-    document.getElementById("adminStatus");
-
-  if (!statusEl) {
-
-    console.error(
-      "adminStatus element missing."
-    );
-
-    return;
-  }
-
-  statusEl.textContent =
-    "🔄 Fetching all data...";
-
-  statusEl.style.color =
-    "#1e40af";
-
+window.loadAdminData = async function() {
+  const statusEl = document.getElementById('adminStatus');
+  statusEl.textContent = '🔄 Fetching all data...';
+  statusEl.style.color = '#1e40af';
+  
   try {
-
-    const [
-      usersSnap,
-      premiumSnap,
-      paymentSnap
-    ] = await Promise.all([
-
-      getDocs(
-        collection(db, "users")
-      ),
-
-      getDocs(
-        collection(db, "premiumUsers")
-      ),
-
-      getDocs(
-        collection(db, "paymentRequests")
-      )
-
+    const [usersSnap, premiumSnap, paymentSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'premiumUsers')),
+      getDocs(collection(db, 'paymentRequests'))
     ]);
 
-    // =================================================
-    // USERS
-    // =================================================
-
-    let totalUsers = 0;
-
-    let userHtml = "";
-
-    usersSnap.forEach(docSnap => {
-
-      const data =
-        docSnap.data();
-
+    let totalUsers = 0, totalPremium = 0, totalRevenue = 0;
+    let userHtml = '';
+    usersSnap.forEach(doc => {
+      const d = doc.data();
       totalUsers++;
-
-      const date =
-        data.createdAt &&
-        data.createdAt.toDate
-          ? data.createdAt.toDate()
-              .toLocaleDateString()
-          : "N/A";
-
-      userHtml += `
-        <tr>
-          <td>${data.email || "N/A"}</td>
-          <td>${data.name || "N/A"}</td>
-          <td>${data.role || "registered"}</td>
-          <td>${date}</td>
-        </tr>
-      `;
+      const dateStr = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleDateString() : 'N/A';
+      userHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.name||'N/A'}</td><td>${d.role||'registered'}</td><td>${dateStr}</td></tr>`;
     });
+    document.getElementById('adminUsersRows').innerHTML = userHtml || '<tr><td colspan="4">No registered users found.</td></tr>';
 
-    const userRows =
-      document.getElementById(
-        "adminUsersRows"
-      );
-
-    if (userRows) {
-
-      userRows.innerHTML =
-        userHtml ||
-        `
-        <tr>
-          <td colspan="4">
-            No registered users found.
-          </td>
-        </tr>
-        `;
-    }
-
-
-    // =================================================
-    // PREMIUM USERS
-    // =================================================
-
-    let totalPremium = 0;
-
-    let premiumHtml = "";
-
-    premiumSnap.forEach(docSnap => {
-
-      const data =
-        docSnap.data();
-
+    let premiumHtml = '';
+    premiumSnap.forEach(doc => {
+      const d = doc.data();
       totalPremium++;
-
-      const validTill =
-        data.validTill &&
-        data.validTill.toDate
-          ? data.validTill.toDate()
-          : null;
-
-      const upgradedAt =
-        data.upgradedAt &&
-        data.upgradedAt.toDate
-          ? data.upgradedAt
-              .toDate()
-              .toLocaleDateString()
-          : "N/A";
-
-      let daysLeft = "N/A";
-
-      if (validTill) {
-
-        daysLeft =
-          Math.max(
-            0,
-            Math.ceil(
-              (validTill - new Date()) /
-              (1000 * 60 * 60 * 24)
-            )
-          );
+      const validTill = d.validTill?.toDate?.() || null;
+      const upgradedAt = d.upgradedAt?.toDate?.() ? d.upgradedAt.toDate().toLocaleDateString() : 'N/A';
+      let daysLeft = 'N/A';
+      if(validTill) {
+        const now = new Date();
+        daysLeft = Math.max(0, Math.ceil((validTill - now) / (1000 * 60 * 60 * 24)));
       }
-
-      premiumHtml += `
-        <tr>
-          <td>${data.email || "N/A"}</td>
-          <td>
-            ${
-              validTill
-                ? validTill.toLocaleDateString()
-                : "N/A"
-            }
-          </td>
-          <td>${daysLeft}</td>
-          <td>${upgradedAt}</td>
-        </tr>
-      `;
+      premiumHtml += `<tr><td>${d.email||'N/A'}</td><td>${validTill?validTill.toLocaleDateString():'N/A'}</td><td>${daysLeft}</td><td>${upgradedAt}</td></tr>`;
     });
+    document.getElementById('adminPremiumRows').innerHTML = premiumHtml || '<tr><td colspan="4">No premium users found.</td></tr>';
 
-    const premiumRows =
-      document.getElementById(
-        "adminPremiumRows"
-      );
-
-    if (premiumRows) {
-
-      premiumRows.innerHTML =
-        premiumHtml ||
-        `
-        <tr>
-          <td colspan="4">
-            No premium users found.
-          </td>
-        </tr>
-        `;
-    }
-
-
-    // =================================================
-    // PAYMENTS
-    // =================================================
-
-    let totalRevenue = 0;
-
-    let paymentHtml = "";
-
-    paymentSnap.forEach(docSnap => {
-
-      const data =
-        docSnap.data();
-
-      const createdAt =
-        data.createdAt &&
-        data.createdAt.toDate
-          ? data.createdAt
-              .toDate()
-              .toLocaleString()
-          : "N/A";
-
-      totalRevenue +=
-        Number(data.amount) || 0;
-
-      paymentHtml += `
-        <tr>
-          <td>${data.email || "N/A"}</td>
-          <td>${data.plan || "N/A"}</td>
-          <td>${data.utr || "N/A"}</td>
-          <td>₹${data.amount || 0}</td>
-          <td>${data.status || "pending"}</td>
-          <td>${createdAt}</td>
-        </tr>
-      `;
+    let payHtml = '';
+    paymentSnap.forEach(doc => {
+      const d = doc.data();
+      const createdAt = d.createdAt?.toDate?.() ? d.createdAt.toDate().toLocaleString() : 'N/A';
+      totalRevenue += d.amount || 0;
+      payHtml += `<tr><td>${d.email||'N/A'}</td><td>${d.plan||'N/A'}</td><td>${d.utr||'N/A'}</td><td>₹${d.amount||0}</td><td>${d.status||'pending'}</td><td>${createdAt}</td></tr>`;
     });
+    document.getElementById('adminPaymentRows').innerHTML = payHtml || '<tr><td colspan="6">No payment history found.</td></tr>';
 
-    const paymentRows =
-      document.getElementById(
-        "adminPaymentRows"
-      );
+    document.getElementById('adminTotalUsers').textContent = totalUsers;
+    document.getElementById('adminPremiumUsers').textContent = totalPremium;
+    document.getElementById('adminTotalRevenue').textContent = '₹' + totalRevenue;
 
-    if (paymentRows) {
-
-      paymentRows.innerHTML =
-        paymentHtml ||
-        `
-        <tr>
-          <td colspan="6">
-            No payment history found.
-          </td>
-        </tr>
-        `;
-    }
-
-
-    // =================================================
-    // DASHBOARD COUNTERS
-    // =================================================
-
-    const totalUsersEl =
-      document.getElementById(
-        "adminTotalUsers"
-      );
-
-    const premiumUsersEl =
-      document.getElementById(
-        "adminPremiumUsers"
-      );
-
-    const revenueEl =
-      document.getElementById(
-        "adminTotalRevenue"
-      );
-
-    if (totalUsersEl) {
-      totalUsersEl.textContent =
-        totalUsers;
-    }
-
-    if (premiumUsersEl) {
-      premiumUsersEl.textContent =
-        totalPremium;
-    }
-
-    if (revenueEl) {
-      revenueEl.textContent =
-        "₹" + totalRevenue;
-    }
-
-
-    statusEl.textContent =
-      "✅ Data loaded successfully.";
-
-    statusEl.style.color =
-      "#166534";
-
-  } catch (error) {
-
-    console.error(
-      "Admin Load Error:",
-      error
-    );
-
-    statusEl.textContent =
-      "❌ Error: " +
-      error.message;
-
-    statusEl.style.color =
-      "#991b1b";
+    statusEl.textContent = '✅ Data loaded successfully.';
+    statusEl.style.color = '#166534';
+  } catch(e) {
+    console.error('Admin Load Error:', e);
+    statusEl.textContent = '❌ Error: ' + e.message + ' (Check Firestore Rules)';
+    statusEl.style.color = '#991b1b';
   }
 };
 
+// =============================================
+// AUTO-APPROVE PAYMENT
+// =============================================
+window.openPayment=function(plan){
+ selectedPlan = plan;
+ const amt = plan === '6' ? '199' : '299';
+ const dur = plan === '6' ? '6 Months' : '1 Year';
+ document.getElementById('paymentDetails').innerHTML=`<div style="background:#f1f5f9;padding:14px;border-radius:12px;text-align:center"><strong>₹${amt}</strong> / ${dur}<br><small>Unlimited PDF tools</small></div>`;
+ document.getElementById('paymentModal').classList.add('show');
+ document.getElementById('upiQr').innerHTML='';
+ new QRCode(document.getElementById('upiQr'),{text:`upi://pay?pa=md.anwar18@ybl&pn=PDF%20Utility%20Hub&am=${amt}&cu=INR`,width:180,height:180});
+};
 
-// =====================================================
-// UPDATE UI - IMPORTANT FIX
-// =====================================================
+window.openPremium=function(){ document.getElementById('dropdown').classList.remove('show'); openPayment('6'); };
 
-function updateUI() {
+window.submitPayment=async function(){
+ const utr=document.getElementById('utr').value.trim();
+ if(!currentUser){ document.getElementById('paymentMsg').textContent='❌ Please login first.'; return; }
+ if(!utr){ document.getElementById('paymentMsg').textContent='❌ Enter UTR.'; return; }
+ const months = selectedPlan === '6' ? 6 : 12;
+ const amount = selectedPlan === '6' ? 199 : 299;
+ const duration = selectedPlan === '6' ? '6 Months' : '1 Year';
+ const validTill = new Date();
+ validTill.setMonth(validTill.getMonth() + months);
+ try{ 
+     await setDoc(doc(db,'paymentRequests',currentUser.uid+'_'+Date.now()),{
+         uid:currentUser.uid, email:currentUser.email, utr:utr, amount:amount, plan:duration, status:'auto_approved', createdAt:new Date()
+     });
+     await setDoc(doc(db, 'premiumUsers', currentUser.uid), {
+         uid: currentUser.uid, email: currentUser.email, active: true, validTill: validTill, upgradedAt: new Date()
+     }, { merge: true });
+     currentRole = 'premium'; updateUI();
+     document.getElementById('paymentMsg').textContent='✅ Payment recorded! You are now PREMIUM.'; 
+     document.getElementById('utr').value=''; 
+     setTimeout(() => hideAllModals(), 3000);
+ }catch(e){ document.getElementById('paymentMsg').textContent='❌ Error: '+e.message; }
+};
 
-  console.log(
-    "Updating UI. Role:",
-    currentRole
-  );
+// Limit
+window.closeLimitReached=()=>document.getElementById('limitReachedPopup').classList.remove('show');
+window.buyPremiumFromLimit=()=>{ closeLimitReached(); openPayment('6'); };
 
-  // =================================================
-  // DROP PLAN
-  // IMPORTANT: ELEMENT MAY NOT EXIST
-  // =================================================
+// Tools
+window.openTool=function(t){
+ document.getElementById('workspace').classList.add('active');
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.textContent.toLowerCase().includes(t)));
+ ['search','compress','merge','zip'].forEach(x=>document.getElementById('tool-'+x).style.display=x===t?'block':'none');
+ document.getElementById('workspace').scrollIntoView({behavior:'smooth'});
+};
 
-  let planText =
-    "👤 GUEST — 60 PAGES";
+function size(b){ b=Number(b)||0; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(1)+' KB'; if(b<1073741824)return (b/1048576).toFixed(2)+' MB'; return (b/1073741824).toFixed(2)+' GB'; }
+function setProgress(tool,p,text){ const f=document.getElementById(tool+'ProgressFill'); if(!f)return; document.getElementById(tool+'Progress').classList.add('show'); f.style.width=Math.min(100,Math.max(0,Math.round(p)))+'%'; if(document.getElementById(tool+'ProgressPct')) document.getElementById(tool+'ProgressPct').textContent=Math.round(p)+'%'; if(document.getElementById(tool+'ProgressLine')) document.getElementById(tool+'ProgressLine').textContent=text||'Processing...'; }
+function hideProgress(tool){ const e=document.getElementById(tool+'Progress'); if(e)e.classList.remove('show'); }
+function safeDownload(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000); }
 
-  if (currentRole === "registered") {
-
-    planText =
-      "👤 FREE USER";
-
+// SEARCH
+let found=[], stopSearch=false;
+window.startSearch=async function(){
+ found=[]; stopSearch=false; document.getElementById('searchRows').innerHTML='';
+ const fs=[...document.getElementById('searchPdfs').files], ef=document.getElementById('searchExcel').files[0];
+ if(!fs.length||!ef){ alert('Select PDFs and Excel.'); return; }
+ if(!await checkPageLimit(fs,'searchStatus')) return;
+ try{
+  setProgress('search',0,'Reading Excel...');
+  const wb=XLSX.read(await ef.arrayBuffer(),{type:'array'});
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+  let names=rows.map(r=>String(r[0]||'').trim()).filter(Boolean);
+  if(names[0]&&/proposal|search/i.test(names[0])) names.shift();
+  let f=0,n=0;
+  for(let i=0;i<names.length;i++){
+   if(stopSearch) break;
+   const name=names[i], file=fs.find(x=>x.name.toLowerCase().includes(name.toLowerCase()));
+   const tr=document.createElement('tr');
+   if(file){ f++; const item={file,checked:false}; found.push(item); tr.innerHTML=`<td></td><td>${name}</td><td class="good">✅ FOUND</td><td>${file.name}</td>`; const c=document.createElement('input'); c.type='checkbox'; c.onchange=()=>{item.checked=c.checked; refreshSearch();}; tr.cells[0].appendChild(c); }
+   else { n++; tr.innerHTML=`<td></td><td>${name}</td><td class="bad">❌ NOT FOUND</td><td></td>`; }
+   document.getElementById('searchRows').appendChild(tr);
+   setProgress('search',((i+1)/names.length)*100,`Searching ${i+1} of ${names.length}`);
+   await new Promise(r=>setTimeout(r,0));
   }
+  document.getElementById('searchStatus').textContent=(stopSearch?'⏹ STOPPED':'✅ COMPLETE')+` | Found ${f} | Not Found ${n}`;
+  refreshSearch(); hideProgress('search');
+ }catch(e){ document.getElementById('searchStatus').textContent='❌ Error: '+e.message; }
+};
+window.stopSearch=function(){ stopSearch=true; document.getElementById('searchStatus').textContent='⏹ Stopping...'; };
+function refreshSearch(){ const h=found.some(x=>x.checked); document.getElementById('searchZip').disabled=!h; document.getElementById('searchMerge').disabled=!h; }
+window.downloadSearchZip=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; const z=new JSZip(); a.forEach((x,i)=>{ z.file(x.file.name,x.file); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Selected_PDFs.zip'); };
+window.mergeSearchResults=async function(){ const a=found.filter(x=>x.checked); if(!a.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<a.length;i++){ const s=await PDFLib.PDFDocument.load(await a[i].file.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Merged_Search.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
 
-  else if (currentRole === "premium") {
-
-    planText =
-      "⭐ PREMIUM — UNLIMITED";
-
+// COMPRESS
+let compressedResults=[], stopCompression=false;
+window.compressFiles=async function(){
+ const fs=[...document.getElementById('compressFiles').files];
+ if(!fs.length){alert('Select PDFs.'); return;}
+ if(!await checkPageLimit(fs,'compressStatus')) return;
+ stopCompression=false; compressedResults=[];
+ document.getElementById('compressRows').innerHTML='';
+ document.getElementById('compressZip').disabled=true; document.getElementById('compressMerge').disabled=true;
+ try{
+  for(let i=0;i<fs.length;i++){
+   if(stopCompression) break;
+   const file=fs[i];
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td>${file.name}</td><td>${size(file.size)}</td><td>⏳</td><td>Processing</td><td></td>`;
+   document.getElementById('compressRows').appendChild(tr);
+   const pdfjs = window.pdfjsLib;
+   if(!pdfjs){ document.getElementById('compressStatus').textContent='❌ PDF.js not loaded.'; return; }
+   const pdf = await pdfjs.getDocument({data:await file.arrayBuffer()}).promise;
+   const total=pdf.numPages;
+   const quality=document.getElementById('quality').value;
+   const jpegQuality = quality==='strong'?0.4 : quality==='medium'?0.55 : 0.7;
+   const scale = quality==='strong'?0.8 : quality==='medium'?0.95 : 1.1;
+   const jsPDF = window.jspdf.jsPDF || window.jspdf;
+   if(!jsPDF){ document.getElementById('compressStatus').textContent='❌ jsPDF not loaded.'; return; }
+   const pdfOut = new jsPDF({unit:'pt', format:'a4', compress:true});
+   for(let p=1;p<=total;p++){
+    if(stopCompression) break;
+    const page = await pdf.getPage(p);
+    const vp = page.getViewport({scale:Math.min(scale, 1100/Math.max(page.getViewport({scale:1}).width,page.getViewport({scale:1}).height))});
+    const canvas = document.createElement('canvas');
+    canvas.width=vp.width; canvas.height=vp.height;
+    const ctx=canvas.getContext('2d',{alpha:false});
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    const jpg = canvas.toDataURL('image/jpeg', jpegQuality);
+    if(p===1) pdfOut.deletePage(1);
+    pdfOut.addPage([vp.width, vp.height], vp.width>vp.height?'l':'p');
+    pdfOut.addImage(jpg,'JPEG',0,0,vp.width,vp.height,'','FAST');
+    canvas.width=1; canvas.height=1;
+    const overall=((i+(p/total))/fs.length)*100;
+    setProgress('compress', overall, `Compressing ${i+1} of ${fs.length} — page ${p}/${total}`);
+    tr.cells[2].textContent=Math.round((p/total)*100)+'%';
+    await new Promise(r=>setTimeout(r,0));
+   }
+   if(!stopCompression){
+    const outputBlob = pdfOut.output('blob');
+    const name=file.name.replace(/\.pdf$/i,'')+'_compressed.pdf';
+    compressedResults.push({name,blob:outputBlob});
+    const reduction=Math.max(0,Math.round((1-outputBlob.size/file.size)*100));
+    tr.cells[2].textContent=size(outputBlob.size);
+    tr.cells[3].textContent=reduction+'% smaller';
+    const btn=document.createElement('button'); btn.textContent='⬇️ Download'; btn.className='action greenbtn'; btn.onclick=()=>safeDownload(outputBlob,name); tr.cells[4].appendChild(btn);
+   }
   }
+  document.getElementById('compressStatus').textContent=stopCompression?'⏹ STOPPED — '+compressedResults.length+' PDF(s) ready.':'✅ DONE — '+compressedResults.length+' PDF(s) ready.';
+  document.getElementById('compressZip').disabled=!compressedResults.length;
+  document.getElementById('compressMerge').disabled=!compressedResults.length;
+  hideProgress('compress');
+ }catch(e){ document.getElementById('compressStatus').textContent='❌ Error: '+e.message; console.error(e); }
+};
+window.stopCompress=function(){ stopCompression=true; document.getElementById('compressStatus').textContent='⏹ Stopping...'; };
+window.downloadCompressedZip=async function(){ if(!compressedResults.length)return; const z=new JSZip(); compressedResults.forEach((x,i)=>{ z.file(x.name,x.blob); }); const blob=await z.generateAsync({type:'blob'}); safeDownload(blob,'Compressed_PDFs.zip'); };
+window.mergeCompressed=async function(){ if(!compressedResults.length)return; try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<compressedResults.length;i++){ const s=await PDFLib.PDFDocument.load(await compressedResults[i].blob.arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); } safeDownload(new Blob([await out.save()],{type:'application/pdf'}),'Compressed_Merged.pdf'); }catch(e){alert('Merge failed: '+e.message);} };
 
-  else if (currentRole === "admin") {
+// MERGE
+window.mergePDFs=async function(){
+ const fs=[...document.getElementById('mergeFiles').files];
+ if(fs.length<2){alert('Select at least 2 PDFs.'); return;}
+ if(!await checkPageLimit(fs,'mergeStatus')) return;
+ try{ const out=await PDFLib.PDFDocument.create(); for(let i=0;i<fs.length;i++){ const s=await PDFLib.PDFDocument.load(await fs[i].arrayBuffer(),{ignoreEncryption:true}); (await out.copyPages(s,s.getPageIndices())).forEach(p=>out.addPage(p)); setProgress('merge',((i+1)/fs.length)*100,`Merging ${i+1} of ${fs.length}`); } let name=document.getElementById('mergeName').value||'Merged.pdf'; if(!/\.pdf$/i.test(name))name+='.pdf'; safeDownload(new Blob([await out.save()],{type:'application/pdf'}),name); document.getElementById('mergeStatus').textContent='✅ Merge complete.'; hideProgress('merge'); }catch(e){ document.getElementById('mergeStatus').textContent='❌ Error: '+e.message; }
+};
 
-    planText =
-      "🛡️ ADMIN";
+// ZIP
+window.createZip=async function(){
+ const fs=[...document.getElementById('zipFiles').files];
+ if(!fs.length){alert('Select PDFs.'); return;}
+ if(!await checkPageLimit(fs,'zipStatus')) return;
+ try{ const z=new JSZip(); for(let i=0;i<fs.length;i++){ z.file(fs[i].name,fs[i]); setProgress('zip',((i+1)/fs.length)*80,`Adding ${i+1} of ${fs.length}`); } const blob=await z.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:9}},m=>setProgress('zip',80+m.percent*.2,'Building ZIP...')); let name=document.getElementById('zipName').value||'PDFs.zip'; if(!/\.zip$/i.test(name))name+='.zip'; safeDownload(blob,name); document.getElementById('zipStatus').textContent=`✅ ${fs.length} PDF(s) zipped.`; hideProgress('zip'); }catch(e){ document.getElementById('zipStatus').textContent='❌ Error: '+e.message; }
+};
 
-  }
-
-  const dropPlan =
-    document.getElementById(
-      "dropPlan"
-    );
-
-  if (dropPlan) {
-
-    dropPlan.textContent =
-      planText;
-
-  }
-
-
-  // =================================================
-  // ADMIN DASHBOARD
-  // =================================================
-
-  const adminDashboard =
-    document.getElementById(
-      "adminDashboard"
-    );
-
-  if (adminDashboard) {
-
-    if (currentRole === "admin") {
-
-      adminDashboard.style.display =
-        "block";
-
-    } else {
-
-      adminDashboard.style.display =
-        "none";
-    }
-  }
-
-
-  // =================================================
-  // ADMIN MENU BUTTON
-  // =================================================
-
-  const adminMenu =
-    document.getElementById(
-      "adminMenuBtn"
-    );
-
-  if (adminMenu) {
-
-    adminMenu.style.display =
-      currentRole === "admin"
-        ? "block"
-        : "none";
-  }
-
-
-  // =================================================
-  // PREMIUM MENU
-  // =================================================
-
-  const premiumMenu =
-    document.getElementById(
-      "premiumMenuBtn"
-    );
-
-  if (premiumMenu) {
-
-    premiumMenu.style.display =
-      (
-        currentRole === "premium" ||
-        currentRole === "admin"
-      )
-        ? "none"
-        : "block";
-  }
-}
-
-
-// =====================================================
-// ADD DROP PLAN ELEMENT IF MISSING
-// =====================================================
-
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    const dropHead =
-      document.querySelector(
-        ".drop-head"
-      );
-
-    if (
-      dropHead &&
-      !document.getElementById("dropPlan")
-    ) {
-
-      const plan =
-        document.createElement("div");
-
-      plan.id =
-        "dropPlan";
-
-      plan.style.fontSize =
-        "12px";
-
-      plan.style.color =
-        "#64748b";
-
-      plan.style.marginTop =
-        "4px";
-
-      plan.textContent =
-        "👤 GUEST — 60 PAGES";
-
-      dropHead.appendChild(plan);
-    }
-  }
-);
+loadPageUsage(); updateUI();
+console.log('✅ PDF Utility Hub ready (Admin Dashboard forced logic)');
+</script>
+</body>
+</html>

@@ -414,6 +414,78 @@ const PAGE_LIMITS = {
     admin: Infinity 
 };
 
+// =============================================
+// PAGE LIMIT CONTROL
+// Guest = 20 pages, Registered = 50 pages,
+// Premium/Admin = Unlimited.
+// Usage is stored separately for each logged-in user.
+// =============================================
+function usageKey() {
+    return currentUser ? ('pdfhub_pages_' + currentUser.uid) : 'pdfhub_guest_pages';
+}
+
+function loadPageUsage() {
+    const raw = localStorage.getItem(usageKey());
+    pageUsage = Math.max(0, parseInt(raw || '0', 10) || 0);
+}
+
+function savePageUsage() {
+    localStorage.setItem(usageKey(), String(pageUsage));
+}
+
+function currentPageLimit() {
+    return PAGE_LIMITS[currentRole] ?? 20;
+}
+
+function pageLimitMessage(needed, available) {
+    const limit = currentPageLimit();
+    const who = currentRole === 'guest' ? 'Guest' : 'Registered user';
+    return '❌ Page limit reached. ' + who + ' limit is ' + limit + ' pages. ' +
+           'This operation needs ' + needed + ' pages, but only ' + available + ' pages are remaining. ' +
+           (currentRole === 'guest' ? 'Please login for 50 pages.' : 'Upgrade to Premium for unlimited access.');
+}
+
+async function countPdfPages(files) {
+    let total = 0;
+    for (const file of files) {
+        const pdf = await PDFLib.PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+        total += pdf.getPageCount();
+    }
+    return total;
+}
+
+async function checkPageLimit(files, statusElementId) {
+    if (currentRole === 'premium' || currentRole === 'admin') return true;
+
+    const limit = currentPageLimit();
+    const available = Math.max(0, limit - pageUsage);
+    let pages;
+    try {
+        pages = await countPdfPages(files);
+    } catch (e) {
+        const msg = '❌ Could not read PDF page count: ' + (e.message || e);
+        if (statusElementId) document.getElementById(statusElementId).textContent = msg;
+        else alert(msg);
+        return false;
+    }
+
+    if (pages > available) {
+        const msg = pageLimitMessage(pages, available);
+        if (statusElementId) document.getElementById(statusElementId).textContent = msg;
+        else alert(msg);
+        return false;
+    }
+
+    return { pages };
+}
+
+function consumePages(pages) {
+    if (!pages || currentRole === 'premium' || currentRole === 'admin') return;
+    pageUsage += pages;
+    savePageUsage();
+    updateUI();
+}
+
 const ROLE_DISPLAY = {
     guest: { label: '👤 GUEST', badge: 'guest', note: '20 pages limit', plan: 'Free' },
     registered: { label: '📝 REGISTERED', badge: 'registered', note: '50 pages limit', plan: 'Free' },
@@ -647,7 +719,7 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         currentRole = 'registered';
-        pageUsage = 0;
+        loadPageUsage();
         
         if (ADMIN_UIDS.includes(user.uid)) {
             currentRole = 'admin';
@@ -675,7 +747,7 @@ onAuthStateChanged(auth, async (user) => {
     } else {
         currentUser = null;
         currentRole = 'guest';
-        pageUsage = 0;
+        loadPageUsage();
         console.log('👤 Guest user');
         updateUI();
     }
@@ -945,8 +1017,12 @@ window.startSearch = async function() {
         alert('Select PDF files and Excel file.');
         return;
     }
+
+    const searchCheck = await checkPageLimit(fs, 'searchStatus');
+    if (!searchCheck) return;
     
     try {
+        consumePages(searchCheck.pages);
         const wb = XLSX.read(await ef.arrayBuffer(), { type: 'array' });
         const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
         let names = rows.map(r => String(r[0] || '').trim()).filter(Boolean);
@@ -996,6 +1072,10 @@ function refreshSearch() {
 window.downloadSearchZip = async function() {
     const a = found.filter(x => x.checked);
     if (!a.length) return;
+    const zipFiles = a.map(x => x.file);
+    const searchZipCheck = await checkPageLimit(zipFiles, 'searchStatus');
+    if (!searchZipCheck) return;
+    consumePages(searchZipCheck.pages);
     const z = new JSZip();
     a.forEach(x => z.file(x.file.name, x.file));
     const blob = await z.generateAsync({ type: 'blob' });
@@ -1013,6 +1093,10 @@ window.downloadSearchZip = async function() {
 window.mergeSearchResults = async function() {
     const a = found.filter(x => x.checked);
     if (!a.length) return;
+    const mergeFiles = a.map(x => x.file);
+    const mergeSearchCheck = await checkPageLimit(mergeFiles, 'searchStatus');
+    if (!mergeSearchCheck) return;
+    consumePages(mergeSearchCheck.pages);
     const out = await PDFLib.PDFDocument.create();
     for (const x of a) {
         const s = await PDFLib.PDFDocument.load(await x.file.arrayBuffer(), { ignoreEncryption: true });
@@ -1050,6 +1134,10 @@ window.compressFiles = async function() {
         return;
     }
 
+    const compressCheck = await checkPageLimit(fs, 'compressStatus');
+    if (!compressCheck) return;
+
+    consumePages(compressCheck.pages);
     stopCompression = false;
     rows.innerHTML = '';
     compressedResults = [];
@@ -1158,6 +1246,9 @@ window.mergePDFs = async function() {
         alert('Select at least 2 PDFs.');
         return;
     }
+    const mergeCheck = await checkPageLimit(fs, 'mergeStatus');
+    if (!mergeCheck) return;
+    consumePages(mergeCheck.pages);
     try {
         const out = await PDFLib.PDFDocument.create();
         for (const f of fs) {
@@ -1188,6 +1279,9 @@ window.createZip = async function() {
         alert('Select PDFs.');
         return;
     }
+    const zipCheck = await checkPageLimit(fs, 'zipStatus');
+    if (!zipCheck) return;
+    consumePages(zipCheck.pages);
     const z = new JSZip();
     fs.forEach(f => z.file(f.name, f));
     let name = document.getElementById('zipName').value || 'PDF_Files.zip';
@@ -1343,6 +1437,9 @@ function escapeHtml(value) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+
+loadPageUsage();
+updateUI();
 
 console.log('✅ PDF Utility Hub loaded successfully!');
 console.log('👑 Admin UID:', ADMIN_UIDS);

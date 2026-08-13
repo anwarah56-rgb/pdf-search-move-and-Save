@@ -243,7 +243,7 @@ th{background:#f8fafc;font-weight:600}
 <button class="admin-tab" onclick="switchAdminTab('premium')">⭐ Premium Users</button>
 <button class="admin-tab" onclick="switchAdminTab('payments')">💳 Payment History</button>
 </div>
-<div class="status" id="adminStatus">🔄 Loading data... (Make sure Firestore Rules allow reading)</div>
+<div class="status" id="adminStatus">🔄 Loading data...</div>
 
 <div id="admin-section-users" class="admin-section active">
 <div class="admin-card-table"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Joined On</th></tr></thead><tbody id="adminUsersRows"></tbody></table></div>
@@ -337,7 +337,9 @@ async function checkPageLimit(files, statusId){
 
 function consumePages(pages){ if(pages && currentRole!=='premium'&&currentRole!=='admin'){ pageUsage+=pages; savePageUsage(); updateUI(); } }
 
-// UI Updates (Tools always visible, Admin Dashboard toggles)
+// =============================================
+// ✅ HARDENED UI UPDATE FUNCTION (Guarantees Dashboard shows)
+// =============================================
 function updateUI(){
  const isLoggedIn=!!currentUser, role=currentRole, limit=PAGE_LIMITS[role]??20, isUnlimited=limit===Infinity;
  document.getElementById('loginBtn').style.display=isLoggedIn?'none':'inline-block';
@@ -360,13 +362,17 @@ function updateUI(){
  document.getElementById('dropPlan').textContent = planText;
  document.getElementById('premiumMenuBtn').style.display=(role==='premium'||role==='admin')?'none':'block';
 
- // ✅ TOGGLE ADMIN DASHBOARD (Shown below the tools)
+ // ✅ FORCE SHOW ADMIN DASHBOARD IF ROLE IS ADMIN
  const adminDashboard = document.getElementById('adminDashboard');
- if(role === 'admin') {
-   adminDashboard.style.display = 'block';
-   loadAdminData(); // Auto-load when admin logs in
+ if (role === 'admin') {
+     console.log('🛡️ ADMIN ROLE DETECTED! Forcefully showing Dashboard.');
+     adminDashboard.style.display = 'block';
+     // Load data only if empty or on demand
+     if (document.getElementById('adminUsersRows').children.length === 0) {
+         loadAdminData();
+     }
  } else {
-   adminDashboard.style.display = 'none';
+     adminDashboard.style.display = 'none';
  }
 }
 
@@ -466,12 +472,16 @@ onAuthStateChanged(auth, async (user)=>{
     }
    } catch(e){ console.warn('Error checking role:', e); }
   }
+  
+  // Force re-run updateUI to ensure dashboard shows
+  setTimeout(() => updateUI(), 100);
+  
  } else { 
    currentUser=null; 
    currentRole='guest'; 
    loadPageUsage(); 
+   updateUI();
  }
- updateUI();
 });
 
 // Modals Helpers
@@ -762,7 +772,7 @@ window.createZip=async function(){
 };
 
 loadPageUsage(); updateUI();
-console.log('✅ PDF Utility Hub ready (Admin Dashboard + Tools together)');
+console.log('✅ PDF Utility Hub ready (Admin Dashboard forced logic)');
 </script>
 </body>
 </html>
